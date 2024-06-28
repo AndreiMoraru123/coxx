@@ -1,24 +1,21 @@
-# Prerequisites
-*.d
+# Bazel build artifacts
+bazel-bin/
+bazel-out/
+bazel-testlogs/
+bazel-*/external/
+*.log
+
+# Bazel symlinks
+/bazel-*
+
+# User-specific Bazel files
+.bazelrc.user
 
 # Compiled Object files
-*.slo
-*.lo
 *.o
-*.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Compiled Dynamic libraries
 *.so
 *.dylib
 *.dll
-
-# Fortran module files
-*.mod
-*.smod
 
 # Compiled Static libraries
 *.lai
@@ -26,7 +23,21 @@
 *.a
 *.lib
 
-# Executables
-*.exe
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# C/C++ coverage files
+*.gcno
+*.gcda
+*.gcov
+
+# Log files
+*.log
 *.out
-*.app
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
