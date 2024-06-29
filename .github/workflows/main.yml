@@ -13,23 +13,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Set up Bazelisk
-      uses: philwo/setup-bazelisk@v1
+      - name: Set up Bazelisk
+        uses: philwo/setup-bazelisk@v1
 
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y software-properties-common
-        sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-        sudo apt-get update
-        sudo apt-get install -y g++-14
-        sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-14 60
-        
-    - name: Build project
-      run: bazel build //...
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y software-properties-common
+          sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+          sudo apt-get update
+          sudo apt-get install -y g++-13
+          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-13 60
 
-    - name: Run tests
-      run: bazel test //...
+      - name: Build project
+        run: bazel build //...
+
+      - name: Run tests
+        run: bazel test //...
