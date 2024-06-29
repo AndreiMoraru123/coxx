@@ -1,7 +1,17 @@
+cc_library(
+    name = "socket",
+    srcs = ["socket.cxx"],
+    hdrs = ["socket.hxx"],
+    deps = [],
+)
+
 cc_binary(
-    name = "hello_world",
-    srcs = ["main.cxx"],
+    name = "server",
+    srcs = ["server.cxx"],
     copts = ["-std=c++23"],
+    deps = [
+        ":socket",
+    ],
 )
 
 cc_test(
