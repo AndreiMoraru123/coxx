@@ -11,6 +11,17 @@
         "kind": "build",
         "isDefault": true
       }
+    },
+    {
+      "label": "bazel build //:client (debug)",
+      "type": "shell",
+      "command": "bazel",
+      "args": ["build", "-c", "dbg", "//:client"],
+      "problemMatcher": "$gcc",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
     }
   ]
 }
