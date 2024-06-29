@@ -1,0 +1,16 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "bazel build //:server (debug)",
+      "type": "shell",
+      "command": "bazel",
+      "args": ["build", "-c", "dbg", "//:server"],
+      "problemMatcher": "$gcc",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    }
+  ]
+}
