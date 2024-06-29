@@ -21,13 +21,22 @@ void Socket::setOptions() {
   }
 }
 
-void Socket::bindToPort(std::int64_t port) {
+void Socket::bindToPort(std::int64_t port, std::uint32_t netaddr,
+                        std::string connectionType) {
   struct sockaddr_in addr = {};
   addr.sin_family = AF_INET;
   addr.sin_port = ntohs(port);
-  addr.sin_addr.s_addr = ntohl(0);
-  if (bind(fd, reinterpret_cast<sockaddr *>(&addr), sizeof(addr))) {
-    throw std::runtime_error("Failed to bind to port");
+  addr.sin_addr.s_addr = ntohl(netaddr);
+  if (connectionType == "server") {
+    if (bind(fd, reinterpret_cast<sockaddr *>(&addr), sizeof(addr))) {
+      throw std::runtime_error("Failed to bind to port");
+    }
+  } else if (connectionType == "client") {
+    if (connect(fd, reinterpret_cast<sockaddr *>(&addr), sizeof(addr))) {
+      throw std::runtime_error("Failed to bind to port");
+    }
+  } else {
+    throw std::invalid_argument("Invalid connection type");
   }
 }
 

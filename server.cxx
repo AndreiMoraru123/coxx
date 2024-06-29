@@ -32,10 +32,10 @@ void Server::doSomething(std::int64_t connfd) {
 
 void Server::run() {
   socket.setOptions();
-  socket.bindToPort(1234);
+  socket.bindToPort(1234, 0, "server");
 
   if (listen(socket.getFd(), SOMAXCONN)) {
-    throw ::std::runtime_error("Failed to listen");
+    throw std::runtime_error("Failed to listen");
   }
 
   while (true) {

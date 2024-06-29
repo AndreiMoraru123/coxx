@@ -14,6 +14,15 @@ cc_binary(
     ],
 )
 
+cc_binary(
+    name = "client",
+    srcs = ["client.cxx"],
+    copts = ["-std=c++23"],
+    deps = [
+        ":socket",
+    ],
+)
+
 cc_test(
     name = "hello_test",
     size = "small",
