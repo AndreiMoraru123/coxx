@@ -23,7 +23,7 @@
       "miDebuggerPath": "/usr/bin/gdb"
     },
     {
-      "name": "Debug Cliet",
+      "name": "Debug Client",
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/bazel-bin/client",

@@ -1,5 +1,6 @@
 #include <unistd.h>
 
+#include <cstring>
 #include <iostream>
 #include <print>
 #include <vector>
@@ -11,10 +12,64 @@ class Server {
   Server() = default;
   void run();
   void doSomething(std::int64_t connfd);
+  std::int32_t oneRequest(std::int64_t connfd);
 
  private:
   Socket socket;
 };
+
+std::int32_t Server::oneRequest(std::int64_t connfd) {
+  constexpr size_t k_max_msg = 4096;
+  std::vector<char> rbuf(4 + k_max_msg + 1);
+  errno = 0;
+
+  std::string header(4, '\0');
+  std::int32_t err = socket.readFull(connfd, header, 4);
+  if (err) {
+    if (errno == 0) {
+      std::println("EOF");
+    } else {
+      std::cerr << "read() error" << std::endl;
+    }
+    return err;
+  }
+
+  // Copy the header back into rbuf
+  std::memcpy(rbuf.data(), header.data(), 4);
+
+  std::uint32_t len = 0;
+  std::memcpy(&len, rbuf.data(), 4);
+  if (len > k_max_msg) {
+    std::println("too long");
+    return -1;
+  }
+
+  // Read the request body
+  std::string body(len, '\0');
+  err = socket.readFull(connfd, body, len);
+  if (err) {
+    std::cerr << "read() error" << std::endl;
+    return err;
+  }
+
+  // Copy the body back into rbuf
+  std::memcpy(rbuf.data() + 4, body.data(), len);
+
+  // Print the null temrinated string in the buffer
+  rbuf[4 + len] = '\0';
+  std::println("Client says {}", &rbuf[4]);
+
+  // Reply using the same protocol
+  const std::string reply = "world";
+  std::vector<char> wbuf(4 + reply.size());
+  len = static_cast<std::uint32_t>(reply.size());
+
+  std::memcpy(wbuf.data(), &len, 4);
+  std::memcpy(wbuf.data() + 4, reply.data(), len);
+
+  std::string wbufStr(wbuf.begin(), wbuf.end());
+  return socket.writeAll(connfd, wbufStr, len + 4);
+}
 
 void Server::doSomething(std::int64_t connfd) {
   std::vector<char> rbuf(64);
@@ -46,9 +101,16 @@ void Server::run() {
                &socklen);
 
     if (connfd == -1) {
-      continue;
+      continue;  // error
     }
-    doSomething(connfd);
+
+    while (true) {
+      std::int32_t err = oneRequest(connfd);
+      if (err) {
+        break;
+      }
+    }
+
     close(connfd);
   }
 }
