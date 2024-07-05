@@ -5,7 +5,10 @@ class Client {
  public:
   Client() = default;
   void run();
+  Socket& getSocket();
 
- public:
+ private:
   Socket socket;
 };
+
+Socket& Client::getSocket() { return socket; }

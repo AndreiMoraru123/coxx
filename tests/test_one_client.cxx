@@ -73,8 +73,8 @@ class ClientServerTest : public ::testing::Test {
   std::string serverResponse;
 
   void SetUp() override {
-    serverThread =
-        std::thread([this] { clientMessage = runServer(server.socket, 1); });
+    serverThread = std::thread(
+        [this] { clientMessage = runServer(server.getSocket(), 1); });
     std::this_thread::sleep_for(std::chrono::seconds(1));
   }
 
@@ -86,7 +86,7 @@ class ClientServerTest : public ::testing::Test {
 };
 
 TEST_F(ClientServerTest, OneServerOneClient) {
-  serverResponse = runClient(client.socket);
+  serverResponse = runClient(client.getSocket());
 
   EXPECT_EQ(clientMessage, "hello");
   EXPECT_EQ(serverResponse, "world");

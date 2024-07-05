@@ -7,7 +7,10 @@ class Server {
  public:
   Server() = default;
   void run();
+  Socket& getSocket();
 
- public:
+ private:
   Socket socket;
 };
+
+Socket& Server::getSocket() { return socket; }
