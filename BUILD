@@ -5,18 +5,18 @@ cc_library(
     deps = [],
 )
 
-cc_binary(
+cc_library(
     name = "server",
-    srcs = ["server.cxx"],
+    hdrs = ["server.hxx"],
     copts = ["-std=c++23"],
     deps = [
         ":socket",
     ],
 )
 
-cc_binary(
+cc_library(
     name = "client",
-    srcs = ["client.cxx"],
+    hdrs = ["client.hxx"],
     copts = ["-std=c++23"],
     deps = [
         ":socket",
@@ -24,8 +24,14 @@ cc_binary(
 )
 
 cc_test(
-    name = "hello_test",
+    name = "test_one_client.cxx",
     size = "small",
-    srcs = ["hello_test.cxx"],
-    deps = ["@gtest//:gtest_main"],
+    srcs = ["tests/test_one_client.cxx"],
+    copts = ["-std=c++23"],
+    deps = [
+        ":client",
+        ":server",
+        ":socket",
+        "@gtest//:gtest_main",
+    ],
 )
