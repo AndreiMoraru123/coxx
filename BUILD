@@ -24,7 +24,7 @@ cc_library(
 )
 
 cc_test(
-    name = "test_one_client.cxx",
+    name = "test_one_client",
     size = "small",
     srcs = ["tests/test_one_client.cxx"],
     copts = ["-std=c++23"],
