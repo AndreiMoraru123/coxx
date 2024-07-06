@@ -12,7 +12,8 @@ constexpr std::int64_t CLIENT_NETADDR = INADDR_LOOPBACK;
 constexpr std::int8_t BUFFER_SIZE = 64;
 constexpr std::int16_t backlog = SOMAXCONN;
 
-constexpr std::int64_t MAX_ITERATIONS = 1;
+constexpr std::int64_t MAX_ITERATIONS =
+    1;  // has to always be 1 because of how I made the threading setup.
 
 const std::string clientSays = "hello";
 const std::string serverResponds = "world";
@@ -29,7 +30,7 @@ const std::string serverResponds = "world";
  * @return std::string The message received from the client. Returns an empty
  * string if the read operation fails.
  */
-std::string serverReadWrite(std::int64_t connFd, std::string wbuf) {
+static std::string serverReadWrite(std::int64_t connFd, std::string wbuf) {
   std::vector<char> rbuf(BUFFER_SIZE);
   ssize_t n = read(connFd, rbuf.data(), rbuf.size() - 1);
   if (n < 0) {
@@ -61,7 +62,7 @@ std::string serverReadWrite(std::int64_t connFd, std::string wbuf) {
  * @throws std::runtime_error If the server fails to listen on the specified
  * port.
  */
-std::string runServer(Socket& serverSocket, std::int64_t maxIterations) {
+static std::string run(Socket& serverSocket, std::int64_t maxIterations) {
   serverSocket.setOptions();
   serverSocket.bindToPort(PORT, SERVER_NETADDR, "server");
 
@@ -103,7 +104,7 @@ std::string runServer(Socket& serverSocket, std::int64_t maxIterations) {
  * client ops.
  * @return std::string The response received from the server, if any.
  */
-std::string runClient(Socket& clientSocket) {
+static std::string run(Socket& clientSocket) {
   clientSocket.setOptions();
   clientSocket.bindToPort(PORT, CLIENT_NETADDR, "client");
 
@@ -145,7 +146,7 @@ class ClientServerTest : public ::testing::Test {
    */
   void SetUp() override {
     serverThread = std::thread(
-        [this] { clientMessage = runServer(server.socket, MAX_ITERATIONS); });
+        [this] { clientMessage = run(server.socket, MAX_ITERATIONS); });
     std::this_thread::sleep_for(std::chrono::seconds(1));
   }
 
@@ -168,7 +169,7 @@ class ClientServerTest : public ::testing::Test {
  *
  */
 TEST_F(ClientServerTest, OneServerOneClient) {
-  serverResponse = runClient(client.socket);
+  serverResponse = run(client.socket);
 
   EXPECT_EQ(clientMessage, "hello");
   EXPECT_EQ(serverResponse, "world");
