@@ -9,6 +9,7 @@
 constexpr std::int64_t PORT = 1234;
 constexpr std::int64_t SERVER_NETADDR = 0;
 constexpr std::int64_t CLIENT_NETADDR = INADDR_LOOPBACK;
+constexpr std::int16_t backlog = SOMAXCONN;
 
 constexpr std::int64_t MAX_ITERATIONS = 1;
 
@@ -32,7 +33,7 @@ std::string runServer(Socket& serverSocket, std::int64_t maxIterations) {
   serverSocket.setOptions();
   serverSocket.bindToPort(PORT, SERVER_NETADDR, "server");
 
-  if (listen(serverSocket.getFd(), SOMAXCONN)) {
+  if (listen(serverSocket.getFd(), backlog)) {
     throw std::runtime_error("Failed to listen");
   }
 
