@@ -84,7 +84,7 @@ void Socket::bindToPort(std::int64_t port, std::uint32_t netaddr,
     }
   } else if (connectionType == "client") {
     if (connect(_fd, reinterpret_cast<sockaddr *>(&addr), sizeof(addr))) {
-      throw std::runtime_error("Failed to bind to port");
+      throw std::runtime_error("Failed to connect to port");
     }
   } else {
     throw std::invalid_argument("Invalid connection type");

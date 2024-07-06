@@ -5,7 +5,7 @@
       "name": "Debug Server",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/bazel-bin/server",
+      "program": "${workspaceFolder}/bazel-bin/server/server",
       "args": [],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
@@ -26,7 +26,7 @@
       "name": "Debug Client",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/bazel-bin/client",
+      "program": "${workspaceFolder}/bazel-bin/client/client",
       "args": [],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
@@ -44,10 +44,10 @@
       "miDebuggerPath": "/usr/bin/gdb"
     },
     {
-      "name": "Debug One Client Test",
+      "name": "Debug Client Server Test",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/bazel-bin/test_one_client",
+      "program": "${workspaceFolder}/bazel-bin/tests/test_client_server",
       "args": [],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
@@ -61,7 +61,7 @@
           "ignoreFailures": true
         }
       ],
-      "preLaunchTask": "bazel build //:test_one_client (debug)",
+      "preLaunchTask": "bazel build //:test_client_server (debug)",
       "miDebuggerPath": "/usr/bin/gdb"
     }
   ]

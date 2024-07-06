@@ -5,7 +5,7 @@
       "label": "bazel build //:server (debug)",
       "type": "shell",
       "command": "bazel",
-      "args": ["build", "-c", "dbg", "//:server"],
+      "args": ["build", "-c", "dbg", "//server:server"],
       "problemMatcher": "$gcc",
       "group": {
         "kind": "build",
@@ -16,7 +16,7 @@
       "label": "bazel build //:client (debug)",
       "type": "shell",
       "command": "bazel",
-      "args": ["build", "-c", "dbg", "//:client"],
+      "args": ["build", "-c", "dbg", "//client:client"],
       "problemMatcher": "$gcc",
       "group": {
         "kind": "build",
@@ -24,10 +24,10 @@
       }
     },
     {
-      "label": "bazel build //:test_one_client (debug)",
+      "label": "bazel build //:test_client_server (debug)",
       "type": "shell",
       "command": "bazel",
-      "args": ["build", "-c", "dbg", "//:test_one_client"],
+      "args": ["build", "-c", "dbg", "//tests:test_client_server"],
       "problemMatcher": "$gcc",
       "group": {
         "kind": "build",

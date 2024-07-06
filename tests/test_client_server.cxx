@@ -3,20 +3,9 @@
 #include <chrono>
 #include <thread>
 
-#include "../client.hxx"
-#include "../server.hxx"
+#include "common.hxx"
 
 constexpr std::int64_t PORT = 1234;
-constexpr std::int64_t SERVER_NETADDR = 0;
-constexpr std::int64_t CLIENT_NETADDR = INADDR_LOOPBACK;
-constexpr std::int8_t BUFFER_SIZE = 64;
-constexpr std::int16_t backlog = SOMAXCONN;
-
-constexpr std::int64_t MAX_ITERATIONS =
-    1;  // has to always be 1 because of how I made the threading setup.
-
-const std::string clientSays = "hello";
-const std::string serverResponds = "world";
 
 /**
  * @brief Handles one read() and one write() for a server connection.
@@ -146,7 +135,7 @@ class ClientServerTest : public ::testing::Test {
    */
   void SetUp() override {
     serverThread = std::thread(
-        [this] { clientMessage = run(server.socket, MAX_ITERATIONS); });
+        [this] { clientMessage = run(server.getSocket(), MAX_ITERATIONS); });
     std::this_thread::sleep_for(std::chrono::seconds(1));
   }
 
@@ -169,7 +158,7 @@ class ClientServerTest : public ::testing::Test {
  *
  */
 TEST_F(ClientServerTest, OneServerOneClient) {
-  serverResponse = run(client.socket);
+  serverResponse = run(client.getSocket());
 
   EXPECT_EQ(clientMessage, "hello");
   EXPECT_EQ(serverResponse, "world");

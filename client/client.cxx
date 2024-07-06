@@ -1,22 +1,4 @@
-#include <unistd.h>
-
-#include <cstring>
-#include <iostream>
-#include <print>
-#include <string>
-#include <vector>
-
-#include "socket.hxx"
-
-class Client {
- public:
-  Client() = default;
-  void run();
-  std::int32_t query(std::int64_t fd, std::string text);
-
- private:
-  Socket socket;
-};
+#include "client.hxx"
 
 std::int32_t Client::query(std::int64_t fd, std::string text) {
   constexpr size_t k_max_msg = 4096;
@@ -99,8 +81,4 @@ L_DONE:
   close(socket.getFd());
 }
 
-auto main() -> int {
-  Client client;
-  client.run();
-  return 0;
-}
+Socket& Client::getSocket() { return socket; }

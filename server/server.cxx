@@ -1,22 +1,4 @@
-#include <unistd.h>
-
-#include <cstring>
-#include <iostream>
-#include <print>
-#include <vector>
-
-#include "socket.hxx"
-
-class Server {
- public:
-  Server() = default;
-  void run();
-  void doSomething(std::int64_t connfd);
-  std::int32_t oneRequest(std::int64_t connfd);
-
- private:
-  Socket socket;
-};
+#include "server.hxx"
 
 std::int32_t Server::oneRequest(std::int64_t connfd) {
   constexpr size_t k_max_msg = 4096;
@@ -115,8 +97,4 @@ void Server::run() {
   }
 }
 
-auto main() -> int {
-  Server server;
-  server.run();
-  return 0;
-}
+Socket& Server::getSocket() { return socket; }
