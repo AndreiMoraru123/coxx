@@ -1,14 +1,5 @@
-
 #include "socket.hxx"
 
-class Client {
- public:
-  Client() = default;
-  void run();
-  Socket& getSocket();
-
- private:
+struct Client {
   Socket socket;
 };
-
-Socket& Client::getSocket() { return socket; }
