@@ -53,6 +53,7 @@ std::int32_t Server::oneRequest(std::int64_t connfd) {
   return socket.writeAll(connfd, wbufStr, len + 4);
 }
 
+[[deprecated("No longer in use, server uses oneRequest()")]]
 void Server::doSomething(std::int64_t connfd) {
   std::vector<char> rbuf(64);
   ssize_t n = read(connfd, rbuf.data(), rbuf.size() - 1);
