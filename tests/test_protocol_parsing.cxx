@@ -165,8 +165,9 @@ static std::pair<std::int32_t, std::string> query(Socket& clientSocket,
  * @param numQueries the number of requests (messages) the server will process.
  * @return std::string The last client message the server processed.
  */
-static std::string run(Socket& serverSocket, std::int64_t maxIterations,
-                       std::uint8_t numQueries) {
+static std::vector<std::string> run(Socket& serverSocket,
+                                    std::int64_t maxIterations,
+                                    std::uint8_t numQueries) {
   serverSocket.setOptions();
   serverSocket.bindToPort(PORT, SERVER_NETADDR, "server");
 
@@ -174,7 +175,7 @@ static std::string run(Socket& serverSocket, std::int64_t maxIterations,
     throw std::runtime_error("Failed to listen");
   }
 
-  std::string lastClientMsg;
+  std::vector<std::string> clientMessages;
 
   for (int i = 0; i < maxIterations; ++i) {
     struct sockaddr_in client_addr = {};
@@ -192,11 +193,11 @@ static std::string run(Socket& serverSocket, std::int64_t maxIterations,
       if (err) {
         break;
       }
-      lastClientMsg = msg;
+      clientMessages.push_back(msg);
     }
     close(connFd);
   }
-  return lastClientMsg;
+  return clientMessages;
 }
 
 /**
@@ -237,7 +238,7 @@ class ClientServerTest : public ::testing::Test {
   Server server;
   Client client;
   std::thread serverThread;
-  std::string lastClientMessage;
+  std::vector<std::string> clientMessages;
 
   /**
    * @brief Set up the text fixture.
@@ -248,7 +249,7 @@ class ClientServerTest : public ::testing::Test {
    */
   void SetUp() override {
     serverThread = std::thread([this] {
-      lastClientMessage = run(server.getSocket(), MAX_ITERATIONS, NUM_QUERIES);
+      clientMessages = run(server.getSocket(), MAX_ITERATIONS, NUM_QUERIES);
     });
     std::this_thread::sleep_for(std::chrono::seconds(1));
   }
@@ -274,7 +275,10 @@ class ClientServerTest : public ::testing::Test {
  */
 TEST_F(ClientServerTest, ProtocolParsing) {
   auto serverResponses = run(client.getSocket(), NUM_QUERIES);
-  EXPECT_EQ(lastClientMessage, "hello");
+
+  for (const auto& msg : clientMessages) {
+    EXPECT_EQ(msg, "hello");
+  }
 
   for (const auto& [err, msg] : serverResponses) {
     EXPECT_EQ(err, 0);
