@@ -1,12 +1,12 @@
 #include "server.hxx"
 
-std::int32_t Server::oneRequest(std::int64_t connfd) {
+std::int32_t Server::oneRequest(std::int64_t connFd) {
   constexpr size_t k_max_msg = 4096;
   std::vector<char> rbuf(4 + k_max_msg + 1);
   errno = 0;
 
   std::string header(4, '\0');
-  std::int32_t err = socket.readFull(connfd, header, 4);
+  std::int32_t err = socket.readFull(connFd, header, 4);
   if (err) {
     if (errno == 0) {
       std::println("EOF");
@@ -28,7 +28,7 @@ std::int32_t Server::oneRequest(std::int64_t connfd) {
 
   // Read the request body
   std::string body(len, '\0');
-  err = socket.readFull(connfd, body, len);
+  err = socket.readFull(connFd, body, len);
   if (err) {
     std::cerr << "read() error" << std::endl;
     return err;
@@ -37,7 +37,7 @@ std::int32_t Server::oneRequest(std::int64_t connfd) {
   // Copy the body back into rbuf
   std::memcpy(rbuf.data() + 4, body.data(), len);
 
-  // Print the null temrinated string in the buffer
+  // Print the null terminated string in the buffer
   rbuf[4 + len] = '\0';
   std::println("Client says {}", &rbuf[4]);
 
@@ -50,13 +50,13 @@ std::int32_t Server::oneRequest(std::int64_t connfd) {
   std::memcpy(wbuf.data() + 4, reply.data(), len);
 
   std::string wbufStr(wbuf.begin(), wbuf.end());
-  return socket.writeAll(connfd, wbufStr, len + 4);
+  return socket.writeAll(connFd, wbufStr, len + 4);
 }
 
 [[deprecated("No longer in use, server uses oneRequest()")]]
-void Server::doSomething(std::int64_t connfd) {
+void Server::doSomething(std::int64_t connFd) {
   std::vector<char> rbuf(64);
-  ssize_t n = read(connfd, rbuf.data(), rbuf.size() - 1);
+  ssize_t n = read(connFd, rbuf.data(), rbuf.size() - 1);
   if (n < 0) {
     std::cerr << "read() error" << std::endl;
     return;
@@ -65,7 +65,7 @@ void Server::doSomething(std::int64_t connfd) {
   std::println("Client says {}", std::string(rbuf.begin(), rbuf.begin() + n));
 
   std::string wbuf = "world";
-  write(connfd, wbuf.c_str(), wbuf.length());
+  write(connFd, wbuf.c_str(), wbuf.length());
 }
 
 void Server::run() {
@@ -79,22 +79,22 @@ void Server::run() {
   while (true) {
     struct sockaddr_in client_addr = {};
     socklen_t socklen = sizeof(client_addr);
-    std::int64_t connfd =
+    std::int64_t connFd =
         accept(socket.getFd(), reinterpret_cast<struct sockaddr*>(&client_addr),
                &socklen);
 
-    if (connfd == -1) {
+    if (connFd == -1) {
       continue;  // error
     }
 
     while (true) {
-      std::int32_t err = oneRequest(connfd);
+      std::int32_t err = oneRequest(connFd);
       if (err) {
         break;
       }
     }
 
-    close(connfd);
+    close(connFd);
   }
 }
 
