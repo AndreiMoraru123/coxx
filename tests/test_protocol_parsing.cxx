@@ -216,18 +216,20 @@ static std::string run(Socket& serverSocket, std::int64_t maxIterations,
  * @return std::pair<std::int32_t, std::string> The last error code along with
  * the last response received from the server for the last query.
  */
-static std::pair<std::int32_t, std::string> run(Socket& clientSocket,
-                                                std::uint8_t numQueries) {
+static std::vector<std::pair<std::int32_t, std::string>> run(
+    Socket& clientSocket, std::uint8_t numQueries) {
+  std::vector<std::pair<std::int32_t, std::string>> responses;
+
   clientSocket.setOptions();
   clientSocket.bindToPort(PORT, CLIENT_NETADDR, "client");
 
   std::pair<std::int32_t, std::string> response;
   for (int i = 0; i < numQueries; ++i) {
-    response = query(clientSocket, "hello");
+    responses.emplace_back(query(clientSocket, clientSays));
   }
 
   close(clientSocket.getFd());
-  return response;
+  return responses;
 }
 
 class ClientServerTest : public ::testing::Test {
@@ -272,9 +274,11 @@ class ClientServerTest : public ::testing::Test {
  *
  */
 TEST_F(ClientServerTest, ProtocolParsing) {
-  auto lastServerMessage = run(client.getSocket(), NUM_QUERIES);
+  auto serverResponses = run(client.getSocket(), NUM_QUERIES);
   EXPECT_EQ(lastClientMessage, "hello");
 
-  EXPECT_EQ(std::get<0>(lastServerMessage), 0);
-  EXPECT_EQ(std::get<1>(lastServerMessage), "world");
+  for (const auto& [err, msg] : serverResponses) {
+    EXPECT_EQ(err, 0);
+    EXPECT_EQ(msg, "world");
+  }
 }
