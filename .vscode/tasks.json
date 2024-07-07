@@ -33,6 +33,17 @@
         "kind": "build",
         "isDefault": true
       }
+    },
+    {
+      "label": "bazel build //:test_protocol_parsing (debug)",
+      "type": "shell",
+      "command": "bazel",
+      "args": ["build", "-c", "dbg", "//tests:test_protocol_parsing"],
+      "problemMatcher": "$gcc",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
     }
   ]
 }

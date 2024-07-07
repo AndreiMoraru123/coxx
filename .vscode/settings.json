@@ -71,5 +71,6 @@
     "typeinfo": "cpp",
     "variant": "cpp",
     "get_workspace_status": "cpp"
-  }
+  },
+  "C_Cpp.intelliSenseEngineFallback": "enabled"
 }

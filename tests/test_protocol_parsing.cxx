@@ -7,6 +7,7 @@
 #include "common.hxx"
 
 constexpr std::int64_t PORT = 12345;
+constexpr std::uint8_t NUM_CLIENTS = 3;
 
 static std::pair<std::int32_t, std::string> oneRequest(Socket& serverSocket,
                                                        std::int64_t connFd) {
@@ -116,7 +117,8 @@ static std::pair<std::int32_t, std::string> query(Socket& clientSocket,
   return {0, &rbuf[4]};
 }
 
-static std::string run(Socket& serverSocket, std::int64_t maxIterations) {
+static std::string run(Socket& serverSocket, std::int64_t maxIterations,
+                       std::uint8_t numClients) {
   serverSocket.setOptions();
   serverSocket.bindToPort(PORT, SERVER_NETADDR, "server");
 
@@ -124,7 +126,6 @@ static std::string run(Socket& serverSocket, std::int64_t maxIterations) {
     throw std::runtime_error("Failed to listen");
   }
 
-  std::vector<std::thread> clientThreads;
   std::string lastClientMsg;
 
   for (int i = 0; i < maxIterations; ++i) {
@@ -138,7 +139,7 @@ static std::string run(Socket& serverSocket, std::int64_t maxIterations) {
       continue;
     }
 
-    for (int i = 0; i < maxIterations; ++i) {
+    for (int i = 0; i < numClients; ++i) {
       auto [err, msg] = oneRequest(serverSocket, connFd);
       if (err) {
         break;
@@ -150,11 +151,15 @@ static std::string run(Socket& serverSocket, std::int64_t maxIterations) {
   return lastClientMsg;
 }
 
-static std::pair<std::int32_t, std::string> run(Socket& clientSocket) {
+static std::pair<std::int32_t, std::string> run(Socket& clientSocket,
+                                                std::uint8_t numClients) {
   clientSocket.setOptions();
   clientSocket.bindToPort(PORT, CLIENT_NETADDR, "client");
 
-  auto response = query(clientSocket, "hello");
+  std::pair<std::int32_t, std::string> response;
+  for (int i = 0; i < numClients; ++i) {
+    response = query(clientSocket, "hello");
+  }
 
   close(clientSocket.getFd());
   return response;
@@ -166,8 +171,7 @@ class ClientServerTest : public ::testing::Test {
   Client client;
   std::thread serverThread;
   std::mutex mutex;
-  std::string clientMessage;
-  std::string serverResponse;
+  std::string lastClientMessage;
 
   /**
    * @brief Set up the text fixture.
@@ -177,8 +181,9 @@ class ClientServerTest : public ::testing::Test {
    * the server would be different applications, with different runtimes.
    */
   void SetUp() override {
-    serverThread = std::thread(
-        [this] { clientMessage = run(server.getSocket(), MAX_ITERATIONS); });
+    serverThread = std::thread([this] {
+      lastClientMessage = run(server.getSocket(), MAX_ITERATIONS, NUM_CLIENTS);
+    });
     std::this_thread::sleep_for(std::chrono::seconds(1));
   }
 
@@ -201,9 +206,9 @@ class ClientServerTest : public ::testing::Test {
  *
  */
 TEST_F(ClientServerTest, ProtocolParsing) {
-  auto serverMessage = run(client.getSocket());
-  EXPECT_EQ(clientMessage, "hello");
+  auto lastServerMessage = run(client.getSocket(), NUM_CLIENTS);
+  EXPECT_EQ(lastClientMessage, "hello");
 
-  EXPECT_EQ(std::get<0>(serverMessage), 0);
-  EXPECT_EQ(std::get<1>(serverMessage), "world");
+  EXPECT_EQ(std::get<0>(lastServerMessage), 0);
+  EXPECT_EQ(std::get<1>(lastServerMessage), "world");
 }
