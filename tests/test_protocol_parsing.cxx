@@ -237,7 +237,6 @@ class ClientServerTest : public ::testing::Test {
   Server server;
   Client client;
   std::thread serverThread;
-  std::mutex mutex;
   std::string lastClientMessage;
 
   /**
