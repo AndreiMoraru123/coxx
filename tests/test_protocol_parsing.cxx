@@ -7,8 +7,28 @@
 #include "common.hxx"
 
 constexpr std::int64_t PORT = 12345;
-constexpr std::uint8_t NUM_CLIENTS = 3;
+constexpr std::uint8_t NUM_QUERIES = 3;
 
+/**
+ * @brief Processes a single request from a client and sends back a response.
+ *
+ * This function implements the protocol by first reading a 4-byte header to
+ * determine the length of the incoming message. It then reads the message of
+ * that length. If the message length exceeds the maximum allowed (K_MAX_MSG),
+ * it returns an error. After successfully reading the message, it builds a
+ * response and sends it back to the client.
+ *
+ * +-----+------+-----+------+--------
+ * | len | msg1 | len | msg2 | more...
+ * +-----+------+-----+------+--------
+ *
+ * @param serverSocket A reference to the Socket object configured for the
+ * server ops.
+ * @param connFd The file descriptor for the connection to the client.
+ * @return std::pair<std::int32_t, std::string> The error code (0 on success, -1
+ * on failure) along with the message received from the client (on success) or
+ * an error message (on failure).
+ */
 static std::pair<std::int32_t, std::string> oneRequest(Socket& serverSocket,
                                                        std::int64_t connFd) {
   std::vector<char> rbuf(4 + K_MAX_MSG + 1);
@@ -21,7 +41,7 @@ static std::pair<std::int32_t, std::string> oneRequest(Socket& serverSocket,
     if (errno == 0) {
       message = "EOF";
     } else {
-      message = "read () error";
+      message = "read() error";
     }
     return {err, message};
   }
@@ -60,6 +80,18 @@ static std::pair<std::int32_t, std::string> oneRequest(Socket& serverSocket,
   return {serverSocket.writeAll(connFd, wbufStr, len + 4), clientMessage};
 }
 
+/**
+ * @brief Sends a query to the server and waits for the response.
+ *
+ * Uses the same 4-byte protocol as the Server.
+ *
+ * @param clientSocket A reference to the Socket object configured for the
+ * client ops.
+ * @param text The message to send to the server.
+ * @return std::pair<std::int32_t, std::string> The error code (0 on success, -1
+ * on failure) along with the response received from the server (on success) or
+ * an error message (on failure).
+ */
 static std::pair<std::int32_t, std::string> query(Socket& clientSocket,
                                                   std::string text) {
   std::int64_t fd = clientSocket.getFd();
@@ -117,8 +149,24 @@ static std::pair<std::int32_t, std::string> query(Socket& clientSocket,
   return {0, &rbuf[4]};
 }
 
+/**
+ * @brief Simulates a server run for testing.
+ *
+ * Initializes the server socket, binds it to the global common port and server
+ * network address. For each accepted connection, it reads a number of @p
+ * numQueries from the client, responds to every one of them, and then closes
+ * the connection.
+ *
+ * @param serverSocket A reference to the Socket object configured for the
+ * server ops.
+ * @param maxIterations The maximum number of client connections to accepts
+ * before stopping. This is just to avoid infinite runs for the testing
+ * scenario. In a real scenario, this could run indefinitely.
+ * @param numQueries the number of requests (messages) the server will process.
+ * @return std::string The last client message the server processed.
+ */
 static std::string run(Socket& serverSocket, std::int64_t maxIterations,
-                       std::uint8_t numClients) {
+                       std::uint8_t numQueries) {
   serverSocket.setOptions();
   serverSocket.bindToPort(PORT, SERVER_NETADDR, "server");
 
@@ -139,7 +187,7 @@ static std::string run(Socket& serverSocket, std::int64_t maxIterations,
       continue;
     }
 
-    for (int i = 0; i < numClients; ++i) {
+    for (int i = 0; i < numQueries; ++i) {
       auto [err, msg] = oneRequest(serverSocket, connFd);
       if (err) {
         break;
@@ -151,13 +199,30 @@ static std::string run(Socket& serverSocket, std::int64_t maxIterations,
   return lastClientMsg;
 }
 
+/**
+ * @brief Simulates client operations for testing.
+ *
+ * Initializes the server socket, binds it to the global common port and server
+ * network address.
+ *
+ * Sends @p numQueries to the server and awaits a response back for each.
+ *
+ * This function is the core functionality tested in this file: the capability
+ * of the server to handle multiple requests from a client.
+ *
+ * @param clientSocket A reference to the Socket object configured for the
+ * client ops.
+ * @param numQueries the number of requests (messages) the client will send.
+ * @return std::pair<std::int32_t, std::string> The last error code along with
+ * the last response received from the server for the last query.
+ */
 static std::pair<std::int32_t, std::string> run(Socket& clientSocket,
-                                                std::uint8_t numClients) {
+                                                std::uint8_t numQueries) {
   clientSocket.setOptions();
   clientSocket.bindToPort(PORT, CLIENT_NETADDR, "client");
 
   std::pair<std::int32_t, std::string> response;
-  for (int i = 0; i < numClients; ++i) {
+  for (int i = 0; i < numQueries; ++i) {
     response = query(clientSocket, "hello");
   }
 
@@ -182,7 +247,7 @@ class ClientServerTest : public ::testing::Test {
    */
   void SetUp() override {
     serverThread = std::thread([this] {
-      lastClientMessage = run(server.getSocket(), MAX_ITERATIONS, NUM_CLIENTS);
+      lastClientMessage = run(server.getSocket(), MAX_ITERATIONS, NUM_QUERIES);
     });
     std::this_thread::sleep_for(std::chrono::seconds(1));
   }
@@ -200,13 +265,14 @@ class ClientServerTest : public ::testing::Test {
 };
 
 /**
- * @test Test case for a single client - server communication.
+ * @test Test case for a multiple requests from a client to a server via a
+ * splitting protocol.
  *
- * Runs the client socket and asserts the received messages on both sides.
+ * Runs the client socket and asserts the last received messages on both sides.
  *
  */
 TEST_F(ClientServerTest, ProtocolParsing) {
-  auto lastServerMessage = run(client.getSocket(), NUM_CLIENTS);
+  auto lastServerMessage = run(client.getSocket(), NUM_QUERIES);
   EXPECT_EQ(lastClientMessage, "hello");
 
   EXPECT_EQ(std::get<0>(lastServerMessage), 0);

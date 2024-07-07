@@ -81,8 +81,8 @@ static std::string run(Socket& serverSocket, std::int64_t maxIterations) {
 /**
  * @brief Simulates client operations for testing.
  *
- * Initializes the server socket, binds it to the global common port and server
- * network address.
+ * Initializes the client socket, connects it to the global common port and
+ * client network address.
  *
  * After writing (sending) the message, it waits for a response from the server.
  *
