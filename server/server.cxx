@@ -1,7 +1,7 @@
 #include "server.hxx"
 
 std::int32_t Server::oneRequest(std::int64_t connFd) {
-  constexpr size_t k_max_msg = 4096;
+  constexpr std::size_t k_max_msg = 4096;
   std::vector<char> rbuf(4 + k_max_msg + 1);
   errno = 0;
 

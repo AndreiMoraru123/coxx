@@ -1,7 +1,7 @@
 #include "client.hxx"
 
 std::int32_t Client::query(std::int64_t fd, std::string text) {
-  constexpr size_t k_max_msg = 4096;
+  constexpr std::size_t k_max_msg = 4096;
   std::uint32_t len = static_cast<std::uint32_t>(text.size());
 
   if (len > k_max_msg) {

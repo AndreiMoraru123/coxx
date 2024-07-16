@@ -102,16 +102,17 @@ void Socket::bindToPort(std::int64_t port, std::uint32_t netaddr,
  * @return std::int32_t Returns 0 on success, -1 if an error occurs or EOF is
  * encountered before reading @p n bytes.
  */
-std::int32_t Socket::readFull(std::int64_t fd, std::string &buffer, size_t n) {
+std::int32_t Socket::readFull(std::int64_t fd, std::string &buffer,
+                              std::size_t n) {
   buffer.resize(n);
-  size_t bytesRead = 0;
+  std::size_t bytesRead = 0;
 
   while (bytesRead < n) {
     ssize_t rv = read(fd, &buffer[bytesRead], n - bytesRead);
     if (rv <= 0) {
       return -1;  // Error, or unexpected EOF
     }
-    bytesRead += static_cast<size_t>(rv);
+    bytesRead += static_cast<std::size_t>(rv);
   }
   buffer.resize(bytesRead);
   return 0;
@@ -128,16 +129,17 @@ std::int32_t Socket::readFull(std::int64_t fd, std::string &buffer, size_t n) {
  * @return std::int32_t  Returns 0 on success, -1 if an error occurs during
  * writing
  */
-std::int32_t Socket::writeAll(std::int64_t fd, std::string &buffer, size_t n) {
+std::int32_t Socket::writeAll(std::int64_t fd, std::string &buffer,
+                              std::size_t n) {
   buffer.resize(n);
-  size_t bytesWrote = 0;
+  std::size_t bytesWrote = 0;
 
   while (bytesWrote < n) {
     ssize_t rv = write(fd, &buffer[bytesWrote], n - bytesWrote);
     if (rv <= 0) {
       return -1;  // Error
     }
-    bytesWrote += static_cast<size_t>(rv);
+    bytesWrote += static_cast<std::size_t>(rv);
   }
   buffer.resize(bytesWrote);
   return 0;
