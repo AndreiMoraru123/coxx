@@ -19,8 +19,8 @@ enum class ConnState : std::uint8_t {
 class Conn {
  public:
   Conn()
-      : state(ConnState::REQ),
-        _fd(-1),
+      : _fd(-1),
+        state(ConnState::REQ),
         rbuf(),
         wbuf(),
         wbufSent(0),
@@ -31,8 +31,8 @@ class Conn {
   }
 
   Conn(std::int64_t fd, ConnState state, std::size_t wbufSent)
-      : state(state),
-        _fd(fd),
+      : _fd(fd),
+        state(state),
         rbuf(),
         wbuf(),
         wbufSent(wbufSent),
@@ -61,8 +61,8 @@ class Conn {
   void io();
 
  private:
-  ConnState state;
   std::int64_t _fd;
+  ConnState state;
   std::vector<std::uint8_t> rbuf;
   std::vector<std::uint8_t> wbuf;
   std::size_t wbufSent;
