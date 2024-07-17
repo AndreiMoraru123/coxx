@@ -18,17 +18,9 @@ enum class ConnState : std::uint8_t {
 
 class Conn {
  public:
-  std::int64_t _fd;
-  ConnState state;
-  std::vector<std::uint8_t> rbuf;
-  std::vector<std::uint8_t> wbuf;
-  std::size_t wbufSent;
-  std::size_t wbufSize;
-  std::size_t rbufSize;
-
   Conn()
-      : _fd(-1),
-        state(ConnState::REQ),
+      : state(ConnState::REQ),
+        _fd(-1),
         rbuf(),
         wbuf(),
         wbufSent(0),
@@ -39,8 +31,8 @@ class Conn {
   }
 
   Conn(std::int64_t fd, ConnState state, std::size_t wbufSent)
-      : _fd(fd),
-        state(state),
+      : state(state),
+        _fd(fd),
         rbuf(),
         wbuf(),
         wbufSent(wbufSent),
@@ -51,9 +43,31 @@ class Conn {
   }
 
   ~Conn();
+
+  /**
+   * @brief Get the connection file descriptor
+   *
+   * @return int Returns the file descriptor of the Conn.
+   */
+  int getFd();
+
+  /**
+   * @brief Get the connection state
+   *
+   * @return int Returns the state of the Conn.
+   */
+  ConnState getState();
+
   void io();
 
  private:
+  ConnState state;
+  std::int64_t _fd;
+  std::vector<std::uint8_t> rbuf;
+  std::vector<std::uint8_t> wbuf;
+  std::size_t wbufSent;
+  std::size_t wbufSize;
+  std::size_t rbufSize;
   bool tryOneRequest();
   bool tryFlushBuffer();
   bool tryFillBuffer();

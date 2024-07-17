@@ -115,6 +115,20 @@ void Conn::stateRes() {
   }
 }
 
+/**
+ * @brief Get the connection file descriptor
+ *
+ * @return int Returns the file descriptor of the Conn.
+ */
+int Conn::getFd() { return _fd; }
+
+/**
+ * @brief Get the connection state
+ *
+ * @return int Returns the state of the Conn.
+ */
+ConnState Conn::getState() { return state; }
+
 void Conn::io() {
   if (state == ConnState::REQ) {
     stateReq();

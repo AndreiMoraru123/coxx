@@ -17,10 +17,10 @@ void Server::makeNonBlocking(std::int64_t fd) {
 
 void connPut(std::vector<std::unique_ptr<Conn>>& fd2Conn,
              std::unique_ptr<Conn> conn) {
-  if (fd2Conn.size() <= static_cast<std::size_t>(conn->_fd)) {
-    fd2Conn.resize(conn->_fd + 1);
+  if (fd2Conn.size() <= static_cast<std::size_t>(conn->getFd())) {
+    fd2Conn.resize(conn->getFd() + 1);
   }
-  fd2Conn[conn->_fd] = std::move(conn);
+  fd2Conn[conn->getFd()] = std::move(conn);
 }
 
 std::int32_t Server::acceptNewConn(
@@ -65,8 +65,8 @@ void Server::run() {
       }
 
       pollfd pfd = {};
-      pfd.fd = conn->_fd;
-      pfd.events = (conn->state == ConnState::REQ) ? POLLIN : POLLOUT;
+      pfd.fd = conn->getFd();
+      pfd.events = (conn->getState() == ConnState::REQ) ? POLLIN : POLLOUT;
       pfd.events = pfd.events | POLLERR;
       pollArgs.push_back(pfd);
     }
@@ -79,8 +79,8 @@ void Server::run() {
       if (pollArgs[i].revents) {
         auto& conn = fd2Conn[pollArgs[i].fd];
         conn->io();
-        if (conn->state == ConnState::END) {
-          fd2Conn[conn->_fd].reset();
+        if (conn->getState() == ConnState::END) {
+          fd2Conn[conn->getFd()].reset();
         }
       }
     }
