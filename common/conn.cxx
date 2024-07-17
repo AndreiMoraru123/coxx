@@ -3,7 +3,7 @@
 Conn::~Conn() { close(_fd); }
 
 bool Conn::tryOneRequest() {
-  if (rbuf.size() < 4) {
+  if (rbufSize < 4) {
     return false;
   }
   std::uint32_t len = 0;
@@ -14,7 +14,7 @@ bool Conn::tryOneRequest() {
     return false;
   }
 
-  if (4 + len > rbuf.size()) {
+  if (4 + len > rbufSize) {
     return false;  // not enough data in the buffer;
   }
 
@@ -23,13 +23,13 @@ bool Conn::tryOneRequest() {
 
   std::memcpy(wbuf.data(), &len, 4);
   std::memcpy(wbuf.data() + 4, rbuf.data() + 4, len);
-  wbuf.resize(4 + len);
+  wbufSize = 4 + len;
 
-  std::size_t remain = rbuf.size() - 4 - len;
+  std::size_t remain = rbufSize - 4 - len;
   if (remain) {
     std::memmove(rbuf.data(), rbuf.data() + 4 + len, remain);
   }
-  rbuf.resize(remain);
+  rbufSize = remain;
 
   state = ConnState::RES;
   stateRes();
@@ -40,25 +40,27 @@ bool Conn::tryOneRequest() {
 bool Conn::tryFlushBuffer() {
   ssize_t rv = 0;
   do {
-    std::size_t remain = wbuf.size() - wbufSent;
+    std::size_t remain = wbufSize - wbufSent;
     rv = write(_fd, wbuf.data() + wbufSent, remain);
   } while (rv < 0 && errno == EINTR);
+
   if (rv < 0 && errno == EAGAIN) {
     return false;  // stop
   }
+
   if (rv < 0) {
     std::cerr << "write() error" << std::endl;
     state = ConnState::END;
     return false;
   }
 
-  wbuf.resize(wbuf.size() + static_cast<std::size_t>(rv));
-  assert(wbufSent <= wbuf.size());
+  wbufSent += static_cast<std::size_t>(rv);
+  assert(wbufSent <= wbufSize);
 
-  if (wbufSent == wbuf.size()) {
+  if (wbufSent == wbufSize) {
     state = ConnState::REQ;
     wbufSent = 0;
-    wbuf.resize(0);
+    wbufSize = 0;
     return false;
   }
 
@@ -67,21 +69,26 @@ bool Conn::tryFlushBuffer() {
 }
 
 bool Conn::tryFillBuffer() {
+  assert(rbufSize < rbuf.capacity());
   ssize_t rv = 0;
+
   do {
-    std::size_t cap = rbuf.capacity() - rbuf.size();
-    rv = read(_fd, rbuf.data() + rbuf.size(), cap);
+    std::size_t cap = rbuf.capacity() - rbufSize;
+    rv = read(_fd, rbuf.data() + rbufSize, cap);
   } while (rv < 0 && errno == EINTR);
+
   if (rv < 0 && errno == EAGAIN) {
     return false;  // stop
   }
+
   if (rv < 0) {
     std::cerr << "read() error" << std::endl;
     state = ConnState::END;
     return false;
   }
+
   if (rv == 0) {
-    if (!rbuf.empty()) {
+    if (rbufSize > 0) {
       std::println("unexpected EOF");
     } else {
       std::println("EOF");
@@ -90,7 +97,9 @@ bool Conn::tryFillBuffer() {
     return false;
   }
 
-  rbuf.resize(rbuf.size() + static_cast<std::size_t>(rv));
+  rbufSize += static_cast<std::size_t>(rv);
+  assert(rbufSize <= rbuf.capacity());
+
   while (tryOneRequest()) {
   }
   return (state == ConnState::REQ);
@@ -112,6 +121,7 @@ void Conn::io() {
   } else if (state == ConnState::RES) {
     stateRes();
   } else {
+    std::println("not expected");
     assert(0);
   }
 }

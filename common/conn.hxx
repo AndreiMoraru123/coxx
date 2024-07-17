@@ -1,4 +1,3 @@
-#pragma once
 #include <fcntl.h>
 #include <unistd.h>
 
@@ -19,25 +18,37 @@ enum class ConnState : std::uint8_t {
 
 class Conn {
  public:
-  int _fd;
+  std::int64_t _fd;
   ConnState state;
   std::vector<std::uint8_t> rbuf;
   std::vector<std::uint8_t> wbuf;
   std::size_t wbufSent;
+  std::size_t wbufSize;
+  std::size_t rbufSize;
 
   Conn()
       : _fd(-1),
         state(ConnState::REQ),
-        rbuf(4 + K_MAX_MSG),
-        wbuf(4 + K_MAX_MSG),
-        wbufSent(0) {}
+        rbuf(),
+        wbuf(),
+        wbufSent(0),
+        wbufSize(0),
+        rbufSize(0) {
+    rbuf.reserve(4 + K_MAX_MSG);
+    wbuf.reserve(4 + K_MAX_MSG);
+  }
 
   Conn(std::int64_t fd, ConnState state, std::size_t wbufSent)
       : _fd(fd),
         state(state),
-        rbuf(4 + K_MAX_MSG),
-        wbuf(4 + K_MAX_MSG),
-        wbufSent(wbufSent) {}
+        rbuf(),
+        wbuf(),
+        wbufSent(wbufSent),
+        wbufSize(0),
+        rbufSize(0) {
+    rbuf.reserve(4 + K_MAX_MSG);
+    wbuf.reserve(4 + K_MAX_MSG);
+  }
 
   ~Conn();
   void io();
