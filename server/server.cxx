@@ -85,7 +85,7 @@ void Server::run() {
       }
     }
 
-    if (pollArgs[0].revents) {
+    if (pollArgs.front().revents) {
       acceptNewConn(fd2Conn);
     }
   }
