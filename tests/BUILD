@@ -11,8 +11,8 @@ cc_test(
     copts = ["-std=c++23"],
     deps = [
         ":common",
-        "//client:client_lib",
-        "//server:server_lib",
+        "//client:libclient",
+        "//server:libserver",
         "@gtest//:gtest_main",
     ],
 )
@@ -24,8 +24,8 @@ cc_test(
     copts = ["-std=c++23"],
     deps = [
         ":common",
-        "//client:client_lib",
-        "//server:server_lib",
+        "//client:libclient",
+        "//server:libserver",
         "@gtest//:gtest_main",
     ],
 )

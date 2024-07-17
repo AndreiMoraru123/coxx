@@ -1,5 +1,5 @@
 cc_library(
-    name = "client_lib",
+    name = "libclient",
     srcs = ["client.cxx"],
     hdrs = ["client.hxx"],
     copts = ["-std=c++23"],
@@ -13,5 +13,5 @@ cc_binary(
     name = "client",
     srcs = ["run.cxx"],
     copts = ["-std=c++23"],
-    deps = [":client_lib"],
+    deps = [":libclient"],
 )

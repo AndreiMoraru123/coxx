@@ -70,7 +70,11 @@
     "thread": "cpp",
     "typeinfo": "cpp",
     "variant": "cpp",
-    "get_workspace_status": "cpp"
+    "get_workspace_status": "cpp",
+    "bitset": "cpp",
+    "coroutine": "cpp",
+    "source_location": "cpp",
+    "ranges": "cpp"
   },
   "C_Cpp.intelliSenseEngineFallback": "enabled"
 }

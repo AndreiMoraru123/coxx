@@ -1,0 +1,117 @@
+#include "conn.hxx"
+
+Conn::~Conn() { close(_fd); }
+
+bool Conn::tryOneRequest() {
+  if (rbuf.size() < 4) {
+    return false;
+  }
+  std::uint32_t len = 0;
+  std::memcpy(&len, rbuf.data(), 4);
+  if (len > K_MAX_MSG) {
+    std::println("too long");
+    state = ConnState::END;
+    return false;
+  }
+
+  if (4 + len > rbuf.size()) {
+    return false;  // not enough data in the buffer;
+  }
+
+  std::string clientMessage(rbuf.begin() + 4, rbuf.begin() + 4 + len);
+  std::println("Client says {}", clientMessage);
+
+  std::memcpy(wbuf.data(), &len, 4);
+  std::memcpy(wbuf.data() + 4, rbuf.data() + 4, len);
+  wbuf.resize(4 + len);
+
+  std::size_t remain = rbuf.size() - 4 - len;
+  if (remain) {
+    std::memmove(rbuf.data(), rbuf.data() + 4 + len, remain);
+  }
+  rbuf.resize(remain);
+
+  state = ConnState::RES;
+  stateRes();
+
+  return (state == ConnState::REQ);
+}
+
+bool Conn::tryFlushBuffer() {
+  ssize_t rv = 0;
+  do {
+    std::size_t remain = wbuf.size() - wbufSent;
+    rv = write(_fd, wbuf.data() + wbufSent, remain);
+  } while (rv < 0 && errno == EINTR);
+  if (rv < 0 && errno == EAGAIN) {
+    return false;  // stop
+  }
+  if (rv < 0) {
+    std::cerr << "write() error" << std::endl;
+    state = ConnState::END;
+    return false;
+  }
+
+  wbuf.resize(wbuf.size() + static_cast<std::size_t>(rv));
+  assert(wbufSent <= wbuf.size());
+
+  if (wbufSent == wbuf.size()) {
+    state = ConnState::REQ;
+    wbufSent = 0;
+    wbuf.resize(0);
+    return false;
+  }
+
+  // still got some date in the write buffer, could try to write again
+  return true;
+}
+
+bool Conn::tryFillBuffer() {
+  ssize_t rv = 0;
+  do {
+    std::size_t cap = rbuf.capacity() - rbuf.size();
+    rv = read(_fd, rbuf.data() + rbuf.size(), cap);
+  } while (rv < 0 && errno == EINTR);
+  if (rv < 0 && errno == EAGAIN) {
+    return false;  // stop
+  }
+  if (rv < 0) {
+    std::cerr << "read() error" << std::endl;
+    state = ConnState::END;
+    return false;
+  }
+  if (rv == 0) {
+    if (!rbuf.empty()) {
+      std::println("unexpected EOF");
+    } else {
+      std::println("EOF");
+    }
+    state = ConnState::END;
+    return false;
+  }
+
+  rbuf.resize(rbuf.size() + static_cast<std::size_t>(rv));
+  while (tryOneRequest()) {
+  }
+  return (state == ConnState::REQ);
+}
+
+void Conn::stateReq() {
+  while (tryFillBuffer()) {
+  }
+}
+
+void Conn::stateRes() {
+  while (tryFlushBuffer()) {
+  }
+}
+
+void Conn::io() {
+  if (state == ConnState::REQ) {
+    stateReq();
+  } else if (state == ConnState::RES) {
+    stateRes();
+  } else {
+    assert(0);
+  }
+}
