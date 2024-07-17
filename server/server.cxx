@@ -75,9 +75,9 @@ void Server::run() {
       std::cerr << "poll error" << std::endl;
     }
 
-    for (std::size_t i = 1; i < pollArgs.size(); ++i) {
-      if (pollArgs[i].revents) {
-        auto& conn = fd2Conn[pollArgs[i].fd];
+    for (auto it = std::next(pollArgs.begin()); it != pollArgs.end(); ++it) {
+      if (it->revents) {
+        auto& conn = fd2Conn[it->fd];
         conn->io();
         if (conn->getState() == ConnState::END) {
           fd2Conn[conn->getFd()].reset();
