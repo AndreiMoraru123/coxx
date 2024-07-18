@@ -32,7 +32,7 @@ bool Conn::tryOneRequest() {
   rbufSize = remain;
 
   state = ConnState::RES;
-  stateRes();
+  stateResponse();
 
   return (state == ConnState::REQ);
 }
@@ -105,12 +105,12 @@ bool Conn::tryFillBuffer() {
   return (state == ConnState::REQ);
 }
 
-void Conn::stateReq() {
+void Conn::stateRequest() {
   while (tryFillBuffer()) {
   }
 }
 
-void Conn::stateRes() {
+void Conn::stateResponse() {
   while (tryFlushBuffer()) {
   }
 }
@@ -131,9 +131,9 @@ ConnState Conn::getState() { return state; }
 
 void Conn::io() {
   if (state == ConnState::REQ) {
-    stateReq();
+    stateRequest();
   } else if (state == ConnState::RES) {
-    stateRes();
+    stateResponse();
   } else {
     std::println("not expected");
     assert(0);

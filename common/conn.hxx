@@ -71,6 +71,6 @@ class Conn {
   bool tryOneRequest();
   bool tryFlushBuffer();
   bool tryFillBuffer();
-  void stateReq();
-  void stateRes();
+  void stateRequest();
+  void stateResponse();
 };
