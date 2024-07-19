@@ -5,6 +5,7 @@
     "cschlosser.doxdocgen",
     "streetsidesoftware.code-spell-checker",
     "esbenp.prettier-vscode",
-    "aaron-bond.better-comments"
+    "aaron-bond.better-comments",
+    "shardulm94.trailing-spaces"
   ]
 }
