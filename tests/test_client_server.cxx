@@ -62,11 +62,11 @@ static std::string run(Socket& serverSocket, std::int64_t maxIterations) {
   std::string lastClientMsg;
 
   for (int i = 0; i < maxIterations; ++i) {
-    struct sockaddr_in client_addr = {};
-    socklen_t socklen = sizeof(client_addr);
+    struct sockaddr_in clientAddr = {};
+    socklen_t socklen = sizeof(clientAddr);
     std::int64_t connFd =
         accept(serverSocket.getFd(),
-               reinterpret_cast<struct sockaddr*>(&client_addr), &socklen);
+               reinterpret_cast<struct sockaddr*>(&clientAddr), &socklen);
 
     if (connFd == -1) {
       continue;

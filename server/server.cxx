@@ -25,10 +25,10 @@ void connPut(std::vector<std::unique_ptr<Conn>>& fd2Conn,
 
 std::int32_t Server::acceptNewConn(
     std::vector<std::unique_ptr<Conn>>& fd2Conn) {
-  struct sockaddr_in client_addr = {};
-  socklen_t socklen = sizeof(client_addr);
+  struct sockaddr_in clientAddr = {};
+  socklen_t socklen = sizeof(clientAddr);
   std::int64_t connFd =
-      accept(socket.getFd(), reinterpret_cast<struct sockaddr*>(&client_addr),
+      accept(socket.getFd(), reinterpret_cast<struct sockaddr*>(&clientAddr),
              &socklen);
 
   if (connFd < 0) {
