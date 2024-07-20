@@ -29,7 +29,7 @@ class EventLoopTest : public ::testing::TestWithParam<QueryArray> {
   void SetUp() override {
     serverPid = fork();
     if (serverPid == 0) {
-      server.run();
+      server.run(TEST_PORT);
       exit(0);
     } else if (serverPid > 0) {
       std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -68,5 +68,5 @@ INSTANTIATE_TEST_SUITE_P(QueryTests, EventLoopTest,
  */
 TEST_P(EventLoopTest, SendAndReceive) {
   auto queryList = GetParam();
-  client.run(queryList);
+  client.run(queryList, TEST_PORT);
 }

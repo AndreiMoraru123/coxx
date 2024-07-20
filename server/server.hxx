@@ -21,12 +21,14 @@ class Server {
    *
    */
   Server() = default;
+
   /**
    * @brief Sets the file descriptor to nonblocking mode.
    *
    * @param fd the file descriptor to set into nonblocking mode
    */
   void makeNonBlocking(std::int64_t fd) const;
+
   /**
    * @brief Accepts a new connection and adds it to the fd2Conn vector.
    *
@@ -39,6 +41,7 @@ class Server {
    * @return std::int32_t Error integer indicating success (0) or failure (-1)
    */
   std::int32_t acceptNewConn(std::vector<std::unique_ptr<Conn>>& fd2Conn) const;
+
   /**
    * @brief Runs the server event loop.
    *
@@ -49,8 +52,11 @@ class Server {
    * After `poll` returns, the server gets notified by which file descriptors
    * are ready for reading/writing and can process the connections in the
    * pollArgs vector.
+   *
+   * @param port The port to run the server on.
    */
-  void run();
+  void run(std::int64_t port);
+
   /**
    * @brief Get the Socket object
    *

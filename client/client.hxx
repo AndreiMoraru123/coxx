@@ -10,7 +10,6 @@
 #include "common/conn.hxx"
 #include "common/socket.hxx"
 
-constexpr std::int64_t CLIENT_PORT = 1234;
 constexpr std::int64_t CLIENT_NETADDR = INADDR_LOOPBACK;
 
 using QueryArray = std::array<std::string, 3>;
@@ -60,8 +59,9 @@ class Client {
    * for each query.
    *
    * @param queryList The queries to send to the server.
+   * @param port The port to run the client on.
    */
-  void run(QueryArray queryList);
+  void run(QueryArray queryList, std::int64_t port);
   /**
    * @brief Get the Socket object
    *

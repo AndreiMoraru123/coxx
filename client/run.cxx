@@ -2,6 +2,6 @@
 
 auto main() -> int {
   Client client;
-  client.run(QUERY_LIST);
+  client.run(QUERY_LIST, PORT);
   return 0;
 }

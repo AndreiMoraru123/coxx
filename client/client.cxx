@@ -90,10 +90,11 @@ std::int32_t Client::readResponse(std::int64_t fd) const {
  * for each query.
  *
  * @param queryList The queries to send to the server.
+ * @param port The port to run the client on.
  */
-void Client::run(QueryArray queryList) {
+void Client::run(QueryArray queryList, std::int64_t port) {
   socket.setOptions();
-  socket.bindToPort(CLIENT_PORT, CLIENT_NETADDR, "client");
+  socket.bindToPort(port, CLIENT_NETADDR, "client");
 
   for (auto& query : queryList) {
     std::int32_t sendErr = sendRequest(socket.getFd(), query);

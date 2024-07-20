@@ -2,6 +2,6 @@
 
 auto main() -> int {
   Server server;
-  server.run();
+  server.run(PORT);
   return 0;
 }

@@ -78,10 +78,12 @@ std::int32_t Server::acceptNewConn(
  * flag is either reading (POLLIN) or writing (POLLOUT), never both. After
  * `poll` returns, the server gets notified by which file descriptors are ready
  * for reading/writing and can process the connections in the pollArgs vector.
+ *
+ * @param port The port to run the server on.
  */
-void Server::run() {
+void Server::run(std::int64_t port) {
   socket.setOptions();
-  socket.bindToPort(SERVER_PORT, SERVER_NETADDR, "server");
+  socket.bindToPort(port, SERVER_NETADDR, "server");
 
   if (listen(socket.getFd(), SERVER_BACKLOG)) {
     throw std::runtime_error("Failed to listen");

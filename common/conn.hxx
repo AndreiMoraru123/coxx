@@ -10,6 +10,7 @@
 #include <print>
 #include <vector>
 
+constexpr std::int64_t PORT = 1234;
 constexpr std::size_t K_MAX_MSG = 4096;
 
 /**
