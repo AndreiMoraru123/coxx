@@ -1,9 +1,3 @@
-#include <gtest/gtest.h>
-
-#include <chrono>
-#include <cstring>
-#include <thread>
-
 #include "common.hxx"
 
 constexpr std::int64_t TEST_PORT = 123456;

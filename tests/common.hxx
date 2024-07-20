@@ -1,3 +1,9 @@
+#include <gtest/gtest.h>
+
+#include <chrono>
+#include <cstring>
+#include <thread>
+
 #include "client/client.hxx"
 #include "server/server.hxx"
 
