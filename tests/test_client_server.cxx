@@ -5,7 +5,7 @@
 
 #include "common.hxx"
 
-constexpr std::int64_t PORT = 12345;
+constexpr std::int64_t TEST_PORT = 12345;
 
 /**
  * @brief Handles one read() and one write() for a server connection.
@@ -20,7 +20,7 @@ constexpr std::int64_t PORT = 12345;
  * string if the read operation fails.
  */
 static std::string serverReadWrite(std::int64_t connFd, std::string wbuf) {
-  std::vector<char> rbuf(BUFFER_SIZE);
+  std::vector<char> rbuf(TEST_BUFFER_SIZE);
   ssize_t n = read(connFd, rbuf.data(), rbuf.size() - 1);
   if (n < 0) {
     std::cerr << "read() error" << std::endl;
@@ -53,9 +53,9 @@ static std::string serverReadWrite(std::int64_t connFd, std::string wbuf) {
  */
 static std::string run(Socket& serverSocket, std::int64_t maxIterations) {
   serverSocket.setOptions();
-  serverSocket.bindToPort(PORT, SERVER_NETADDR, "server");
+  serverSocket.bindToPort(TEST_PORT, TEST_SERVER_NETADDR, "server");
 
-  if (listen(serverSocket.getFd(), backlog)) {
+  if (listen(serverSocket.getFd(), TEST_BACKLOG)) {
     throw std::runtime_error("Failed to listen");
   }
 
@@ -95,7 +95,7 @@ static std::string run(Socket& serverSocket, std::int64_t maxIterations) {
  */
 static std::string run(Socket& clientSocket) {
   clientSocket.setOptions();
-  clientSocket.bindToPort(PORT, CLIENT_NETADDR, "client");
+  clientSocket.bindToPort(TEST_PORT, TEST_CLIENT_NETADDR, "client");
 
   write(clientSocket.getFd(), clientSays.c_str(), clientSays.length());
 
@@ -134,8 +134,9 @@ class ClientServerTest : public ::testing::Test {
    * server would be different applications, with different runtimes.
    */
   void SetUp() override {
-    serverThread = std::thread(
-        [this] { clientMessage = run(server.getSocket(), MAX_ITERATIONS); });
+    serverThread = std::thread([this] {
+      clientMessage = run(server.getSocket(), TEST_MAX_ITERATIONS);
+    });
     std::this_thread::sleep_for(std::chrono::seconds(1));
   }
 

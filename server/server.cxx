@@ -81,9 +81,9 @@ std::int32_t Server::acceptNewConn(
  */
 void Server::run() {
   socket.setOptions();
-  socket.bindToPort(PORT, NETADDR, "server");
+  socket.bindToPort(SERVER_PORT, SERVER_NETADDR, "server");
 
-  if (listen(socket.getFd(), BACKLOG)) {
+  if (listen(socket.getFd(), SERVER_BACKLOG)) {
     throw std::runtime_error("Failed to listen");
   }
 

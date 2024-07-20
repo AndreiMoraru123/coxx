@@ -6,8 +6,8 @@
 
 #include "common.hxx"
 
-constexpr std::int64_t PORT = 123456;
-constexpr std::uint8_t NUM_QUERIES = 3;
+constexpr std::int64_t TEST_PORT = 123456;
+constexpr std::uint8_t TEST_NUM_QUERIES = 3;
 
 /**
  * @brief Processes a single request from a client and sends back a response.
@@ -169,9 +169,9 @@ static std::vector<std::string> run(Socket& serverSocket,
                                     std::int64_t maxIterations,
                                     std::uint8_t numQueries) {
   serverSocket.setOptions();
-  serverSocket.bindToPort(PORT, SERVER_NETADDR, "server");
+  serverSocket.bindToPort(TEST_PORT, TEST_SERVER_NETADDR, "server");
 
-  if (listen(serverSocket.getFd(), backlog)) {
+  if (listen(serverSocket.getFd(), TEST_BACKLOG)) {
     throw std::runtime_error("Failed to listen");
   }
 
@@ -222,7 +222,7 @@ static std::vector<std::pair<std::int32_t, std::string>> run(
   std::vector<std::pair<std::int32_t, std::string>> responses;
 
   clientSocket.setOptions();
-  clientSocket.bindToPort(PORT, CLIENT_NETADDR, "client");
+  clientSocket.bindToPort(TEST_PORT, TEST_CLIENT_NETADDR, "client");
 
   std::pair<std::int32_t, std::string> response;
   for (int i = 0; i < numQueries; ++i) {
@@ -249,7 +249,8 @@ class ClientServerTest : public ::testing::Test {
    */
   void SetUp() override {
     serverThread = std::thread([this] {
-      clientMessages = run(server.getSocket(), MAX_ITERATIONS, NUM_QUERIES);
+      clientMessages =
+          run(server.getSocket(), TEST_MAX_ITERATIONS, TEST_NUM_QUERIES);
     });
     std::this_thread::sleep_for(std::chrono::seconds(1));
   }
@@ -274,7 +275,7 @@ class ClientServerTest : public ::testing::Test {
  *
  */
 TEST_F(ClientServerTest, ProtocolParsing) {
-  auto serverResponses = run(client.getSocket(), NUM_QUERIES);
+  auto serverResponses = run(client.getSocket(), TEST_NUM_QUERIES);
 
   for (const auto& msg : clientMessages) {
     EXPECT_EQ(msg, "hello");
