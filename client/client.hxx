@@ -13,6 +13,9 @@
 constexpr std::int64_t CLIENT_PORT = 1234;
 constexpr std::int64_t CLIENT_NETADDR = INADDR_LOOPBACK;
 
+using QueryArray = std::array<std::string, 3>;
+const QueryArray QUERY_LIST = {"hello1", "hello2", "hello3"};
+
 class Client {
  public:
   /**
@@ -36,6 +39,7 @@ class Client {
    * @return std::int32_t Error code indicating success (0) or failure (-1).
    */
   std::int32_t sendRequest(std::int64_t fd, std::string text) const;
+
   /**
    * @brief Reads a response from the server.
    *
@@ -47,14 +51,17 @@ class Client {
    * @return std::int32_t Error code indicating success (0) or failure (-1).
    */
   std::int32_t readResponse(std::int64_t fd) const;
+
   /**
-   * @brief Runs the client.
+   * @brief Runs the client with the provided queries to the server.
    *
    * This function sets up the client socket, binds it to a port, and sends a
    * list of queries to the server. It then reads the responses from the server
    * for each query.
+   *
+   * @param queryList The queries to send to the server.
    */
-  void run();
+  void run(QueryArray queryList);
   /**
    * @brief Get the Socket object
    *

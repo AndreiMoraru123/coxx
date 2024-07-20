@@ -84,6 +84,27 @@
       ],
       "preLaunchTask": "bazel build //:test_protocol_parsing (debug)",
       "miDebuggerPath": "/usr/bin/gdb"
+    },
+    {
+      "name": "Debug Event Loop Test",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/bazel-bin/tests/test_event_loop",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "preLaunchTask": "bazel build //:test_event_loop (debug)",
+      "miDebuggerPath": "/usr/bin/gdb"
     }
   ]
 }

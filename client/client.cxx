@@ -83,17 +83,18 @@ std::int32_t Client::readResponse(std::int64_t fd) const {
 }
 
 /**
- * @brief Runs the client.
+ * @brief Runs the client with the provided queries to the server.
  *
- * This function sets up the client socket, binds it to a port, and sends a list
- * of queries to the server. It then reads the responses from the server for
- * each query.
+ * This function sets up the client socket, binds it to a port, and sends a
+ * list of queries to the server. It then reads the responses from the server
+ * for each query.
+ *
+ * @param queryList The queries to send to the server.
  */
-void Client::run() {
+void Client::run(QueryArray queryList) {
   socket.setOptions();
   socket.bindToPort(CLIENT_PORT, CLIENT_NETADDR, "client");
 
-  std::array<std::string, 3> queryList = {"hello1", "hello2", "hello3"};
   for (auto& query : queryList) {
     std::int32_t sendErr = sendRequest(socket.getFd(), query);
     if (sendErr) {

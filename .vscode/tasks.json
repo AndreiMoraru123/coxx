@@ -44,6 +44,17 @@
         "kind": "build",
         "isDefault": true
       }
+    },
+    {
+      "label": "bazel build //:test_event_loop (debug)",
+      "type": "shell",
+      "command": "bazel",
+      "args": ["build", "-c", "dbg", "//tests:test_event_loop"],
+      "problemMatcher": "$gcc",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
     }
   ]
 }

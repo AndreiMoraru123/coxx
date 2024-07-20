@@ -29,3 +29,16 @@ cc_test(
         "@gtest//:gtest_main",
     ],
 )
+
+cc_test(
+    name = "test_event_loop",
+    size = "small",
+    srcs = ["test_event_loop.cxx"],
+    copts = ["-std=c++23"],
+    deps = [
+        ":common",
+        "//client:libclient",
+        "//server:libserver",
+        "@gtest//:gtest_main",
+    ],
+)
