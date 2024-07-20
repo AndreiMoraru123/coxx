@@ -22,7 +22,7 @@ class Server {
    *
    * @param fd the file descriptor to set into nonblocking mode
    */
-  void makeNonBlocking(std::int64_t fd);
+  void makeNonBlocking(std::int64_t fd) const;
   /**
    * @brief Accepts a new connection and adds it to the fd2Conn vector.
    *
@@ -34,7 +34,7 @@ class Server {
    * their file descriptor.
    * @return std::int32_t Error integer indicating success (0) or failure (-1)
    */
-  std::int32_t acceptNewConn(std::vector<std::unique_ptr<Conn>>& fd2Conn);
+  std::int32_t acceptNewConn(std::vector<std::unique_ptr<Conn>>& fd2Conn) const;
   /**
    * @brief Runs the server event loop
    *

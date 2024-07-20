@@ -5,7 +5,7 @@
  *
  * @param fd the file descriptor to set into nonblocking mode
  */
-void Server::makeNonBlocking(std::int64_t fd) {
+void Server::makeNonBlocking(std::int64_t fd) const {
   errno = 0;
   std::int64_t flags = fcntl(fd, F_GETFL, 0);
   if (errno) {
@@ -51,7 +51,7 @@ static void connPut(std::vector<std::unique_ptr<Conn>>& fd2Conn,
  * @return std::int32_t Error integer indicating success (0) or failure (-1)
  */
 std::int32_t Server::acceptNewConn(
-    std::vector<std::unique_ptr<Conn>>& fd2Conn) {
+    std::vector<std::unique_ptr<Conn>>& fd2Conn) const {
   struct sockaddr_in clientAddr = {};
   socklen_t socklen = sizeof(clientAddr);
   std::int64_t connFd =
