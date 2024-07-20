@@ -1,5 +1,10 @@
 #include "server.hxx"
 
+/**
+ * @brief Sets the file descriptor to nonblocking mode.
+ *
+ * @param fd the file descriptor to set into nonblocking mode
+ */
 void Server::makeNonBlocking(std::int64_t fd) {
   errno = 0;
   std::int64_t flags = fcntl(fd, F_GETFL, 0);
@@ -15,8 +20,8 @@ void Server::makeNonBlocking(std::int64_t fd) {
   }
 }
 
-void connPut(std::vector<std::unique_ptr<Conn>>& fd2Conn,
-             std::unique_ptr<Conn> conn) {
+static void connPut(std::vector<std::unique_ptr<Conn>>& fd2Conn,
+                    std::unique_ptr<Conn> conn) {
   if (fd2Conn.size() <= static_cast<std::size_t>(conn->getFd())) {
     fd2Conn.resize(conn->getFd() + 1);
   }
@@ -50,15 +55,20 @@ void Server::run() {
     throw std::runtime_error("Failed to listen");
   }
 
+  // all client connections, keyed by fd
   std::vector<std::unique_ptr<Conn>> fd2Conn;
   makeNonBlocking(socket.getFd());
 
+  // the event loop
   std::vector<pollfd> pollArgs;
   while (true) {
+    // prepare the arguments of poll
     pollArgs.clear();
+    // the listening fd is put first for convenience
     pollfd pfd = {socket.getFd(), POLLIN, 0};
     pollArgs.push_back(pfd);
 
+    // connection fds
     for (auto& conn : fd2Conn) {
       if (!conn) {
         continue;
@@ -71,20 +81,24 @@ void Server::run() {
       pollArgs.push_back(pfd);
     }
 
+    // poll for active fds, timeout does not matter here
     if (poll(pollArgs.data(), static_cast<nfds_t>(pollArgs.size()), 1000) < 0) {
       std::cerr << "poll error" << std::endl;
     }
 
+    // process active connections
     for (auto it = std::next(pollArgs.begin()); it != pollArgs.end(); ++it) {
       if (it->revents) {
         auto& conn = fd2Conn[it->fd];
         conn->io();
         if (conn->getState() == ConnState::END) {
-          fd2Conn[conn->getFd()].reset();
+          // client closed (normally or bad)
+          fd2Conn[conn->getFd()].reset();  // destroy this connection
         }
       }
     }
 
+    // try to accept a new connection if the listening fd is active
     if (pollArgs.front().revents) {
       acceptNewConn(fd2Conn);
     }

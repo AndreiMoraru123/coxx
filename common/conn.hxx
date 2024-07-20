@@ -5,19 +5,34 @@
 #include <cstdint>
 #include <cstring>
 #include <iostream>
+#include <memory>
 #include <print>
 #include <vector>
 
 constexpr std::size_t K_MAX_MSG = 4096;
 
+/**
+ * @enum ConnState
+ * @brief Represents the state of a connection.
+ *
+ */
 enum class ConnState : std::uint8_t {
-  REQ = 0,
-  RES = 1,
-  END = 2,
+  REQ = 0, /** Request state */
+  RES = 1, /** Response state */
+  END = 2, /** End State */
 };
 
+/**
+ * @class Conn
+ * @brief  Manages a connection's state and buffers.
+ *
+ */
 class Conn {
  public:
+  /**
+   * @brief Construct a new Conn object
+   *
+   */
   Conn()
       : _fd(-1),
         state(ConnState::REQ),
@@ -30,6 +45,13 @@ class Conn {
     wbuf.reserve(4 + K_MAX_MSG);
   }
 
+  /**
+   * @brief Construct a new Conn object
+   *
+   * @param fd File descriptor for the connection
+   * @param state Initial state of the connection
+   * @param wbufSent Number of bytes sent in the write buffer
+   */
   Conn(std::int64_t fd, ConnState state, std::size_t wbufSent)
       : _fd(fd),
         state(state),
@@ -42,6 +64,11 @@ class Conn {
     wbuf.reserve(4 + K_MAX_MSG);
   }
 
+  /**
+   * @brief Destroy the Conn object
+   *
+   * Closes the connection file descriptor to free up the network resource.
+   */
   ~Conn();
 
   /**
@@ -49,14 +76,14 @@ class Conn {
    *
    * @return int Returns the file descriptor of the Conn.
    */
-  int getFd();
+  int getFd() const;
 
   /**
    * @brief Get the connection state
    *
    * @return int Returns the state of the Conn.
    */
-  ConnState getState();
+  ConnState getState() const;
 
   void io();
 

@@ -120,14 +120,14 @@ void Conn::stateResponse() {
  *
  * @return int Returns the file descriptor of the Conn.
  */
-int Conn::getFd() { return _fd; }
+int Conn::getFd() const { return _fd; }
 
 /**
  * @brief Get the connection state
  *
  * @return int Returns the state of the Conn.
  */
-ConnState Conn::getState() { return state; }
+ConnState Conn::getState() const { return state; }
 
 void Conn::io() {
   if (state == ConnState::REQ) {

@@ -64,7 +64,8 @@ class Socket {
    * @return std::int32_t Returns 0 on success, -1 if an error occurs or EOF is
    * encountered before reading @p n bytes.
    */
-  std::int32_t readFull(std::int64_t fd, std::string &buffer, std::size_t n);
+  std::int32_t readFull(std::int64_t fd, std::string &buffer,
+                        std::size_t n) const;
 
   /**
    * @brief Writes @p n bytes from the @p buffer to the file descriptor @p fd.
@@ -77,14 +78,15 @@ class Socket {
    * @return std::int32_t  Returns 0 on success, -1 if an error occurs during
    * writing
    */
-  std::int32_t writeAll(std::int64_t fd, std::string &buffer, std::size_t n);
+  std::int32_t writeAll(std::int64_t fd, std::string &buffer,
+                        std::size_t n) const;
 
   /**
    * @brief Get the Fd object
    *
    * @return int Returns the file descriptor of the Socket.
    */
-  int getFd();
+  int getFd() const;
 
  private:
   /**

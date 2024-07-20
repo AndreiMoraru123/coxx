@@ -102,7 +102,7 @@ void Socket::bindToPort(std::int64_t port, std::uint32_t netaddr,
  * encountered before reading @p n bytes.
  */
 std::int32_t Socket::readFull(std::int64_t fd, std::string &buffer,
-                              std::size_t n) {
+                              std::size_t n) const {
   buffer.resize(n);
   std::size_t bytesRead = 0;
 
@@ -129,7 +129,7 @@ std::int32_t Socket::readFull(std::int64_t fd, std::string &buffer,
  * writing
  */
 std::int32_t Socket::writeAll(std::int64_t fd, std::string &buffer,
-                              std::size_t n) {
+                              std::size_t n) const{
   buffer.resize(n);
   std::size_t bytesWrote = 0;
 
@@ -149,4 +149,4 @@ std::int32_t Socket::writeAll(std::int64_t fd, std::string &buffer,
  *
  * @return int Returns the file descriptor of the Socket.
  */
-int Socket::getFd() { return _fd; }
+int Socket::getFd() const { return _fd; }

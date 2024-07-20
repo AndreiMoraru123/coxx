@@ -16,6 +16,7 @@ class Server {
   /**
    * @brief Sets the file descriptor to nonblocking mode.
    *
+   * @param fd the file descriptor to set into nonblocking mode
    */
   void makeNonBlocking(std::int64_t fd);
   std::int32_t acceptNewConn(std::vector<std::unique_ptr<Conn>>& fd2Conn);
