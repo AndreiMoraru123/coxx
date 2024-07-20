@@ -91,7 +91,7 @@ std::int32_t Client::readResponse(std::int64_t fd) const {
  */
 void Client::run() {
   socket.setOptions();
-  socket.bindToPort(1234, INADDR_LOOPBACK, "client");
+  socket.bindToPort(PORT, NETADDR, "client");
 
   std::array<std::string, 3> queryList = {"hello1", "hello2", "hello3"};
   for (auto& query : queryList) {

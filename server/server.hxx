@@ -10,6 +10,10 @@
 #include "common/conn.hxx"
 #include "common/socket.hxx"
 
+constexpr std::int64_t PORT = 1234;
+constexpr std::int64_t NETADDR = 0;
+constexpr std::int16_t BACKLOG = SOMAXCONN;
+
 class Server {
  public:
   /**

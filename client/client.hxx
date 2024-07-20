@@ -9,6 +9,9 @@
 
 #include "common/socket.hxx"
 
+constexpr std::int64_t PORT = 1234;
+constexpr std::int64_t NETADDR = INADDR_LOOPBACK;
+
 class Client {
  public:
   /**

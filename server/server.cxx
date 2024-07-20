@@ -81,9 +81,9 @@ std::int32_t Server::acceptNewConn(
  */
 void Server::run() {
   socket.setOptions();
-  socket.bindToPort(1234, 0, "server");
+  socket.bindToPort(PORT, NETADDR, "server");
 
-  if (listen(socket.getFd(), SOMAXCONN)) {
+  if (listen(socket.getFd(), BACKLOG)) {
     throw std::runtime_error("Failed to listen");
   }
 
