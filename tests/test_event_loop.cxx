@@ -4,11 +4,19 @@
 
 constexpr std::int64_t TEST_PORT = 1234567;
 
+/**
+ * @class EventLoopTest
+ * @brief Test fixture for testing the event loop functionality
+ *
+ * This class sets up a server and client environment for testing the main event
+ * loop of the app. The server is ran in a separate process to simulate a real
+ * run scenario as if the client and server were different remote application
+ * with different runtimes
+ */
 class EventLoopTest : public ::testing::TestWithParam<QueryArray> {
  protected:
   Server server;
   Client client;
-  // std::thread serverThread;
   pid_t serverPid;
 
   /**
@@ -44,9 +52,20 @@ class EventLoopTest : public ::testing::TestWithParam<QueryArray> {
   }
 };
 
+/**
+ * @brief Instantiates the parametrized test suite for EventLoopTest.
+ *
+ * This macro provides the test suite for the even loop test, a QueryArray for
+ * the client to run.
+ */
 INSTANTIATE_TEST_SUITE_P(QueryTests, EventLoopTest,
                          ::testing::Values(QueryArray{"foo", "bar", "baz"}));
 
+/**
+ * @brief Test case for sending a list of queries to the server
+ *
+ * Runs the client on the dummy query array.
+ */
 TEST_P(EventLoopTest, SendAndReceive) {
   auto queryList = GetParam();
   client.run(queryList);
