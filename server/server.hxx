@@ -12,6 +12,10 @@
 
 class Server {
  public:
+  /**
+   * @brief Construct a new Server object
+   *
+   */
   Server() = default;
   /**
    * @brief Sets the file descriptor to nonblocking mode.
@@ -19,8 +23,35 @@ class Server {
    * @param fd the file descriptor to set into nonblocking mode
    */
   void makeNonBlocking(std::int64_t fd);
+  /**
+   * @brief Accepts a new connection and adds it to the fd2Conn vector.
+   *
+   *  This function accepts a new connection on the server's socket, makes it
+   * non-blocking, creates a Conn object for it, and adds it to the vector that
+   * maps the connections to their file descriptors.
+   *
+   * @param fd2Conn A vector of unique pointers to Conn objects, indexed by
+   * their file descriptor.
+   * @return std::int32_t Error integer indicating success (0) or failure (-1)
+   */
   std::int32_t acceptNewConn(std::vector<std::unique_ptr<Conn>>& fd2Conn);
+  /**
+   * @brief Runs the server event loop
+   *
+   * This function first sets up the arguments for polling. The listening fd is
+   * polled with the POLLIN flag. For the connection fd (connFd) the state of
+   * the connection object (Conn) determines the poll flag. In this scenario,
+   * the poll flag is either reading (POLLIN) or writing (POLLOUT), never both.
+   * After `poll` returns, the server gets notified by which file descriptors
+   * are ready for reading/writing and can process the connections in the
+   * pollArgs vector.
+   */
   void run();
+  /**
+   * @brief Get the Socket object
+   *
+   * @return Socket&
+   */
   Socket& getSocket();
 
  private:

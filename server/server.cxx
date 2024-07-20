@@ -20,6 +20,17 @@ void Server::makeNonBlocking(std::int64_t fd) {
   }
 }
 
+/**
+ * @brief Adds a connection to the fd2Conn mapping vector.
+ *
+ * This function ensures that the fd2Conn vec is large enough to hold the
+ * connection at the index corresponding to it's file descriptor. Resizes if
+ * necessary, and then owns the connection.
+ *
+ * @param fd2Conn A vector of unique pointers to Conn objects, indexed by their
+ * file descriptor.
+ * @param conn A unique pointer to a Conn object to be added to the vector
+ */
 static void connPut(std::vector<std::unique_ptr<Conn>>& fd2Conn,
                     std::unique_ptr<Conn> conn) {
   if (fd2Conn.size() <= static_cast<std::size_t>(conn->getFd())) {
@@ -28,6 +39,17 @@ static void connPut(std::vector<std::unique_ptr<Conn>>& fd2Conn,
   fd2Conn[conn->getFd()] = std::move(conn);
 }
 
+/**
+ * @brief Accepts a new connection and adds it to the fd2Conn vector.
+ *
+ *  This function accepts a new connection on the server's socket, makes it
+ * non-blocking, creates a Conn object for it, and adds it to the vector that
+ * maps the connections to their file descriptors.
+ *
+ * @param fd2Conn A vector of unique pointers to Conn objects, indexed by their
+ * file descriptor.
+ * @return std::int32_t Error integer indicating success (0) or failure (-1)
+ */
 std::int32_t Server::acceptNewConn(
     std::vector<std::unique_ptr<Conn>>& fd2Conn) {
   struct sockaddr_in clientAddr = {};
@@ -47,6 +69,16 @@ std::int32_t Server::acceptNewConn(
   return 0;
 }
 
+/**
+ * @brief Runs the server event loop
+ *
+ * This function first sets up the arguments for polling. The listening fd is
+ * polled with the POLLIN flag. For the connection fd (connFd) the state of the
+ * connection object (Conn) determines the poll flag. In this scenario, the poll
+ * flag is either reading (POLLIN) or writing (POLLOUT), never both. After
+ * `poll` returns, the server gets notified by which file descriptors are ready
+ * for reading/writing and can process the connections in the pollArgs vector.
+ */
 void Server::run() {
   socket.setOptions();
   socket.bindToPort(1234, 0, "server");
@@ -105,4 +137,9 @@ void Server::run() {
   }
 }
 
+/**
+ * @brief Get the Socket object
+ *
+ * @return Socket&
+ */
 Socket& Server::getSocket() { return socket; }
