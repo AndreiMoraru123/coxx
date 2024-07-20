@@ -5,6 +5,7 @@ cc_library(
     copts = ["-std=c++23"],
     visibility = ["//visibility:public"],
     deps = [
+        "//common:conn",
         "//common:socket",
     ],
 )

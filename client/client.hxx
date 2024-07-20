@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 
+#include "common/conn.hxx"
 #include "common/socket.hxx"
 
 constexpr std::int64_t CLIENT_PORT = 1234;
@@ -63,5 +64,4 @@ class Client {
 
  private:
   Socket socket;
-  static constexpr std::size_t k_max_msg = 4096;
 };

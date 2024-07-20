@@ -18,11 +18,11 @@
 std::int32_t Client::sendRequest(std::int64_t fd, std::string text) const {
   std::uint32_t len = static_cast<std::uint32_t>(text.size());
 
-  if (len > k_max_msg) {
+  if (len > K_MAX_MSG) {
     return -1;
   }
 
-  std::vector<char> wbuf(4 + k_max_msg);
+  std::vector<char> wbuf(4 + K_MAX_MSG);
   std::memcpy(wbuf.data(), &len, 4);
   std::memcpy(wbuf.data() + 4, text.data(), len);
 
@@ -43,7 +43,7 @@ std::int32_t Client::sendRequest(std::int64_t fd, std::string text) const {
 std::int32_t Client::readResponse(std::int64_t fd) const {
   // 4 bytes header
   std::string header(4, '\0');
-  std::vector<char> rbuf(4 + k_max_msg + 1);
+  std::vector<char> rbuf(4 + K_MAX_MSG + 1);
   std::int32_t readErr = socket.readFull(fd, header, 4);
   errno = 0;
   if (readErr) {
@@ -60,7 +60,7 @@ std::int32_t Client::readResponse(std::int64_t fd) const {
 
   std::uint32_t len = 0;
   std::memcpy(&len, rbuf.data(), 4);
-  if (len > k_max_msg) {
+  if (len > K_MAX_MSG) {
     std::println("too long");
     return -1;
   }
