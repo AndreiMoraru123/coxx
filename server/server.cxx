@@ -70,7 +70,7 @@ std::int32_t Server::acceptNewConn(
 }
 
 /**
- * @brief Runs the server event loop
+ * @brief Runs the server event loop.
  *
  * This function first sets up the arguments for polling. The listening fd is
  * polled with the POLLIN flag. For the connection fd (connFd) the state of the

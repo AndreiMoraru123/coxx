@@ -13,7 +13,7 @@
 class Server {
  public:
   /**
-   * @brief Construct a new Server object
+   * @brief Construct a new Server object.
    *
    */
   Server() = default;
@@ -36,7 +36,7 @@ class Server {
    */
   std::int32_t acceptNewConn(std::vector<std::unique_ptr<Conn>>& fd2Conn) const;
   /**
-   * @brief Runs the server event loop
+   * @brief Runs the server event loop.
    *
    * This function first sets up the arguments for polling. The listening fd is
    * polled with the POLLIN flag. For the connection fd (connFd) the state of
