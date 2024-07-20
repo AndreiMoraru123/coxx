@@ -5,7 +5,7 @@
 
 #include "common.hxx"
 
-constexpr std::int64_t PORT = 1234;
+constexpr std::int64_t PORT = 12345;
 
 /**
  * @brief Handles one read() and one write() for a server connection.

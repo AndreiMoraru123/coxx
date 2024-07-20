@@ -6,7 +6,7 @@
 
 #include "common.hxx"
 
-constexpr std::int64_t PORT = 12345;
+constexpr std::int64_t PORT = 123456;
 constexpr std::uint8_t NUM_QUERIES = 3;
 
 /**
