@@ -73,7 +73,7 @@ void Socket::setOptions() const {
  */
 void Socket::bindToPort(std::int64_t port, std::uint32_t netaddr,
                         std::string connectionType) const {
-  struct sockaddr_in addr = {};
+  sockaddr_in addr = {};
   addr.sin_family = AF_INET;
   addr.sin_port = ntohs(port);
   addr.sin_addr.s_addr = ntohl(netaddr);
@@ -129,7 +129,7 @@ std::int32_t Socket::readFull(std::int64_t fd, std::string &buffer,
  * writing
  */
 std::int32_t Socket::writeAll(std::int64_t fd, std::string &buffer,
-                              std::size_t n) const{
+                              std::size_t n) const {
   buffer.resize(n);
   std::size_t bytesWrote = 0;
 

@@ -1,5 +1,17 @@
 #include "server.hxx"
 
+constexpr std::int64_t MAX_EVENTS = 32;
+
+static void epollCtlAdd(std::int64_t epFd, std::int64_t fd,
+                        std::uint32_t events) {
+  epoll_event ev;
+  ev.events = events;
+  ev.data.fd = fd;
+  if (epoll_ctl(epFd, EPOLL_CTL_ADD, fd, &ev) == -1) {
+    std::cerr << "epoll_ctl() error" << std::endl;
+  }
+}
+
 /**
  * @brief Sets the file descriptor to nonblocking mode.
  *
@@ -52,11 +64,10 @@ static void connPut(std::vector<std::unique_ptr<Conn>>& fd2Conn,
  */
 std::int32_t Server::acceptNewConn(
     std::vector<std::unique_ptr<Conn>>& fd2Conn) const {
-  struct sockaddr_in clientAddr = {};
+  sockaddr_in clientAddr = {};
   socklen_t socklen = sizeof(clientAddr);
-  std::int64_t connFd =
-      accept(socket.getFd(), reinterpret_cast<struct sockaddr*>(&clientAddr),
-             &socklen);
+  std::int64_t connFd = accept(
+      socket.getFd(), reinterpret_cast<sockaddr*>(&clientAddr), &socklen);
 
   if (connFd < 0) {
     return -1;  // error
@@ -84,57 +95,60 @@ std::int32_t Server::acceptNewConn(
 void Server::run(std::int64_t port) {
   socket.setOptions();
   socket.bindToPort(port, SERVER_NETADDR, "server");
+  makeNonBlocking(socket.getFd());
 
   if (listen(socket.getFd(), SERVER_BACKLOG)) {
     throw std::runtime_error("Failed to listen");
   }
 
-  // all client connections, keyed by fd
-  std::vector<std::unique_ptr<Conn>> fd2Conn;
-  makeNonBlocking(socket.getFd());
+  sockaddr_in clientAddr = {};
+  std::int64_t numFds;
+  epoll_event events[MAX_EVENTS];
+  std::vector<std::unique_ptr<Conn>> fd2Conn(MAX_EVENTS);
+
+  std::int64_t epFd = epoll_create(1);
+  epollCtlAdd(epFd, socket.getFd(), EPOLLIN | EPOLLOUT | EPOLLET);
 
   // the event loop
-  std::vector<pollfd> pollArgs;
   while (true) {
-    // prepare the arguments of poll
-    pollArgs.clear();
-    // the listening fd is put first for convenience
-    pollfd pfd = {socket.getFd(), POLLIN, 0};
-    pollArgs.push_back(pfd);
-
+    numFds = epoll_wait(epFd, events, MAX_EVENTS, -1);
     // connection fds
-    for (auto& conn : fd2Conn) {
-      if (!conn) {
-        continue;
-      }
+    for (std::int64_t i = 0; i < numFds; ++i) {
+      if (events[i].data.fd == socket.getFd()) {
+        socklen_t socketLen = sizeof(clientAddr);
+        std::int64_t connFd =
+            accept(socket.getFd(), reinterpret_cast<sockaddr*>(&clientAddr),
+                   &socketLen);
+        if (connFd < 0) {
+          std::cerr << "accept() error";
+          continue;
+        }
 
-      pollfd pfd = {};
-      pfd.fd = conn->getFd();
-      pfd.events = (conn->getState() == ConnState::REQ) ? POLLIN : POLLOUT;
-      pfd.events = pfd.events | POLLERR;
-      pollArgs.push_back(pfd);
-    }
+        makeNonBlocking(connFd);
+        epollCtlAdd(epFd, connFd, EPOLLIN | EPOLLET | EPOLLRDHUP | EPOLLHUP);
 
-    // poll for active fds, timeout does not matter here
-    if (poll(pollArgs.data(), static_cast<nfds_t>(pollArgs.size()), 1000) < 0) {
-      std::cerr << "poll error" << std::endl;
-    }
-
-    // process active connections
-    for (auto it = std::next(pollArgs.begin()); it != pollArgs.end(); ++it) {
-      if (it->revents) {
-        auto& conn = fd2Conn[it->fd];
-        conn->io();
-        if (conn->getState() == ConnState::END) {
-          // client closed (normally or bad)
-          fd2Conn[conn->getFd()].reset();  // destroy this connection
+        if (static_cast<std::size_t>(connFd) >= fd2Conn.size()) {
+          fd2Conn.resize(connFd + 1);
+        }
+        fd2Conn[connFd] = std::make_unique<Conn>(connFd, ConnState::REQ, 0);
+      } else {
+        auto& conn = fd2Conn[events[i].data.fd];
+        if (!conn) {
+          std::cerr << "Connection not found for fd: " << events[i].data.fd
+                    << std::endl;
+        }
+        if (events[i].events & (EPOLLIN | EPOLLOUT)) {
+          conn->io();
+          if (conn->getState() == ConnState::END) {
+            epoll_ctl(epFd, EPOLL_CTL_DEL, conn->getFd(), nullptr);
+            fd2Conn[conn->getFd()].reset();
+          }
         }
       }
-    }
-
-    // try to accept a new connection if the listening fd is active
-    if (pollArgs.front().revents) {
-      acceptNewConn(fd2Conn);
+      if (events[i].events & (EPOLLRDHUP | EPOLLHUP)) {
+        epoll_ctl(epFd, EPOLL_CTL_DEL, events[i].data.fd, nullptr);
+        fd2Conn[events[i].data.fd].reset();
+      }
     }
   }
 }
