@@ -14,6 +14,7 @@
 constexpr std::int64_t SERVER_PORT = 1234;
 constexpr std::int64_t SERVER_NETADDR = 0;
 constexpr std::int16_t SERVER_BACKLOG = SOMAXCONN;
+constexpr std::int64_t MAX_EVENTS = 32;
 
 class Server {
  public:

@@ -101,6 +101,7 @@ void Server::run(std::int64_t port) {
       }
       if (events[i].events & (EPOLLRDHUP | EPOLLHUP)) {
         epoll_ctl(epFd, EPOLL_CTL_DEL, events[i].data.fd, nullptr);
+        close(events[i].data.fd);
         fd2Conn[events[i].data.fd].reset();
       }
     }
