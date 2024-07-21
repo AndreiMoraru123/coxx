@@ -1,6 +1,7 @@
-#include <poll.h>
+#include <sys/epoll.h>
 #include <unistd.h>
 
+#include <array>
 #include <cstring>
 #include <iostream>
 #include <memory>
@@ -13,6 +14,7 @@
 constexpr std::int64_t SERVER_PORT = 1234;
 constexpr std::int64_t SERVER_NETADDR = 0;
 constexpr std::int16_t SERVER_BACKLOG = SOMAXCONN;
+constexpr std::int64_t MAX_EVENTS = 32;
 
 class Server {
  public:
@@ -21,26 +23,6 @@ class Server {
    *
    */
   Server() = default;
-
-  /**
-   * @brief Sets the file descriptor to nonblocking mode.
-   *
-   * @param fd the file descriptor to set into nonblocking mode
-   */
-  void makeNonBlocking(std::int64_t fd) const;
-
-  /**
-   * @brief Accepts a new connection and adds it to the fd2Conn vector.
-   *
-   *  This function accepts a new connection on the server's socket, makes it
-   * non-blocking, creates a Conn object for it, and adds it to the vector that
-   * maps the connections to their file descriptors.
-   *
-   * @param fd2Conn A vector of unique pointers to Conn objects, indexed by
-   * their file descriptor.
-   * @return std::int32_t Error integer indicating success (0) or failure (-1)
-   */
-  std::int32_t acceptNewConn(std::vector<std::unique_ptr<Conn>>& fd2Conn) const;
 
   /**
    * @brief Runs the server event loop.
