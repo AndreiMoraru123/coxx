@@ -1,7 +1,5 @@
 #include "server.hxx"
 
-constexpr std::int64_t MAX_EVENTS = 32;
-
 static void epollCtlAdd(std::int64_t epFd, std::int64_t fd,
                         std::uint32_t events) {
   epoll_event ev;
