@@ -231,7 +231,7 @@ class ClientServerTest : public ::testing::Test {
  protected:
   Server server;
   Client client;
-  std::thread serverThread;
+  std::jthread serverThread;
   std::vector<std::string> clientMessages;
 
   /**
@@ -242,22 +242,11 @@ class ClientServerTest : public ::testing::Test {
    * the server would be different applications, with different runtimes.
    */
   void SetUp() override {
-    serverThread = std::thread([this] {
+    serverThread = std::jthread([this] {
       clientMessages =
           run(server.getSocket(), TEST_MAX_ITERATIONS, TEST_NUM_QUERIES);
     });
     std::this_thread::sleep_for(std::chrono::seconds(1));
-  }
-
-  /**
-   * @brief Tear down the text fixture.
-   *
-   * Ensures that the server thread is properly joined into the main thread.
-   */
-  void TearDown() override {
-    if (serverThread.joinable()) {
-      serverThread.join();
-    }
   }
 };
 
