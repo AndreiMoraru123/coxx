@@ -59,7 +59,7 @@ class EventLoopTest : public ::testing::TestWithParam<QueryArray> {
  * the client to run.
  */
 INSTANTIATE_TEST_SUITE_P(QueryTests, EventLoopTest,
-                         ::testing::Values(QueryArray{"foo", "bar", "baz"}));
+                         ::testing::Values(QueryArray{"get", "k"}));
 
 /**
  * @brief Test case for sending a list of queries to the server

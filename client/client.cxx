@@ -12,11 +12,16 @@
  * +-----+------+
  *
  * @param fd The file descriptor to which the request is sent.
- * @param text The message to be send.
+   * @param cmd The command to be send.
  * @return std::int32_t Error code indicating success (0) or failure (-1).
  */
-std::int32_t Client::sendRequest(std::int64_t fd, std::string text) const {
-  std::uint32_t len = static_cast<std::uint32_t>(text.size());
+std::int32_t Client::sendRequest(std::int64_t fd, const QueryArray cmd) const {
+  // std::uint32_t len = static_cast<std::uint32_t>(text.size());
+  std::uint32_t len = 4;
+
+  for (const std::string& s : cmd) {
+    len += 4 + s.size();
+  }
 
   if (len > K_MAX_MSG) {
     return -1;
@@ -24,7 +29,16 @@ std::int32_t Client::sendRequest(std::int64_t fd, std::string text) const {
 
   std::vector<char> wbuf(4 + K_MAX_MSG);
   std::memcpy(wbuf.data(), &len, 4);
-  std::memcpy(wbuf.data() + 4, text.data(), len);
+  std::uint32_t n = cmd.size();
+  std::memcpy(wbuf.data() + 4, &n, len);
+
+  std::size_t current = 8;
+  for (const std::string& s : cmd) {
+    std::uint32_t previous = static_cast<std::uint32_t>(s.size());
+    std::memcpy(wbuf.data() + current, &previous, 4);
+    std::memcpy(wbuf.data() + current + 4, s.data(), s.size());
+    current += 4 + s.size();
+  }
 
   std::string wbufStr(wbuf.begin(), wbuf.end());
   return socket.writeAll(fd, wbufStr, 4 + len);
@@ -76,9 +90,19 @@ std::int32_t Client::readResponse(std::int64_t fd) const {
   // Copy the body back into rbuf
   std::memcpy(rbuf.data() + 4, body.data(), len);
 
-  // Do something
-  rbuf[4 + len] = '\0';
-  std::println("Server says {}", &rbuf[4]);
+  // Print the result
+  auto resCode = Response::OK;
+  if (len < 4) {
+    std::println("bad response");
+    return -1;
+  }
+
+  auto resCodeValue =
+      static_cast<std::underlying_type<Response>::type>(resCode);
+  std::memcpy(&resCodeValue, rbuf.data() + 4, 4);
+
+  std::string_view responseView(rbuf.data() + 8, len - 4);
+  std::println("Server says: [{}] {}", resCodeValue, responseView);
   return 0;
 }
 
@@ -96,18 +120,14 @@ void Client::run(QueryArray queryList, std::int64_t port) {
   socket.setOptions();
   socket.bindToPort(port, CLIENT_NETADDR, "client");
 
-  for (auto& query : queryList) {
-    std::int32_t sendErr = sendRequest(socket.getFd(), query);
-    if (sendErr) {
-      std::cerr << "send request error" << std::endl;
-    }
+  std::int32_t sendErr = sendRequest(socket.getFd(), queryList);
+  if (sendErr) {
+    std::cerr << "send request error" << std::endl;
   }
 
-  for (std::size_t i = 0; i < queryList.size(); ++i) {
-    std::int32_t readErr = readResponse(socket.getFd());
-    if (readErr) {
-      std::cerr << "read response error" << std::endl;
-    }
+  std::int32_t readErr = readResponse(socket.getFd());
+  if (readErr) {
+    std::cerr << "read response error" << std::endl;
   }
 }
 

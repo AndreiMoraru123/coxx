@@ -27,7 +27,7 @@
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/bazel-bin/client/client",
-      "args": [],
+      "args": ["get", "k"],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
       "environment": [],

@@ -12,8 +12,7 @@
 
 constexpr std::int64_t CLIENT_NETADDR = INADDR_LOOPBACK;
 
-using QueryArray = std::array<std::string, 3>;
-const QueryArray QUERY_LIST = {"hello1", "hello2", "hello3"};
+using QueryArray = std::vector<std::string>;
 
 class Client {
  public:
@@ -34,10 +33,10 @@ class Client {
    * +-----+------+
    *
    * @param fd The file descriptor to which the request is sent.
-   * @param text The message to be send.
+   * @param cmd The command to be send.
    * @return std::int32_t Error code indicating success (0) or failure (-1).
    */
-  std::int32_t sendRequest(std::int64_t fd, std::string text) const;
+  std::int32_t sendRequest(std::int64_t fd, const QueryArray cmd) const;
 
   /**
    * @brief Reads a response from the server.
