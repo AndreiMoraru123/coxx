@@ -97,6 +97,7 @@ class Conn {
   std::size_t wbufSent;
   std::size_t wbufSize;
   std::size_t rbufSize;
+  Request request;
   bool tryOneRequest();
   bool tryFlushBuffer();
   bool tryFillBuffer();

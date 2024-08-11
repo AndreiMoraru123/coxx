@@ -25,7 +25,6 @@ bool Conn::tryOneRequest() {
   std::uint8_t& requestData = *(rbuf.data() + 4);
   std::uint8_t& responseData = *(wbuf.data() + 4 + 4);
 
-  auto request = Request();
   std::int32_t err = request(requestData, len, resCode, responseData, wLen);
 
   if (err) {
