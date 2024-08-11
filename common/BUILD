@@ -7,10 +7,19 @@ cc_library(
 )
 
 cc_library(
+    name = "req",
+    srcs = ["req.cxx"],
+    hdrs = ["req.hxx"],
+    copts = ["-std=c++23"],
+    visibility = ["//visibility:public"],
+    deps = [],
+)
+
+cc_library(
     name = "conn",
     srcs = ["conn.cxx"],
     hdrs = ["conn.hxx"],
     copts = ["-std=c++23"],
     visibility = ["//visibility:public"],
-    deps = [],
+    deps = [":req"],
 )

@@ -11,20 +11,7 @@
 #include <print>
 #include <vector>
 
-constexpr std::int64_t PORT = 1234;
-constexpr std::size_t K_MAX_MSG = 4096;
-constexpr std::size_t K_MAX_ARGS = 1024;
-
-/**
- * @enum Response
- * @brief Represents the state of a server response.
- *
- */
-enum class Response : std::uint32_t {
-  OK = 0,
-  ERR = 1,
-  NX = 2,
-};
+#include "req.hxx"
 
 /**
  * @enum ConnState
