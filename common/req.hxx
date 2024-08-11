@@ -25,21 +25,22 @@ enum class Response : std::uint32_t {
 class Request {
  public:
   Request() = default;
-  std::int32_t operator()(std::uint8_t& request, std::uint32_t reqLen,
-                          Response& resCode, std::uint8_t& response,
-                          std::uint32_t& resLen);
+  std::int32_t operator()(std::uint8_t& requestData,
+                          std::uint32_t requestLength, Response& responseCode,
+                          std::uint8_t& responseValue,
+                          std::uint32_t& responseLength);
 
  private:
-  static std::map<std::string, std::string> cmdMap;
-  std::uint32_t parse(std::uint8_t& data, std::size_t len,
-                      std::vector<std::string>& out);
-  Response get(const std::vector<std::string>& cmd, std::uint8_t& response,
-               std::uint32_t& responseLength);
-  Response set(const std::vector<std::string>& cmd,
-               [[maybe_unused]] std::uint8_t& response,
+  static std::map<std::string, std::string> commandMap;
+  std::uint32_t parse(std::uint8_t& requestData, std::size_t length,
+                      std::vector<std::string>& outputData);
+  Response get(const std::vector<std::string>& commandList,
+               std::uint8_t& responseValue, std::uint32_t& responseLength);
+  Response set(const std::vector<std::string>& commandList,
+               [[maybe_unused]] std::uint8_t& responseValue,
                [[maybe_unused]] std::uint32_t& responseLength);
-  Response del(const std::vector<std::string>& cmd,
-               [[maybe_unused]] std::uint8_t& response,
+  Response del(const std::vector<std::string>& commandList,
+               [[maybe_unused]] std::uint8_t& responseValue,
                [[maybe_unused]] std::uint32_t& responseLength);
-  bool isCmd(const std::string& word, const char* cmd);
+  bool isCommand(const std::string& word, const char* commandList);
 };

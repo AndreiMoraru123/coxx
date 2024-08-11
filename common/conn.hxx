@@ -14,30 +14,30 @@
 #include "req.hxx"
 
 /**
- * @enum ConnState
+ * @enum ConnectionState
  * @brief Represents the state of a connection.
  *
  */
-enum class ConnState : std::uint8_t {
+enum class ConnectionState : std::uint8_t {
   REQ = 0, /** Request state */
   RES = 1, /** Response state */
   END = 2, /** End State */
 };
 
 /**
- * @class Conn
+ * @class Connection
  * @brief  Manages a connection's state and buffers.
  *
  */
-class Conn {
+class Connection {
  public:
   /**
-   * @brief Construct a new Conn object
+   * @brief Construct a new Connection object
    *
    */
-  Conn()
+  Connection()
       : _fd(-1),
-        state(ConnState::REQ),
+        state(ConnectionState::REQ),
         rbuf(),
         wbuf(),
         wbufSent(0),
@@ -48,13 +48,13 @@ class Conn {
   }
 
   /**
-   * @brief Construct a new Conn object
+   * @brief Construct a new Connection object
    *
    * @param fd File descriptor for the connection
    * @param state Initial state of the connection
    * @param wbufSent Number of bytes sent in the write buffer
    */
-  Conn(std::int64_t fd, ConnState state, std::size_t wbufSent)
+  Connection(std::int64_t fd, ConnectionState state, std::size_t wbufSent)
       : _fd(fd),
         state(state),
         rbuf(),
@@ -67,31 +67,31 @@ class Conn {
   }
 
   /**
-   * @brief Destroy the Conn object
+   * @brief Destroy the Connection object
    *
    * Closes the connection file descriptor to free up the network resource.
    */
-  ~Conn();
+  ~Connection();
 
   /**
    * @brief Get the connection file descriptor
    *
-   * @return int Returns the file descriptor of the Conn.
+   * @return int Returns the file descriptor of the Connection.
    */
   int getFd() const;
 
   /**
    * @brief Get the connection state
    *
-   * @return int Returns the state of the Conn.
+   * @return int Returns the state of the Connection.
    */
-  ConnState getState() const;
+  ConnectionState getState() const;
 
   void io();
 
  private:
   std::int64_t _fd;
-  ConnState state;
+  ConnectionState state;
   std::vector<std::uint8_t> rbuf;
   std::vector<std::uint8_t> wbuf;
   std::size_t wbufSent;

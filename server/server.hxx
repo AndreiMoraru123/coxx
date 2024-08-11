@@ -29,11 +29,11 @@ class Server {
    *
    * This function first sets up the arguments for polling. The listening fd is
    * polled with the POLLIN flag. For the connection fd (connFd) the state of
-   * the connection object (Conn) determines the poll flag. In this scenario,
-   * the poll flag is either reading (POLLIN) or writing (POLLOUT), never both.
-   * After `poll` returns, the server gets notified by which file descriptors
-   * are ready for reading/writing and can process the connections in the
-   * pollArgs vector.
+   * the connection object (Connection) determines the poll flag. In this
+   * scenario, the poll flag is either reading (POLLIN) or writing (POLLOUT),
+   * never both. After `poll` returns, the server gets notified by which file
+   * descriptors are ready for reading/writing and can process the connections
+   * in the pollArgs vector.
    *
    * @param port The port to run the server on.
    */

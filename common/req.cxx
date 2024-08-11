@@ -1,98 +1,102 @@
 #include "req.hxx"
 
-std::map<std::string, std::string> Request::cmdMap;
+std::map<std::string, std::string> Request::commandMap;
 
-bool Request::isCmd(const std::string& word, const char* cmd) {
-  return 0 == strcasecmp(word.c_str(), cmd);
+bool Request::isCommand(const std::string& word, const char* commandList) {
+  return 0 == strcasecmp(word.c_str(), commandList);
 }
 
-Response Request::get(const std::vector<std::string>& cmd,
-                      std::uint8_t& response, std::uint32_t& responseLength) {
-  if (!cmdMap.count(cmd[1])) {
+Response Request::get(const std::vector<std::string>& commandList,
+                      std::uint8_t& responseValue,
+                      std::uint32_t& responseLength) {
+  if (!commandMap.count(commandList[1])) {
     return Response::NX;
   }
 
-  const std::string& value = cmdMap[cmd[1]];
+  const std::string& value = commandMap[commandList[1]];
   assert(value.size() <= K_MAX_MSG);
 
-  std::memcpy(&response, value.data(), value.size());
+  std::memcpy(&responseValue, value.data(), value.size());
   responseLength = static_cast<std::uint32_t>(value.size());
   return Response::OK;
 }
 
-Response Request::set(const std::vector<std::string>& cmd,
-                      [[maybe_unused]] std::uint8_t& response,
+Response Request::set(const std::vector<std::string>& commandList,
+                      [[maybe_unused]] std::uint8_t& responseValue,
                       [[maybe_unused]] std::uint32_t& responseLength) {
-  cmdMap[cmd[1]] = cmd[2];
+  commandMap[commandList[1]] = commandList[2];
   return Response::OK;
 }
 
-Response Request::del(const std::vector<std::string>& cmd,
-                      [[maybe_unused]] std::uint8_t& response,
+Response Request::del(const std::vector<std::string>& commandList,
+                      [[maybe_unused]] std::uint8_t& responseValue,
                       [[maybe_unused]] std::uint32_t& responseLength) {
-  cmdMap.erase(cmd[1]);
+  commandMap.erase(commandList[1]);
   return Response::OK;
 }
 
-std::uint32_t Request::parse(std::uint8_t& data, std::size_t len,
-                             std::vector<std::string>& out) {
-  if (len < 4) {
+std::uint32_t Request::parse(std::uint8_t& requestData, std::size_t length,
+                             std::vector<std::string>& outputData) {
+  if (length < 4) {
     return -1;
   }
 
-  std::uint32_t n = 0;
-  std::memcpy(&n, &data, 4);
-  if (n > K_MAX_ARGS) {
+  std::uint32_t count = 0;
+  std::memcpy(&count, &requestData, 4);
+  if (count > K_MAX_ARGS) {
     return -1;
   }
 
-  std::size_t pos = 4;
-  while (n--) {
-    if (pos + 4 > len) {
+  std::size_t currentPosition = 4;
+  while (count--) {
+    if (currentPosition + 4 > length) {
       return -1;
     }
 
     std::uint32_t sizeOfData = 0;
-    std::memcpy(&sizeOfData, &data + pos, 4);
+    std::memcpy(&sizeOfData, &requestData + currentPosition, 4);
 
-    if (pos + 4 + sizeOfData > len) {
+    if (currentPosition + 4 + sizeOfData > length) {
       return -1;
     }
 
-    out.push_back(
-        std::string(reinterpret_cast<char*>(&data + pos + 4), sizeOfData));
+    outputData.push_back(
+        std::string(reinterpret_cast<char*>(&requestData + currentPosition + 4),
+                    sizeOfData));
 
-    pos += 4 + sizeOfData;
+    currentPosition += 4 + sizeOfData;
   }
 
-  if (pos != len) {
+  if (currentPosition != length) {
     return -1;
   }
 
   return 0;
 }
 
-std::int32_t Request::operator()(std::uint8_t& request, std::uint32_t reqLen,
-                                 Response& resCode, std::uint8_t& response,
-                                 std::uint32_t& resLen) {
-  std::vector<std::string> cmd;
+std::int32_t Request::operator()(std::uint8_t& requestData,
+                                 std::uint32_t requestLength,
+                                 Response& responseCode,
+                                 std::uint8_t& responseValue,
+                                 std::uint32_t& responseLength) {
+  std::vector<std::string> commandList;
 
-  if (0 != parse(request, reqLen, cmd)) {
+  if (0 != parse(requestData, requestLength, commandList)) {
     std::println("bad request");
     return -1;
   }
 
-  if (cmd.size() == 2 && isCmd(cmd[0], "get")) {
-    resCode = get(cmd, response, resLen);
-  } else if (cmd.size() == 3 && isCmd(cmd[0], "set")) {
-    resCode = set(cmd, response, resLen);
-  } else if (cmd.size() == 2 && isCmd(cmd[0], "del")) {
-    resCode = del(cmd, response, resLen);
+  if (commandList.size() == 2 && isCommand(commandList[0], "get")) {
+    responseCode = get(commandList, responseValue, responseLength);
+  } else if (commandList.size() == 3 && isCommand(commandList[0], "set")) {
+    responseCode = set(commandList, responseValue, responseLength);
+  } else if (commandList.size() == 2 && isCommand(commandList[0], "del")) {
+    responseCode = del(commandList, responseValue, responseLength);
   } else {
-    resCode = Response::ERR;
-    const std::string msg = "Unknown cmd";
-    std::strcpy(reinterpret_cast<char*>(&response), msg.c_str());
-    resLen = std::strlen(msg.c_str());
+    responseCode = Response::ERR;
+    const std::string msg = "Unknown command";
+    std::strcpy(reinterpret_cast<char*>(&responseValue), msg.c_str());
+    responseLength = std::strlen(msg.c_str());
     return 0;
   }
   return 0;

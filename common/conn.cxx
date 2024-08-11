@@ -1,8 +1,8 @@
 #include "conn.hxx"
 
-Conn::~Conn() { close(_fd); }
+Connection::~Connection() { close(_fd); }
 
-bool Conn::tryOneRequest() {
+bool Connection::tryOneRequest() {
   if (rbufSize < 4) {
     // Not enough data in the buffer, will retry next iteration.
     return false;
@@ -12,7 +12,7 @@ bool Conn::tryOneRequest() {
   std::memcpy(&len, rbuf.data(), 4);
   if (len > K_MAX_MSG) {
     std::println("too long");
-    state = ConnState::END;
+    state = ConnectionState::END;
     return false;
   }
 
@@ -28,7 +28,7 @@ bool Conn::tryOneRequest() {
   std::int32_t err = request(requestData, len, resCode, responseData, wLen);
 
   if (err) {
-    state = ConnState::END;
+    state = ConnectionState::END;
     return false;
   }
 
@@ -45,13 +45,13 @@ bool Conn::tryOneRequest() {
   }
   rbufSize = remain;
 
-  state = ConnState::RES;
+  state = ConnectionState::RES;
   stateResponse();
 
-  return (state == ConnState::REQ);
+  return (state == ConnectionState::REQ);
 }
 
-bool Conn::tryFlushBuffer() {
+bool Connection::tryFlushBuffer() {
   ssize_t rv = 0;
   do {
     std::size_t remain = wbufSize - wbufSent;
@@ -64,7 +64,7 @@ bool Conn::tryFlushBuffer() {
 
   if (rv < 0) {
     std::cerr << "write() error" << std::endl;
-    state = ConnState::END;
+    state = ConnectionState::END;
     return false;
   }
 
@@ -72,17 +72,17 @@ bool Conn::tryFlushBuffer() {
   assert(wbufSent <= wbufSize);
 
   if (wbufSent == wbufSize) {
-    state = ConnState::REQ;
+    state = ConnectionState::REQ;
     wbufSent = 0;
     wbufSize = 0;
     return false;
   }
 
-  // still got some date in the write buffer, could try to write again
+  // still got some data in the write buffer, could try to write again
   return true;
 }
 
-bool Conn::tryFillBuffer() {
+bool Connection::tryFillBuffer() {
   assert(rbufSize < rbuf.capacity());
   ssize_t rv = 0;
 
@@ -97,7 +97,7 @@ bool Conn::tryFillBuffer() {
 
   if (rv < 0) {
     std::cerr << "read() error" << std::endl;
-    state = ConnState::END;
+    state = ConnectionState::END;
     return false;
   }
 
@@ -107,7 +107,7 @@ bool Conn::tryFillBuffer() {
     } else {
       std::println("EOF");
     }
-    state = ConnState::END;
+    state = ConnectionState::END;
     return false;
   }
 
@@ -116,15 +116,15 @@ bool Conn::tryFillBuffer() {
 
   while (tryOneRequest()) {
   }
-  return (state == ConnState::REQ);
+  return (state == ConnectionState::REQ);
 }
 
-void Conn::stateRequest() {
+void Connection::stateRequest() {
   while (tryFillBuffer()) {
   }
 }
 
-void Conn::stateResponse() {
+void Connection::stateResponse() {
   while (tryFlushBuffer()) {
   }
 }
@@ -132,21 +132,21 @@ void Conn::stateResponse() {
 /**
  * @brief Get the connection file descriptor
  *
- * @return int Returns the file descriptor of the Conn.
+ * @return int Returns the file descriptor of the Connection.
  */
-int Conn::getFd() const { return _fd; }
+int Connection::getFd() const { return _fd; }
 
 /**
  * @brief Get the connection state
  *
- * @return int Returns the state of the Conn.
+ * @return int Returns the state of the Connection.
  */
-ConnState Conn::getState() const { return state; }
+ConnectionState Connection::getState() const { return state; }
 
-void Conn::io() {
-  if (state == ConnState::REQ) {
+void Connection::io() {
+  if (state == ConnectionState::REQ) {
     stateRequest();
-  } else if (state == ConnState::RES) {
+  } else if (state == ConnectionState::RES) {
     stateResponse();
   } else {
     std::println("not expected");

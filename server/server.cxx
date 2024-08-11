@@ -35,10 +35,11 @@ static void makeNonBlocking(std::int64_t fd) {
  *
  * This function first sets up the arguments for polling. The listening fd is
  * polled with the POLLIN flag. For the connection fd (connFd) the state of the
- * connection object (Conn) determines the poll flag. In this scenario, the poll
- * flag is either reading (POLLIN) or writing (POLLOUT), never both. After
- * `poll` returns, the server gets notified by which file descriptors are ready
- * for reading/writing and can process the connections in the pollArgs vector.
+ * connection object (Connection) determines the poll flag. In this scenario,
+ * the poll flag is either reading (POLLIN) or writing (POLLOUT), never both.
+ * After `poll` returns, the server gets notified by which file descriptors are
+ * ready for reading/writing and can process the connections in the pollArgs
+ * vector.
  *
  * @param port The port to run the server on.
  */
@@ -56,7 +57,7 @@ void Server::run(std::int64_t port) {
 
   std::int64_t numFds;
   std::array<epoll_event, MAX_EVENTS> events;
-  std::vector<std::unique_ptr<Conn>> fd2Conn(MAX_EVENTS);
+  std::vector<std::unique_ptr<Connection>> fd2Conn(MAX_EVENTS);
 
   std::int64_t epFd = epoll_create(1);
   epollCtlAdd(epFd, socket.getFd(), EPOLLIN | EPOLLOUT | EPOLLET);
@@ -81,7 +82,8 @@ void Server::run(std::int64_t port) {
         if (static_cast<std::size_t>(connFd) >= fd2Conn.size()) {
           fd2Conn.resize(connFd + 1);
         }
-        fd2Conn[connFd] = std::make_unique<Conn>(connFd, ConnState::REQ, 0);
+        fd2Conn[connFd] =
+            std::make_unique<Connection>(connFd, ConnectionState::REQ, 0);
 
       } else {
         auto& conn = fd2Conn[events[i].data.fd];
@@ -91,7 +93,7 @@ void Server::run(std::int64_t port) {
         }
         if (events[i].events & (EPOLLIN | EPOLLOUT)) {
           conn->io();
-          if (conn->getState() == ConnState::END) {
+          if (conn->getState() == ConnectionState::END) {
             epoll_ctl(epFd, EPOLL_CTL_DEL, conn->getFd(), nullptr);
             fd2Conn[conn->getFd()].reset();
           }
