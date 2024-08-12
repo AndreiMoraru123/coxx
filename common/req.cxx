@@ -14,7 +14,7 @@ Response Request::get(const std::vector<std::string>& commandList,
   }
 
   const std::string& value = commandMap[commandList[1]];
-  assert(value.size() <= K_MAX_MSG);
+  assert(value.size() <= MAX_MESSAGE_SIZE);
 
   std::memcpy(&responseValue, value.data(), value.size());
   responseLength = static_cast<std::uint32_t>(value.size());
@@ -43,7 +43,7 @@ std::uint32_t Request::parse(std::uint8_t& requestData, std::size_t length,
 
   std::uint32_t count = 0;
   std::memcpy(&count, &requestData, 4);
-  if (count > K_MAX_ARGS) {
+  if (count > MAX_NUM_ARGS) {
     return -1;
   }
 
@@ -76,7 +76,7 @@ std::uint32_t Request::parse(std::uint8_t& requestData, std::size_t length,
 
 std::int32_t Request::operator()(std::uint8_t& requestData,
                                  std::uint32_t requestLength,
-                                 Response& responseCode,
+                                 Response& response,
                                  std::uint8_t& responseValue,
                                  std::uint32_t& responseLength) {
   std::vector<std::string> commandList;
@@ -87,13 +87,13 @@ std::int32_t Request::operator()(std::uint8_t& requestData,
   }
 
   if (commandList.size() == 2 && isCommand(commandList[0], "get")) {
-    responseCode = get(commandList, responseValue, responseLength);
+    response = get(commandList, responseValue, responseLength);
   } else if (commandList.size() == 3 && isCommand(commandList[0], "set")) {
-    responseCode = set(commandList, responseValue, responseLength);
+    response = set(commandList, responseValue, responseLength);
   } else if (commandList.size() == 2 && isCommand(commandList[0], "del")) {
-    responseCode = del(commandList, responseValue, responseLength);
+    response = del(commandList, responseValue, responseLength);
   } else {
-    responseCode = Response::ERR;
+    response = Response::ERR;
     const std::string msg = "Unknown command";
     std::strcpy(reinterpret_cast<char*>(&responseValue), msg.c_str());
     responseLength = std::strlen(msg.c_str());

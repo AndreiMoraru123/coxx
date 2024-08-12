@@ -91,23 +91,23 @@ void Socket::configureConnection(std::int64_t port, std::uint32_t netaddr,
 }
 
 /**
- * @brief Reads @p n bytes from the file descriptor @p fd into the @p buffer.
+ * @brief Reads @p numberOfBytes bytes from the file descriptor @p fd into the @p buffer.
  *
  * @param fd The file descriptor from which to read.
  * @param buffer A reference to a string where the read data will be stored.
  * The function ensures that the string is resized to exactly fit the read
  * data.
- * @param n The number of bytes to read.
+ * @param numberOfBytes The number of bytes to read.
  * @return std::int32_t Returns 0 on success, -1 if an error occurs or EOF is
- * encountered before reading @p n bytes.
+ * encountered before reading @p numberOfBytes bytes.
  */
 std::int32_t Socket::readFull(std::int64_t fd, std::string &buffer,
-                              std::size_t n) const {
-  buffer.resize(n);
+                              std::size_t numberOfBytes) const {
+  buffer.resize(numberOfBytes);
   std::size_t bytesRead = 0;
 
-  while (bytesRead < n) {
-    ssize_t readBytes = read(fd, &buffer[bytesRead], n - bytesRead);
+  while (bytesRead < numberOfBytes) {
+    ssize_t readBytes = read(fd, &buffer[bytesRead], numberOfBytes - bytesRead);
     if (readBytes <= 0) {
       return -1;  // Error, or unexpected EOF
     }
@@ -118,23 +118,23 @@ std::int32_t Socket::readFull(std::int64_t fd, std::string &buffer,
 }
 
 /**
- * @brief Writes @p n bytes from the @p buffer to the file descriptor @p fd.
+ * @brief Writes @p numberOfBytes bytes from the @p buffer to the file descriptor @p fd.
  *
  * @param fd The file descriptor to which to write.
  * @param buffer A reference to a string containing the data to be written.
  * The function ensures that the string is resized to exactly fit the read
  * data.
- * @param n The number of bytes to write.
+ * @param numberOfBytes The number of bytes to write.
  * @return std::int32_t  Returns 0 on success, -1 if an error occurs during
  * writing
  */
 std::int32_t Socket::writeAll(std::int64_t fd, std::string &buffer,
-                              std::size_t n) const {
-  buffer.resize(n);
+                              std::size_t numberOfBytes) const {
+  buffer.resize(numberOfBytes);
   std::size_t bytesWrote = 0;
 
-  while (bytesWrote < n) {
-    ssize_t writtenBytes = write(fd, &buffer[bytesWrote], n - bytesWrote);
+  while (bytesWrote < numberOfBytes) {
+    ssize_t writtenBytes = write(fd, &buffer[bytesWrote], numberOfBytes - bytesWrote);
     if (writtenBytes <= 0) {
       return -1;  // Error
     }

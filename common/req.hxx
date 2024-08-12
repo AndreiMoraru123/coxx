@@ -8,8 +8,8 @@
 #include <vector>
 
 constexpr std::int64_t PORT = 1234;
-constexpr std::size_t K_MAX_MSG = 4096;
-constexpr std::size_t K_MAX_ARGS = 1024;
+constexpr std::size_t MAX_MESSAGE_SIZE = 4096;
+constexpr std::size_t MAX_NUM_ARGS = 1024;
 
 /**
  * @enum Response
@@ -26,7 +26,7 @@ class Request {
  public:
   Request() = default;
   std::int32_t operator()(std::uint8_t& requestData,
-                          std::uint32_t requestLength, Response& responseCode,
+                          std::uint32_t requestLength, Response& response,
                           std::uint8_t& responseValue,
                           std::uint32_t& responseLength);
 

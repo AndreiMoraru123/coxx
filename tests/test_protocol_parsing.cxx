@@ -8,7 +8,7 @@ constexpr std::uint8_t TEST_NUM_QUERIES = 3;
  *
  * This function implements the protocol by first reading a 4-byte header to
  * determine the length of the incoming message. It then reads the message of
- * that length. If the message length exceeds the maximum allowed (K_MAX_MSG),
+ * that length. If the message length exceeds the maximum allowed (MAX_MESSAGE_SIZE),
  * it returns an error. After successfully reading the message, it builds a
  * response and sends it back to the client.
  *
@@ -25,7 +25,7 @@ constexpr std::uint8_t TEST_NUM_QUERIES = 3;
  */
 static std::pair<std::int32_t, std::string> oneRequest(Socket& serverSocket,
                                                        std::int64_t connFd) {
-  std::vector<char> readBuffer(4 + K_MAX_MSG + 1);
+  std::vector<char> readBuffer(4 + MAX_MESSAGE_SIZE + 1);
   errno = 0;
 
   std::string header(4, '\0');
@@ -45,7 +45,7 @@ static std::pair<std::int32_t, std::string> oneRequest(Socket& serverSocket,
 
   std::uint32_t len = 0;
   std::memcpy(&len, readBuffer.data(), 4);
-  if (len > K_MAX_MSG) {
+  if (len > MAX_MESSAGE_SIZE) {
     return {-1, "too long"};
   }
 
@@ -91,48 +91,48 @@ static std::pair<std::int32_t, std::string> query(Socket& clientSocket,
   std::int64_t fd = clientSocket.getFd();
   std::uint32_t len = static_cast<uint32_t>(text.size());
 
-  if (len > K_MAX_MSG) {
+  if (len > MAX_MESSAGE_SIZE) {
     return {-1, "query too long"};
   }
 
-  std::vector<char> writeBuffer(4 + K_MAX_MSG);
+  std::vector<char> writeBuffer(4 + MAX_MESSAGE_SIZE);
   std::memcpy(writeBuffer.data(), &len, 4);
   std::memcpy(writeBuffer.data() + 4, text.data(), len);
 
   std::string wbufStr(writeBuffer.begin(), writeBuffer.end());
-  std::int32_t writeErr = clientSocket.writeAll(fd, wbufStr, 4 + len);
-  if (writeErr) {
-    return {writeErr, "write() error"};
+  std::int32_t writeError = clientSocket.writeAll(fd, wbufStr, 4 + len);
+  if (writeError) {
+    return {writeError, "write() error"};
   }
 
   // 4 bytes header
   std::string header(4, '\0');
-  std::vector<char> readBuffer(4 + K_MAX_MSG + 1);
-  std::int32_t readErr = clientSocket.readFull(fd, header, 4);
+  std::vector<char> readBuffer(4 + MAX_MESSAGE_SIZE + 1);
+  std::int32_t readError = clientSocket.readFull(fd, header, 4);
   errno = 0;
-  if (readErr) {
+  if (readError) {
     std::string message;
     if (errno == 0) {
       message = "EOF";
     } else {
       message = "read() error";
     }
-    return {readErr, message};
+    return {readError, message};
   }
 
   // Copy the header back into readBuffer
   std::memcpy(readBuffer.data(), header.data(), 4);
 
   std::memcpy(&len, readBuffer.data(), 4);
-  if (len > K_MAX_MSG) {
+  if (len > MAX_MESSAGE_SIZE) {
     return {-1, "too long"};
   }
 
   // Read the reply body
   std::string body(len, '\0');
-  readErr = clientSocket.readFull(fd, body, len);
-  if (readErr) {
-    return {readErr, "read() error"};
+  readError = clientSocket.readFull(fd, body, len);
+  if (readError) {
+    return {readError, "read() error"};
   }
 
   // Copy the body back into readBuffer
@@ -172,11 +172,11 @@ static std::vector<std::string> run(Socket& serverSocket,
   std::vector<std::string> clientMessages;
 
   for (int i = 0; i < maxIterations; ++i) {
-    sockaddr_in clientAddr = {};
-    socklen_t socklen = sizeof(clientAddr);
+    sockaddr_in clientAddress = {};
+    socklen_t socketLength = sizeof(clientAddress);
     std::int64_t connFd =
-        accept(serverSocket.getFd(), reinterpret_cast<sockaddr*>(&clientAddr),
-               &socklen);
+        accept(serverSocket.getFd(),
+               reinterpret_cast<sockaddr*>(&clientAddress), &socketLength);
 
     if (connFd == -1) {
       continue;

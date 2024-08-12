@@ -8,42 +8,44 @@ bool Connection::tryOneRequest() {
     return false;
   }
 
-  std::uint32_t len = 0;
-  std::memcpy(&len, readBuffer.data(), 4);
-  if (len > K_MAX_MSG) {
+  std::uint32_t messageLength = 0;
+  std::memcpy(&messageLength, readBuffer.data(), 4);
+  if (messageLength > MAX_MESSAGE_SIZE) {
     std::println("too long");
     state = ConnectionState::END;
     return false;
   }
 
-  if (4 + len > readBufferSize) {
+  if (4 + messageLength > readBufferSize) {
     return false;  // not enough data in the buffer;
   }
 
-  auto resCode = Response::OK;
-  std::uint32_t wLen = 0;
+  auto response = Response::OK;
+  std::uint32_t writeLength = 0;
   std::uint8_t& requestData = *(readBuffer.data() + 4);
   std::uint8_t& responseData = *(writeBuffer.data() + 4 + 4);
 
-  std::int32_t err = request(requestData, len, resCode, responseData, wLen);
+  std::int32_t err =
+      request(requestData, messageLength, response, responseData, writeLength);
 
   if (err) {
     state = ConnectionState::END;
     return false;
   }
 
-  wLen += 4;
-  std::memcpy(writeBuffer.data(), &wLen, 4);
-  auto resCodeValue =
-      static_cast<std::underlying_type<Response>::type>(resCode);
-  std::memcpy(writeBuffer.data() + 4, &resCodeValue, 4);
-  writeBufferSize = 4 + wLen;
+  writeLength += 4;
+  std::memcpy(writeBuffer.data(), &writeLength, 4);
+  auto responseValue =
+      static_cast<std::underlying_type<Response>::type>(response);
+  std::memcpy(writeBuffer.data() + 4, &responseValue, 4);
+  writeBufferSize = 4 + writeLength;
 
-  std::size_t remain = readBufferSize - 4 - len;
-  if (remain) {
-    std::memmove(readBuffer.data(), readBuffer.data() + 4 + len, remain);
+  std::size_t remainingSize = readBufferSize - 4 - messageLength;
+  if (remainingSize) {
+    std::memmove(readBuffer.data(), readBuffer.data() + 4 + messageLength,
+                 remainingSize);
   }
-  readBufferSize = remain;
+  readBufferSize = remainingSize;
 
   state = ConnectionState::RES;
   stateResponse();
@@ -54,8 +56,9 @@ bool Connection::tryOneRequest() {
 bool Connection::tryFlushBuffer() {
   ssize_t writtenBytes = 0;
   do {
-    std::size_t remain = writeBufferSize - writeBufferSent;
-    writtenBytes = write(_fd, writeBuffer.data() + writeBufferSent, remain);
+    std::size_t remainingSize = writeBufferSize - writeBufferSent;
+    writtenBytes =
+        write(_fd, writeBuffer.data() + writeBufferSent, remainingSize);
   } while (writtenBytes < 0 && errno == EINTR);
 
   if (writtenBytes < 0 && errno == EAGAIN) {
@@ -87,8 +90,9 @@ bool Connection::tryFillBuffer() {
   ssize_t readBytes = 0;
 
   do {
-    std::size_t cap = readBuffer.capacity() - readBufferSize;
-    readBytes = read(_fd, readBuffer.data() + readBufferSize, cap);
+    std::size_t availableCapacity = readBuffer.capacity() - readBufferSize;
+    readBytes =
+        read(_fd, readBuffer.data() + readBufferSize, availableCapacity);
   } while (readBytes < 0 && errno == EINTR);
 
   if (readBytes < 0 && errno == EAGAIN) {

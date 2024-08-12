@@ -53,7 +53,7 @@ void Server::run(std::int64_t port) {
   }
 
   sockaddr_in clientAddr = {};
-  socklen_t socketLen = sizeof(clientAddr);
+  socklen_t socketAddressLength = sizeof(clientAddr);
 
   std::int64_t numFds;
   std::array<epoll_event, MAX_EVENTS> events;
@@ -70,7 +70,7 @@ void Server::run(std::int64_t port) {
       if (events[i].data.fd == socket.getFd()) {
         std::int64_t connFd =
             accept(socket.getFd(), reinterpret_cast<sockaddr*>(&clientAddr),
-                   &socketLen);
+                   &socketAddressLength);
         if (connFd < 0) {
           std::cerr << "accept() error";
           continue;

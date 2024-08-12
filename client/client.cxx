@@ -16,21 +16,20 @@
  * @return std::int32_t Error code indicating success (0) or failure (-1).
  */
 std::int32_t Client::sendRequest(std::int64_t fd, const QueryArray cmd) const {
-  // std::uint32_t len = static_cast<std::uint32_t>(text.size());
-  std::uint32_t len = 4;
+  std::uint32_t messageLength = 4;
 
   for (const std::string& s : cmd) {
-    len += 4 + s.size();
+    messageLength += 4 + s.size();
   }
 
-  if (len > K_MAX_MSG) {
+  if (messageLength > MAX_MESSAGE_SIZE) {
     return -1;
   }
 
-  std::vector<char> writeBuffer(4 + K_MAX_MSG);
-  std::memcpy(writeBuffer.data(), &len, 4);
+  std::vector<char> writeBuffer(4 + MAX_MESSAGE_SIZE);
+  std::memcpy(writeBuffer.data(), &messageLength, 4);
   std::uint32_t n = cmd.size();
-  std::memcpy(writeBuffer.data() + 4, &n, len);
+  std::memcpy(writeBuffer.data() + 4, &n, messageLength);
 
   std::size_t current = 8;
   for (const std::string& s : cmd) {
@@ -41,7 +40,7 @@ std::int32_t Client::sendRequest(std::int64_t fd, const QueryArray cmd) const {
   }
 
   std::string wbufStr(writeBuffer.begin(), writeBuffer.end());
-  return socket.writeAll(fd, wbufStr, 4 + len);
+  return socket.writeAll(fd, wbufStr, 4 + messageLength);
 }
 
 /**
@@ -57,52 +56,52 @@ std::int32_t Client::sendRequest(std::int64_t fd, const QueryArray cmd) const {
 std::int32_t Client::readResponse(std::int64_t fd) const {
   // 4 bytes header
   std::string header(4, '\0');
-  std::vector<char> readBuffer(4 + K_MAX_MSG + 1);
-  std::int32_t readErr = socket.readFull(fd, header, 4);
+  std::vector<char> readBuffer(4 + MAX_MESSAGE_SIZE + 1);
+  std::int32_t readError = socket.readFull(fd, header, 4);
   errno = 0;
-  if (readErr) {
+  if (readError) {
     if (errno == 0) {
       std::println("EOF");
     } else {
       std::cerr << "read() error" << std::endl;
     }
-    return readErr;
+    return readError;
   }
 
   // Copy the header back into readBuffer
   std::memcpy(readBuffer.data(), header.data(), 4);
 
-  std::uint32_t len = 0;
-  std::memcpy(&len, readBuffer.data(), 4);
-  if (len > K_MAX_MSG) {
+  std::uint32_t messageLength = 0;
+  std::memcpy(&messageLength, readBuffer.data(), 4);
+  if (messageLength > MAX_MESSAGE_SIZE) {
     std::println("too long");
     return -1;
   }
 
   // Read the reply body
-  std::string body(len, '\0');
-  readErr = socket.readFull(fd, body, len);
-  if (readErr) {
+  std::string responseBody(messageLength, '\0');
+  readError = socket.readFull(fd, responseBody, messageLength);
+  if (readError) {
     std::cerr << "read() error" << std::endl;
-    return readErr;
+    return readError;
   }
 
   // Copy the body back into readBuffer
-  std::memcpy(readBuffer.data() + 4, body.data(), len);
+  std::memcpy(readBuffer.data() + 4, responseBody.data(), messageLength);
 
   // Print the result
-  auto resCode = Response::OK;
-  if (len < 4) {
+  auto response = Response::OK;
+  if (messageLength < 4) {
     std::println("bad response");
     return -1;
   }
 
-  auto resCodeValue =
-      static_cast<std::underlying_type<Response>::type>(resCode);
-  std::memcpy(&resCodeValue, readBuffer.data() + 4, 4);
+  auto responseValue =
+      static_cast<std::underlying_type<Response>::type>(response);
+  std::memcpy(&responseValue, readBuffer.data() + 4, 4);
 
-  std::string_view responseView(readBuffer.data() + 8, len - 4);
-  std::println("Server says: [{}] {}", resCodeValue, responseView);
+  std::string_view responseView(readBuffer.data() + 8, messageLength - 4);
+  std::println("Server says: [{}] {}", responseValue, responseView);
   return 0;
 }
 
@@ -125,8 +124,8 @@ void Client::run(QueryArray queryList, std::int64_t port) {
     std::cerr << "send request error" << std::endl;
   }
 
-  std::int32_t readErr = readResponse(socket.getFd());
-  if (readErr) {
+  std::int32_t readError = readResponse(socket.getFd());
+  if (readError) {
     std::cerr << "read response error" << std::endl;
   }
 }

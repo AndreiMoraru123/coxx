@@ -43,8 +43,8 @@ class Connection {
         writeBufferSent(0),
         writeBufferSize(0),
         readBufferSize(0) {
-    readBuffer.reserve(4 + K_MAX_MSG);
-    writeBuffer.reserve(4 + K_MAX_MSG);
+    readBuffer.reserve(4 + MAX_MESSAGE_SIZE);
+    writeBuffer.reserve(4 + MAX_MESSAGE_SIZE);
   }
 
   /**
@@ -63,8 +63,8 @@ class Connection {
         writeBufferSent(writeBufferSent),
         writeBufferSize(0),
         readBufferSize(0) {
-    readBuffer.reserve(4 + K_MAX_MSG);
-    writeBuffer.reserve(4 + K_MAX_MSG);
+    readBuffer.reserve(4 + MAX_MESSAGE_SIZE);
+    writeBuffer.reserve(4 + MAX_MESSAGE_SIZE);
   }
 
   /**

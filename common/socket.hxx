@@ -54,32 +54,34 @@ class Socket {
                            std::string connectionType) const;
 
   /**
-   * @brief Reads @p n bytes from the file descriptor @p fd into the @p buffer.
+   * @brief Reads @p numberOfBytes bytes from the file descriptor @p fd into the
+   * @p buffer.
    *
    * @param fd The file descriptor from which to read.
    * @param buffer A reference to a string where the read data will be stored.
    * The function ensures that the string is resized to exactly fit the read
    * data.
-   * @param n The number of bytes to read.
+   * @param numberOfBytes The number of bytes to read.
    * @return std::int32_t Returns 0 on success, -1 if an error occurs or EOF is
-   * encountered before reading @p n bytes.
+   * encountered before reading @p numberOfBytes bytes.
    */
   std::int32_t readFull(std::int64_t fd, std::string &buffer,
-                        std::size_t n) const;
+                        std::size_t numberOfBytes) const;
 
   /**
-   * @brief Writes @p n bytes from the @p buffer to the file descriptor @p fd.
+   * @brief Writes @p numberOfBytes bytes from the @p buffer to the file
+   * descriptor @p fd.
    *
    * @param fd The file descriptor to which to write.
    * @param buffer A reference to a string containing the data to be written.
    * The function ensures that the string is resized to exactly fit the read
    * data.
-   * @param n The number of bytes to write.
+   * @param numberOfBytes The number of bytes to write.
    * @return std::int32_t  Returns 0 on success, -1 if an error occurs during
    * writing
    */
   std::int32_t writeAll(std::int64_t fd, std::string &buffer,
-                        std::size_t n) const;
+                        std::size_t numberOfBytes) const;
 
   /**
    * @brief Get the Fd object

@@ -6,26 +6,26 @@ constexpr std::int64_t TEST_PORT = 12345;
  * @brief Handles one read() and one write() for a server connection.
  *
  * This function reads a message from the client connected through the file
- * descriptor @p connFd, stores it in a buffer, and then sends a response back
- * to the client using the provided write buffer @p writeBuffer.
+ * descriptor @p connectionFd, stores it in a buffer, and then sends a response
+ * back to the client using the provided write buffer @p writeBuffer.
  *
- * @param connFd The file descriptor for the connection to the client.
+ * @param connectionFd The file descriptor for the connection to the client.
  * @param writeBuffer The message t obe send back to the client.
  * @return std::string The message received from the client. Returns an empty
  * string if the read operation fails.
  */
-static std::string serverReadWrite(std::int64_t connFd,
+static std::string serverReadWrite(std::int64_t connectionFd,
                                    std::string writeBuffer) {
   std::vector<char> readBuffer(TEST_BUFFER_SIZE);
-  ssize_t n = read(connFd, readBuffer.data(), readBuffer.size() - 1);
+  ssize_t n = read(connectionFd, readBuffer.data(), readBuffer.size() - 1);
   if (n < 0) {
     std::cerr << "read() error" << std::endl;
     return "";
   }
 
-  std::string clientMsg(readBuffer.begin(), readBuffer.begin() + n);
-  write(connFd, writeBuffer.c_str(), writeBuffer.length());
-  return clientMsg;
+  std::string clientMessage(readBuffer.begin(), readBuffer.begin() + n);
+  write(connectionFd, writeBuffer.c_str(), writeBuffer.length());
+  return clientMessage;
 }
 
 /**
@@ -55,23 +55,23 @@ static std::string run(Socket& serverSocket, std::int64_t maxIterations) {
     throw std::runtime_error("Failed to listen");
   }
 
-  std::string lastClientMsg;
+  std::string lastClientMessage;
 
   for (int i = 0; i < maxIterations; ++i) {
-    sockaddr_in clientAddr = {};
-    socklen_t socklen = sizeof(clientAddr);
-    std::int64_t connFd =
-        accept(serverSocket.getFd(), reinterpret_cast<sockaddr*>(&clientAddr),
-               &socklen);
+    sockaddr_in clientAddress = {};
+    socklen_t socketLength = sizeof(clientAddress);
+    std::int64_t connectionFd =
+        accept(serverSocket.getFd(),
+               reinterpret_cast<sockaddr*>(&clientAddress), &socketLength);
 
-    if (connFd == -1) {
+    if (connectionFd == -1) {
       continue;
     }
-    lastClientMsg = serverReadWrite(connFd, serverResponds);
-    close(connFd);
+    lastClientMessage = serverReadWrite(connectionFd, serverResponds);
+    close(connectionFd);
   }
 
-  return lastClientMsg;
+  return lastClientMessage;
 }
 
 /**
