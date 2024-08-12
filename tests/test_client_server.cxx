@@ -7,23 +7,24 @@ constexpr std::int64_t TEST_PORT = 12345;
  *
  * This function reads a message from the client connected through the file
  * descriptor @p connFd, stores it in a buffer, and then sends a response back
- * to the client using the provided write buffer @p wbuf.
+ * to the client using the provided write buffer @p writeBuffer.
  *
  * @param connFd The file descriptor for the connection to the client.
- * @param wbuf The message t obe send back to the client.
+ * @param writeBuffer The message t obe send back to the client.
  * @return std::string The message received from the client. Returns an empty
  * string if the read operation fails.
  */
-static std::string serverReadWrite(std::int64_t connFd, std::string wbuf) {
-  std::vector<char> rbuf(TEST_BUFFER_SIZE);
-  ssize_t n = read(connFd, rbuf.data(), rbuf.size() - 1);
+static std::string serverReadWrite(std::int64_t connFd,
+                                   std::string writeBuffer) {
+  std::vector<char> readBuffer(TEST_BUFFER_SIZE);
+  ssize_t n = read(connFd, readBuffer.data(), readBuffer.size() - 1);
   if (n < 0) {
     std::cerr << "read() error" << std::endl;
     return "";
   }
 
-  std::string clientMsg(rbuf.begin(), rbuf.begin() + n);
-  write(connFd, wbuf.c_str(), wbuf.length());
+  std::string clientMsg(readBuffer.begin(), readBuffer.begin() + n);
+  write(connFd, writeBuffer.c_str(), writeBuffer.length());
   return clientMsg;
 }
 
@@ -48,7 +49,7 @@ static std::string serverReadWrite(std::int64_t connFd, std::string wbuf) {
  */
 static std::string run(Socket& serverSocket, std::int64_t maxIterations) {
   serverSocket.setOptions();
-  serverSocket.bindToPort(TEST_PORT, TEST_SERVER_NETADDR, "server");
+  serverSocket.configureConnection(TEST_PORT, TEST_SERVER_NETADDR, "server");
 
   if (listen(serverSocket.getFd(), TEST_BACKLOG)) {
     throw std::runtime_error("Failed to listen");
@@ -90,17 +91,18 @@ static std::string run(Socket& serverSocket, std::int64_t maxIterations) {
  */
 static std::string run(Socket& clientSocket) {
   clientSocket.setOptions();
-  clientSocket.bindToPort(TEST_PORT, TEST_CLIENT_NETADDR, "client");
+  clientSocket.configureConnection(TEST_PORT, TEST_CLIENT_NETADDR, "client");
 
   write(clientSocket.getFd(), clientSays.c_str(), clientSays.length());
 
-  std::vector<char> rbuf(64);
-  ssize_t n = read(clientSocket.getFd(), rbuf.data(), rbuf.size() - 1);
+  std::vector<char> readBuffer(64);
+  ssize_t n =
+      read(clientSocket.getFd(), readBuffer.data(), readBuffer.size() - 1);
   if (n < 0) {
     std::cerr << "read() error" << std::endl;
     return "";
   }
-  std::string serverMsg(rbuf.begin(), rbuf.begin() + n);
+  std::string serverMsg(readBuffer.begin(), readBuffer.begin() + n);
   close(clientSocket.getFd());
   return serverMsg;
 }

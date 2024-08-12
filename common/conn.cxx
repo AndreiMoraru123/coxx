@@ -3,27 +3,27 @@
 Connection::~Connection() { close(_fd); }
 
 bool Connection::tryOneRequest() {
-  if (rbufSize < 4) {
+  if (readBufferSize < 4) {
     // Not enough data in the buffer, will retry next iteration.
     return false;
   }
 
   std::uint32_t len = 0;
-  std::memcpy(&len, rbuf.data(), 4);
+  std::memcpy(&len, readBuffer.data(), 4);
   if (len > K_MAX_MSG) {
     std::println("too long");
     state = ConnectionState::END;
     return false;
   }
 
-  if (4 + len > rbufSize) {
+  if (4 + len > readBufferSize) {
     return false;  // not enough data in the buffer;
   }
 
   auto resCode = Response::OK;
   std::uint32_t wLen = 0;
-  std::uint8_t& requestData = *(rbuf.data() + 4);
-  std::uint8_t& responseData = *(wbuf.data() + 4 + 4);
+  std::uint8_t& requestData = *(readBuffer.data() + 4);
+  std::uint8_t& responseData = *(writeBuffer.data() + 4 + 4);
 
   std::int32_t err = request(requestData, len, resCode, responseData, wLen);
 
@@ -33,17 +33,17 @@ bool Connection::tryOneRequest() {
   }
 
   wLen += 4;
-  std::memcpy(wbuf.data(), &wLen, 4);
+  std::memcpy(writeBuffer.data(), &wLen, 4);
   auto resCodeValue =
       static_cast<std::underlying_type<Response>::type>(resCode);
-  std::memcpy(wbuf.data() + 4, &resCodeValue, 4);
-  wbufSize = 4 + wLen;
+  std::memcpy(writeBuffer.data() + 4, &resCodeValue, 4);
+  writeBufferSize = 4 + wLen;
 
-  std::size_t remain = rbufSize - 4 - len;
+  std::size_t remain = readBufferSize - 4 - len;
   if (remain) {
-    std::memmove(rbuf.data(), rbuf.data() + 4 + len, remain);
+    std::memmove(readBuffer.data(), readBuffer.data() + 4 + len, remain);
   }
-  rbufSize = remain;
+  readBufferSize = remain;
 
   state = ConnectionState::RES;
   stateResponse();
@@ -52,29 +52,29 @@ bool Connection::tryOneRequest() {
 }
 
 bool Connection::tryFlushBuffer() {
-  ssize_t rv = 0;
+  ssize_t writtenBytes = 0;
   do {
-    std::size_t remain = wbufSize - wbufSent;
-    rv = write(_fd, wbuf.data() + wbufSent, remain);
-  } while (rv < 0 && errno == EINTR);
+    std::size_t remain = writeBufferSize - writeBufferSent;
+    writtenBytes = write(_fd, writeBuffer.data() + writeBufferSent, remain);
+  } while (writtenBytes < 0 && errno == EINTR);
 
-  if (rv < 0 && errno == EAGAIN) {
+  if (writtenBytes < 0 && errno == EAGAIN) {
     return false;  // stop
   }
 
-  if (rv < 0) {
+  if (writtenBytes < 0) {
     std::cerr << "write() error" << std::endl;
     state = ConnectionState::END;
     return false;
   }
 
-  wbufSent += static_cast<std::size_t>(rv);
-  assert(wbufSent <= wbufSize);
+  writeBufferSent += static_cast<std::size_t>(writtenBytes);
+  assert(writeBufferSent <= writeBufferSize);
 
-  if (wbufSent == wbufSize) {
+  if (writeBufferSent == writeBufferSize) {
     state = ConnectionState::REQ;
-    wbufSent = 0;
-    wbufSize = 0;
+    writeBufferSent = 0;
+    writeBufferSize = 0;
     return false;
   }
 
@@ -83,26 +83,26 @@ bool Connection::tryFlushBuffer() {
 }
 
 bool Connection::tryFillBuffer() {
-  assert(rbufSize < rbuf.capacity());
-  ssize_t rv = 0;
+  assert(readBufferSize < readBuffer.capacity());
+  ssize_t readBytes = 0;
 
   do {
-    std::size_t cap = rbuf.capacity() - rbufSize;
-    rv = read(_fd, rbuf.data() + rbufSize, cap);
-  } while (rv < 0 && errno == EINTR);
+    std::size_t cap = readBuffer.capacity() - readBufferSize;
+    readBytes = read(_fd, readBuffer.data() + readBufferSize, cap);
+  } while (readBytes < 0 && errno == EINTR);
 
-  if (rv < 0 && errno == EAGAIN) {
+  if (readBytes < 0 && errno == EAGAIN) {
     return false;  // stop
   }
 
-  if (rv < 0) {
+  if (readBytes < 0) {
     std::cerr << "read() error" << std::endl;
     state = ConnectionState::END;
     return false;
   }
 
-  if (rv == 0) {
-    if (rbufSize > 0) {
+  if (readBytes == 0) {
+    if (readBufferSize > 0) {
       std::println("unexpected EOF");
     } else {
       std::println("EOF");
@@ -111,8 +111,8 @@ bool Connection::tryFillBuffer() {
     return false;
   }
 
-  rbufSize += static_cast<std::size_t>(rv);
-  assert(rbufSize <= rbuf.capacity());
+  readBufferSize += static_cast<std::size_t>(readBytes);
+  assert(readBufferSize <= readBuffer.capacity());
 
   while (tryOneRequest()) {
   }

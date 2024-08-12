@@ -25,7 +25,7 @@ constexpr std::uint8_t TEST_NUM_QUERIES = 3;
  */
 static std::pair<std::int32_t, std::string> oneRequest(Socket& serverSocket,
                                                        std::int64_t connFd) {
-  std::vector<char> rbuf(4 + K_MAX_MSG + 1);
+  std::vector<char> readBuffer(4 + K_MAX_MSG + 1);
   errno = 0;
 
   std::string header(4, '\0');
@@ -40,11 +40,11 @@ static std::pair<std::int32_t, std::string> oneRequest(Socket& serverSocket,
     return {err, message};
   }
 
-  // Copy the header back into rbuf
-  std::memcpy(rbuf.data(), header.data(), 4);
+  // Copy the header back into readBuffer
+  std::memcpy(readBuffer.data(), header.data(), 4);
 
   std::uint32_t len = 0;
-  std::memcpy(&len, rbuf.data(), 4);
+  std::memcpy(&len, readBuffer.data(), 4);
   if (len > K_MAX_MSG) {
     return {-1, "too long"};
   }
@@ -56,21 +56,21 @@ static std::pair<std::int32_t, std::string> oneRequest(Socket& serverSocket,
     return {err, "read() error"};
   }
 
-  // Copy the body back into rbuf
-  std::memcpy(rbuf.data() + 4, body.data(), len);
+  // Copy the body back into readBuffer
+  std::memcpy(readBuffer.data() + 4, body.data(), len);
 
   // Print the null terminated string in the buffer
-  rbuf[4 + len] = '\0';
-  std::string clientMessage = &rbuf[4];
+  readBuffer[4 + len] = '\0';
+  std::string clientMessage = &readBuffer[4];
 
   // Reply using the same protocol
-  std::vector<char> wbuf(4 + serverResponds.size());
+  std::vector<char> writeBuffer(4 + serverResponds.size());
   len = static_cast<std::uint32_t>(serverResponds.size());
 
-  std::memcpy(wbuf.data(), &len, 4);
-  std::memcpy(wbuf.data() + 4, serverResponds.data(), len);
+  std::memcpy(writeBuffer.data(), &len, 4);
+  std::memcpy(writeBuffer.data() + 4, serverResponds.data(), len);
 
-  std::string wbufStr(wbuf.begin(), wbuf.end());
+  std::string wbufStr(writeBuffer.begin(), writeBuffer.end());
   return {serverSocket.writeAll(connFd, wbufStr, len + 4), clientMessage};
 }
 
@@ -95,11 +95,11 @@ static std::pair<std::int32_t, std::string> query(Socket& clientSocket,
     return {-1, "query too long"};
   }
 
-  std::vector<char> wbuf(4 + K_MAX_MSG);
-  std::memcpy(wbuf.data(), &len, 4);
-  std::memcpy(wbuf.data() + 4, text.data(), len);
+  std::vector<char> writeBuffer(4 + K_MAX_MSG);
+  std::memcpy(writeBuffer.data(), &len, 4);
+  std::memcpy(writeBuffer.data() + 4, text.data(), len);
 
-  std::string wbufStr(wbuf.begin(), wbuf.end());
+  std::string wbufStr(writeBuffer.begin(), writeBuffer.end());
   std::int32_t writeErr = clientSocket.writeAll(fd, wbufStr, 4 + len);
   if (writeErr) {
     return {writeErr, "write() error"};
@@ -107,7 +107,7 @@ static std::pair<std::int32_t, std::string> query(Socket& clientSocket,
 
   // 4 bytes header
   std::string header(4, '\0');
-  std::vector<char> rbuf(4 + K_MAX_MSG + 1);
+  std::vector<char> readBuffer(4 + K_MAX_MSG + 1);
   std::int32_t readErr = clientSocket.readFull(fd, header, 4);
   errno = 0;
   if (readErr) {
@@ -120,10 +120,10 @@ static std::pair<std::int32_t, std::string> query(Socket& clientSocket,
     return {readErr, message};
   }
 
-  // Copy the header back into rbuf
-  std::memcpy(rbuf.data(), header.data(), 4);
+  // Copy the header back into readBuffer
+  std::memcpy(readBuffer.data(), header.data(), 4);
 
-  std::memcpy(&len, rbuf.data(), 4);
+  std::memcpy(&len, readBuffer.data(), 4);
   if (len > K_MAX_MSG) {
     return {-1, "too long"};
   }
@@ -135,12 +135,12 @@ static std::pair<std::int32_t, std::string> query(Socket& clientSocket,
     return {readErr, "read() error"};
   }
 
-  // Copy the body back into rbuf
-  std::memcpy(rbuf.data() + 4, body.data(), len);
+  // Copy the body back into readBuffer
+  std::memcpy(readBuffer.data() + 4, body.data(), len);
 
   // Return server message
-  rbuf[4 + len] = '\0';
-  return {0, &rbuf[4]};
+  readBuffer[4 + len] = '\0';
+  return {0, &readBuffer[4]};
 }
 
 /**
@@ -163,7 +163,7 @@ static std::vector<std::string> run(Socket& serverSocket,
                                     std::int64_t maxIterations,
                                     std::uint8_t numQueries) {
   serverSocket.setOptions();
-  serverSocket.bindToPort(TEST_PORT, TEST_SERVER_NETADDR, "server");
+  serverSocket.configureConnection(TEST_PORT, TEST_SERVER_NETADDR, "server");
 
   if (listen(serverSocket.getFd(), TEST_BACKLOG)) {
     throw std::runtime_error("Failed to listen");
@@ -216,7 +216,7 @@ static std::vector<std::pair<std::int32_t, std::string>> run(
   std::vector<std::pair<std::int32_t, std::string>> responses;
 
   clientSocket.setOptions();
-  clientSocket.bindToPort(TEST_PORT, TEST_CLIENT_NETADDR, "client");
+  clientSocket.configureConnection(TEST_PORT, TEST_CLIENT_NETADDR, "client");
 
   std::pair<std::int32_t, std::string> response;
   for (int i = 0; i < numQueries; ++i) {

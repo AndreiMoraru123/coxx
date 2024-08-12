@@ -27,20 +27,20 @@ std::int32_t Client::sendRequest(std::int64_t fd, const QueryArray cmd) const {
     return -1;
   }
 
-  std::vector<char> wbuf(4 + K_MAX_MSG);
-  std::memcpy(wbuf.data(), &len, 4);
+  std::vector<char> writeBuffer(4 + K_MAX_MSG);
+  std::memcpy(writeBuffer.data(), &len, 4);
   std::uint32_t n = cmd.size();
-  std::memcpy(wbuf.data() + 4, &n, len);
+  std::memcpy(writeBuffer.data() + 4, &n, len);
 
   std::size_t current = 8;
   for (const std::string& s : cmd) {
     std::uint32_t previous = static_cast<std::uint32_t>(s.size());
-    std::memcpy(wbuf.data() + current, &previous, 4);
-    std::memcpy(wbuf.data() + current + 4, s.data(), s.size());
+    std::memcpy(writeBuffer.data() + current, &previous, 4);
+    std::memcpy(writeBuffer.data() + current + 4, s.data(), s.size());
     current += 4 + s.size();
   }
 
-  std::string wbufStr(wbuf.begin(), wbuf.end());
+  std::string wbufStr(writeBuffer.begin(), writeBuffer.end());
   return socket.writeAll(fd, wbufStr, 4 + len);
 }
 
@@ -57,7 +57,7 @@ std::int32_t Client::sendRequest(std::int64_t fd, const QueryArray cmd) const {
 std::int32_t Client::readResponse(std::int64_t fd) const {
   // 4 bytes header
   std::string header(4, '\0');
-  std::vector<char> rbuf(4 + K_MAX_MSG + 1);
+  std::vector<char> readBuffer(4 + K_MAX_MSG + 1);
   std::int32_t readErr = socket.readFull(fd, header, 4);
   errno = 0;
   if (readErr) {
@@ -69,11 +69,11 @@ std::int32_t Client::readResponse(std::int64_t fd) const {
     return readErr;
   }
 
-  // Copy the header back into rbuf
-  std::memcpy(rbuf.data(), header.data(), 4);
+  // Copy the header back into readBuffer
+  std::memcpy(readBuffer.data(), header.data(), 4);
 
   std::uint32_t len = 0;
-  std::memcpy(&len, rbuf.data(), 4);
+  std::memcpy(&len, readBuffer.data(), 4);
   if (len > K_MAX_MSG) {
     std::println("too long");
     return -1;
@@ -87,8 +87,8 @@ std::int32_t Client::readResponse(std::int64_t fd) const {
     return readErr;
   }
 
-  // Copy the body back into rbuf
-  std::memcpy(rbuf.data() + 4, body.data(), len);
+  // Copy the body back into readBuffer
+  std::memcpy(readBuffer.data() + 4, body.data(), len);
 
   // Print the result
   auto resCode = Response::OK;
@@ -99,9 +99,9 @@ std::int32_t Client::readResponse(std::int64_t fd) const {
 
   auto resCodeValue =
       static_cast<std::underlying_type<Response>::type>(resCode);
-  std::memcpy(&resCodeValue, rbuf.data() + 4, 4);
+  std::memcpy(&resCodeValue, readBuffer.data() + 4, 4);
 
-  std::string_view responseView(rbuf.data() + 8, len - 4);
+  std::string_view responseView(readBuffer.data() + 8, len - 4);
   std::println("Server says: [{}] {}", resCodeValue, responseView);
   return 0;
 }
@@ -118,7 +118,7 @@ std::int32_t Client::readResponse(std::int64_t fd) const {
  */
 void Client::run(QueryArray queryList, std::int64_t port) {
   socket.setOptions();
-  socket.bindToPort(port, CLIENT_NETADDR, "client");
+  socket.configureConnection(port, CLIENT_NETADDR, "client");
 
   std::int32_t sendErr = sendRequest(socket.getFd(), queryList);
   if (sendErr) {

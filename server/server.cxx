@@ -45,7 +45,7 @@ static void makeNonBlocking(std::int64_t fd) {
  */
 void Server::run(std::int64_t port) {
   socket.setOptions();
-  socket.bindToPort(port, SERVER_NETADDR, "server");
+  socket.configureConnection(port, SERVER_NETADDR, "server");
   makeNonBlocking(socket.getFd());
 
   if (listen(socket.getFd(), SERVER_BACKLOG)) {

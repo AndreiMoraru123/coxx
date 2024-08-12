@@ -38,13 +38,13 @@ class Connection {
   Connection()
       : _fd(-1),
         state(ConnectionState::REQ),
-        rbuf(),
-        wbuf(),
-        wbufSent(0),
-        wbufSize(0),
-        rbufSize(0) {
-    rbuf.reserve(4 + K_MAX_MSG);
-    wbuf.reserve(4 + K_MAX_MSG);
+        readBuffer(),
+        writeBuffer(),
+        writeBufferSent(0),
+        writeBufferSize(0),
+        readBufferSize(0) {
+    readBuffer.reserve(4 + K_MAX_MSG);
+    writeBuffer.reserve(4 + K_MAX_MSG);
   }
 
   /**
@@ -52,18 +52,19 @@ class Connection {
    *
    * @param fd File descriptor for the connection
    * @param state Initial state of the connection
-   * @param wbufSent Number of bytes sent in the write buffer
+   * @param writeBufferSent Number of bytes sent in the write buffer
    */
-  Connection(std::int64_t fd, ConnectionState state, std::size_t wbufSent)
+  Connection(std::int64_t fd, ConnectionState state,
+             std::size_t writeBufferSent)
       : _fd(fd),
         state(state),
-        rbuf(),
-        wbuf(),
-        wbufSent(wbufSent),
-        wbufSize(0),
-        rbufSize(0) {
-    rbuf.reserve(4 + K_MAX_MSG);
-    wbuf.reserve(4 + K_MAX_MSG);
+        readBuffer(),
+        writeBuffer(),
+        writeBufferSent(writeBufferSent),
+        writeBufferSize(0),
+        readBufferSize(0) {
+    readBuffer.reserve(4 + K_MAX_MSG);
+    writeBuffer.reserve(4 + K_MAX_MSG);
   }
 
   /**
@@ -92,11 +93,11 @@ class Connection {
  private:
   std::int64_t _fd;
   ConnectionState state;
-  std::vector<std::uint8_t> rbuf;
-  std::vector<std::uint8_t> wbuf;
-  std::size_t wbufSent;
-  std::size_t wbufSize;
-  std::size_t rbufSize;
+  std::vector<std::uint8_t> readBuffer;
+  std::vector<std::uint8_t> writeBuffer;
+  std::size_t writeBufferSent;
+  std::size_t writeBufferSize;
+  std::size_t readBufferSize;
   Request request;
   bool tryOneRequest();
   bool tryFlushBuffer();

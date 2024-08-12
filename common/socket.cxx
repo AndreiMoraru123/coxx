@@ -71,8 +71,8 @@ void Socket::setOptions() const {
  * such as the port being in use, insufficient permissions, network errors or
  * whatnot.
  */
-void Socket::bindToPort(std::int64_t port, std::uint32_t netaddr,
-                        std::string connectionType) const {
+void Socket::configureConnection(std::int64_t port, std::uint32_t netaddr,
+                                 std::string connectionType) const {
   sockaddr_in addr = {};
   addr.sin_family = AF_INET;
   addr.sin_port = ntohs(port);
@@ -107,11 +107,11 @@ std::int32_t Socket::readFull(std::int64_t fd, std::string &buffer,
   std::size_t bytesRead = 0;
 
   while (bytesRead < n) {
-    ssize_t rv = read(fd, &buffer[bytesRead], n - bytesRead);
-    if (rv <= 0) {
+    ssize_t readBytes = read(fd, &buffer[bytesRead], n - bytesRead);
+    if (readBytes <= 0) {
       return -1;  // Error, or unexpected EOF
     }
-    bytesRead += static_cast<std::size_t>(rv);
+    bytesRead += static_cast<std::size_t>(readBytes);
   }
   buffer.resize(bytesRead);
   return 0;
@@ -134,11 +134,11 @@ std::int32_t Socket::writeAll(std::int64_t fd, std::string &buffer,
   std::size_t bytesWrote = 0;
 
   while (bytesWrote < n) {
-    ssize_t rv = write(fd, &buffer[bytesWrote], n - bytesWrote);
-    if (rv <= 0) {
+    ssize_t writtenBytes = write(fd, &buffer[bytesWrote], n - bytesWrote);
+    if (writtenBytes <= 0) {
       return -1;  // Error
     }
-    bytesWrote += static_cast<std::size_t>(rv);
+    bytesWrote += static_cast<std::size_t>(writtenBytes);
   }
   buffer.resize(bytesWrote);
   return 0;

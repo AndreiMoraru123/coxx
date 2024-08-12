@@ -50,8 +50,8 @@ class Socket {
    * such as the port being in use, insufficient permissions, network errors or
    * whatnot.
    */
-  void bindToPort(std::int64_t port, std::uint32_t netaddr,
-                  std::string connectionType) const;
+  void configureConnection(std::int64_t port, std::uint32_t netaddr,
+                           std::string connectionType) const;
 
   /**
    * @brief Reads @p n bytes from the file descriptor @p fd into the @p buffer.
