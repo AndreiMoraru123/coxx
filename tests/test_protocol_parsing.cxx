@@ -18,18 +18,19 @@ constexpr std::uint8_t TEST_NUM_QUERIES = 3;
  *
  * @param serverSocket A reference to the Socket object configured for the
  * server ops.
- * @param connFd The file descriptor for the connection to the client.
+ * @param connectionFileDescriptor The file descriptor for the connection to the
+ * client.
  * @return std::pair<std::int32_t, std::string> The error code (0 on success, -1
  * on failure) along with the message received from the client (on success) or
  * an error message (on failure).
  */
-static std::pair<std::int32_t, std::string> oneRequest(Socket& serverSocket,
-                                                       std::int64_t connFd) {
+static std::pair<std::int32_t, std::string> oneRequest(
+    Socket& serverSocket, std::int64_t connectionFileDescriptor) {
   std::vector<char> readBuffer(4 + MAX_MESSAGE_SIZE + 1);
   errno = 0;
 
   std::string header(4, '\0');
-  std::int32_t err = serverSocket.readFull(connFd, header, 4);
+  std::int32_t err = serverSocket.readFull(connectionFileDescriptor, header, 4);
   if (err) {
     std::string message;
     if (errno == 0) {
@@ -51,7 +52,7 @@ static std::pair<std::int32_t, std::string> oneRequest(Socket& serverSocket,
 
   // Read the request body
   std::string body(len, '\0');
-  err = serverSocket.readFull(connFd, body, len);
+  err = serverSocket.readFull(connectionFileDescriptor, body, len);
   if (err) {
     return {err, "read() error"};
   }
@@ -70,8 +71,10 @@ static std::pair<std::int32_t, std::string> oneRequest(Socket& serverSocket,
   std::memcpy(writeBuffer.data(), &len, 4);
   std::memcpy(writeBuffer.data() + 4, serverResponds.data(), len);
 
-  std::string wbufStr(writeBuffer.begin(), writeBuffer.end());
-  return {serverSocket.writeAll(connFd, wbufStr, len + 4), clientMessage};
+  std::string writeBufferString(writeBuffer.begin(), writeBuffer.end());
+  return {serverSocket.writeAll(connectionFileDescriptor, writeBufferString,
+                                len + 4),
+          clientMessage};
 }
 
 /**
@@ -99,8 +102,9 @@ static std::pair<std::int32_t, std::string> query(Socket& clientSocket,
   std::memcpy(writeBuffer.data(), &len, 4);
   std::memcpy(writeBuffer.data() + 4, text.data(), len);
 
-  std::string wbufStr(writeBuffer.begin(), writeBuffer.end());
-  std::int32_t writeError = clientSocket.writeAll(fd, wbufStr, 4 + len);
+  std::string writeBufferString(writeBuffer.begin(), writeBuffer.end());
+  std::int32_t writeError =
+      clientSocket.writeAll(fd, writeBufferString, 4 + len);
   if (writeError) {
     return {writeError, "write() error"};
   }
@@ -174,22 +178,22 @@ static std::vector<std::string> run(Socket& serverSocket,
   for (int i = 0; i < maxIterations; ++i) {
     sockaddr_in clientAddress = {};
     socklen_t socketLength = sizeof(clientAddress);
-    std::int64_t connFd =
+    std::int64_t connectionFileDescriptor =
         accept(serverSocket.getFd(),
                reinterpret_cast<sockaddr*>(&clientAddress), &socketLength);
 
-    if (connFd == -1) {
+    if (connectionFileDescriptor == -1) {
       continue;
     }
 
     for (int i = 0; i < numQueries; ++i) {
-      auto [err, msg] = oneRequest(serverSocket, connFd);
+      auto [err, msg] = oneRequest(serverSocket, connectionFileDescriptor);
       if (err) {
         break;
       }
       clientMessages.push_back(msg);
     }
-    close(connFd);
+    close(connectionFileDescriptor);
   }
   return clientMessages;
 }

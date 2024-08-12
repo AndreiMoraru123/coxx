@@ -40,8 +40,8 @@ std::int32_t Client::sendRequest(std::int64_t fd,
     current += 4 + s.size();
   }
 
-  std::string wbufStr(writeBuffer.begin(), writeBuffer.end());
-  return socket.writeAll(fd, wbufStr, 4 + messageLength);
+  std::string writeBufferString(writeBuffer.begin(), writeBuffer.end());
+  return socket.writeAll(fd, writeBufferString, 4 + messageLength);
 }
 
 /**
