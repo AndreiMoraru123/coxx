@@ -122,13 +122,3 @@ void Server::run(std::int64_t port) {
     }
   }
 }
-
-/**
- * @brief Get the Socket object
- *
- * @return Socket&
- */
-[[deprecated("only used in test")]]
-Socket& Server::getSocket() {
-  return socket;
-}

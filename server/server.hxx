@@ -39,14 +39,6 @@ class Server {
    */
   void run(std::int64_t port);
 
-  /**
-   * @brief Get the Socket object
-   *
-   * @return Socket&
-   */
-  [[deprecated("only used in test")]]
-  Socket& getSocket();
-
  private:
   Socket socket;
 };

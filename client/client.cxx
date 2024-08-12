@@ -130,13 +130,3 @@ void Client::run(CommandList commands, std::int64_t port) {
     std::cerr << "read response error" << std::endl;
   }
 }
-
-/**
- * @brief Get the Socket object
- *
- * @return Socket&
- */
-[[deprecated("only used in test")]]
-Socket& Client::getSocket() {
-  return socket;
-}
