@@ -22,7 +22,7 @@
  */
 Socket::Socket() {
   _fd = socket(AF_INET, SOCK_STREAM, 0);
-  if (_fd == -1) {
+  if (_fd == -1) [[unlikely]] {
     throw std::runtime_error("Failed to create socket");
   }
 }
@@ -45,7 +45,8 @@ Socket::~Socket() { close(_fd); }
  */
 void Socket::setOptions() const {
   constexpr std::int64_t val = 1;
-  if (setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val)) == -1) {
+  if (setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val)) == -1)
+      [[unlikely]] {
     throw std::runtime_error("Failed to set socket options");
   }
 }
@@ -85,13 +86,14 @@ void Socket::configureConnection(std::int64_t port, std::uint32_t netaddr,
     if (connect(_fd, reinterpret_cast<sockaddr *>(&addr), sizeof(addr))) {
       throw std::runtime_error("Failed to connect to port");
     }
-  } else {
+  } else [[unlikely]] {
     throw std::invalid_argument("Invalid connection type");
   }
 }
 
 /**
- * @brief Reads @p numberOfBytes bytes from the file descriptor @p fd into the @p buffer.
+ * @brief Reads @p numberOfBytes bytes from the file descriptor @p fd into the
+ * @p buffer.
  *
  * @param fd The file descriptor from which to read.
  * @param buffer A reference to a string where the read data will be stored.
@@ -118,7 +120,8 @@ std::int32_t Socket::readFull(std::int64_t fd, std::string &buffer,
 }
 
 /**
- * @brief Writes @p numberOfBytes bytes from the @p buffer to the file descriptor @p fd.
+ * @brief Writes @p numberOfBytes bytes from the @p buffer to the file
+ * descriptor @p fd.
  *
  * @param fd The file descriptor to which to write.
  * @param buffer A reference to a string containing the data to be written.
@@ -134,7 +137,8 @@ std::int32_t Socket::writeAll(std::int64_t fd, std::string &buffer,
   std::size_t bytesWrote = 0;
 
   while (bytesWrote < numberOfBytes) {
-    ssize_t writtenBytes = write(fd, &buffer[bytesWrote], numberOfBytes - bytesWrote);
+    ssize_t writtenBytes =
+        write(fd, &buffer[bytesWrote], numberOfBytes - bytesWrote);
     if (writtenBytes <= 0) {
       return -1;  // Error
     }

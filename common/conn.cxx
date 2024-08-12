@@ -152,7 +152,7 @@ void Connection::io() {
     stateRequest();
   } else if (state == ConnectionState::RES) {
     stateResponse();
-  } else {
+  } else [[unlikely]] {
     std::println("not expected");
     assert(0);
   }

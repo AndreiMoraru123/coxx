@@ -17,7 +17,7 @@ static void registerEpollEvent(std::int64_t epollFd, std::int64_t fd,
   epoll_event epollEvent;
   epollEvent.events = events;
   epollEvent.data.fd = fd;
-  if (epoll_ctl(epollFd, EPOLL_CTL_ADD, fd, &epollEvent) == -1) {
+  if (epoll_ctl(epollFd, EPOLL_CTL_ADD, fd, &epollEvent) == -1) [[unlikely]] {
     std::cerr << "epoll_ctl() error" << std::endl;
   }
 }
@@ -30,14 +30,14 @@ static void registerEpollEvent(std::int64_t epollFd, std::int64_t fd,
 static void makeNonBlocking(std::int64_t fd) {
   errno = 0;
   std::int64_t flags = fcntl(fd, F_GETFL, 0);
-  if (errno) {
+  if (errno) [[unlikely]] {
     std::cerr << "fcntl error" << std::endl;
   }
 
   flags |= O_NONBLOCK;
 
   fcntl(fd, F_SETFL, flags);
-  if (errno) {
+  if (errno) [[unlikely]] {
     std::cerr << "fcntl error" << std::endl;
   }
 }
