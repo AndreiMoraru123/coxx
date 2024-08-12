@@ -1,11 +1,23 @@
 #include "server.hxx"
 
-static void epollCtlAdd(std::int64_t epFd, std::int64_t fd,
-                        std::uint32_t events) {
-  epoll_event ev;
-  ev.events = events;
-  ev.data.fd = fd;
-  if (epoll_ctl(epFd, EPOLL_CTL_ADD, fd, &ev) == -1) {
+/**
+ * @brief Registers events for a file descriptor with to an epoll instance.
+ *
+ * This function adds a file descriptor entry @p fd in the interest list of the
+ * epoll file descriptor instance @p epollFd and registers it to monitor the
+ * specified @p events. This allows the epoll instance to notify when the
+ * specified events occur on the file descriptor.
+ *
+ * @param epollFd the epoll file descriptor
+ * @param fd the target file descriptor to be monitored
+ * @param events the events to be monitored
+ */
+static void registerEpollEvent(std::int64_t epollFd, std::int64_t fd,
+                               std::uint32_t events) {
+  epoll_event epollEvent;
+  epollEvent.events = events;
+  epollEvent.data.fd = fd;
+  if (epoll_ctl(epollFd, EPOLL_CTL_ADD, fd, &epollEvent) == -1) {
     std::cerr << "epoll_ctl() error" << std::endl;
   }
 }
@@ -34,12 +46,12 @@ static void makeNonBlocking(std::int64_t fd) {
  * @brief Runs the server event loop.
  *
  * This function first sets up the arguments for polling. The listening fd is
- * polled with the POLLIN flag. For the connection fd (connFd) the state of the
- * connection object (Connection) determines the poll flag. In this scenario,
- * the poll flag is either reading (POLLIN) or writing (POLLOUT), never both.
- * After `poll` returns, the server gets notified by which file descriptors are
- * ready for reading/writing and can process the connections in the pollArgs
- * vector.
+ * polled with the POLLIN flag. For the connection fd (connectionFd) the state
+ * of the connection object (Connection) determines the poll flag. In this
+ * scenario, the poll flag is either reading (POLLIN) or writing (POLLOUT),
+ * never both. After `poll` returns, the server gets notified by which file
+ * descriptors are ready for reading/writing and can process the connections in
+ * the pollArgs vector.
  *
  * @param port The port to run the server on.
  */
@@ -52,41 +64,44 @@ void Server::run(std::int64_t port) {
     throw std::runtime_error("Failed to listen");
   }
 
-  sockaddr_in clientAddr = {};
-  socklen_t socketAddressLength = sizeof(clientAddr);
+  sockaddr_in clientAddress = {};
+  socklen_t socketAddressLength = sizeof(clientAddress);
 
-  std::int64_t numFds;
+  std::int64_t numFileDescriptors;
   std::array<epoll_event, MAX_EVENTS> events;
-  std::vector<std::unique_ptr<Connection>> fd2Conn(MAX_EVENTS);
+  std::vector<std::unique_ptr<Connection>> connectionByFileDescriptor(
+      MAX_EVENTS);
 
-  std::int64_t epFd = epoll_create(1);
-  epollCtlAdd(epFd, socket.getFd(), EPOLLIN | EPOLLOUT | EPOLLET);
+  std::int64_t epollFd = epoll_create(1);
+  registerEpollEvent(epollFd, socket.getFd(), EPOLLIN | EPOLLOUT | EPOLLET);
 
   // the event loop
   while (true) {
-    numFds = epoll_wait(epFd, events.data(), MAX_EVENTS, -1);
+    numFileDescriptors = epoll_wait(epollFd, events.data(), MAX_EVENTS, -1);
     // connection fds
-    for (std::int64_t i = 0; i < numFds; ++i) {
+    for (std::int64_t i = 0; i < numFileDescriptors; ++i) {
       if (events[i].data.fd == socket.getFd()) {
-        std::int64_t connFd =
-            accept(socket.getFd(), reinterpret_cast<sockaddr*>(&clientAddr),
+        std::int64_t connectionFd =
+            accept(socket.getFd(), reinterpret_cast<sockaddr*>(&clientAddress),
                    &socketAddressLength);
-        if (connFd < 0) {
+        if (connectionFd < 0) {
           std::cerr << "accept() error";
           continue;
         }
 
-        makeNonBlocking(connFd);
-        epollCtlAdd(epFd, connFd, EPOLLIN | EPOLLET | EPOLLRDHUP | EPOLLHUP);
+        makeNonBlocking(connectionFd);
+        registerEpollEvent(epollFd, connectionFd,
+                           EPOLLIN | EPOLLET | EPOLLRDHUP | EPOLLHUP);
 
-        if (static_cast<std::size_t>(connFd) >= fd2Conn.size()) {
-          fd2Conn.resize(connFd + 1);
+        if (static_cast<std::size_t>(connectionFd) >=
+            connectionByFileDescriptor.size()) {
+          connectionByFileDescriptor.resize(connectionFd + 1);
         }
-        fd2Conn[connFd] =
-            std::make_unique<Connection>(connFd, ConnectionState::REQ, 0);
+        connectionByFileDescriptor[connectionFd] =
+            std::make_unique<Connection>(connectionFd, ConnectionState::REQ, 0);
 
       } else {
-        auto& conn = fd2Conn[events[i].data.fd];
+        auto& conn = connectionByFileDescriptor[events[i].data.fd];
         if (!conn) {
           std::cerr << "Connection not found for fd: " << events[i].data.fd
                     << std::endl;
@@ -94,15 +109,15 @@ void Server::run(std::int64_t port) {
         if (events[i].events & (EPOLLIN | EPOLLOUT)) {
           conn->io();
           if (conn->getState() == ConnectionState::END) {
-            epoll_ctl(epFd, EPOLL_CTL_DEL, conn->getFd(), nullptr);
-            fd2Conn[conn->getFd()].reset();
+            epoll_ctl(epollFd, EPOLL_CTL_DEL, conn->getFd(), nullptr);
+            connectionByFileDescriptor[conn->getFd()].reset();
           }
         }
       }
       if (events[i].events & (EPOLLRDHUP | EPOLLHUP)) {
-        epoll_ctl(epFd, EPOLL_CTL_DEL, events[i].data.fd, nullptr);
+        epoll_ctl(epollFd, EPOLL_CTL_DEL, events[i].data.fd, nullptr);
         close(events[i].data.fd);
-        fd2Conn[events[i].data.fd].reset();
+        connectionByFileDescriptor[events[i].data.fd].reset();
       }
     }
   }
