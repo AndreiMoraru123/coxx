@@ -44,6 +44,7 @@ class Server {
    *
    * @return Socket&
    */
+  [[deprecated("only used in test")]]
   Socket& getSocket();
 
  private:

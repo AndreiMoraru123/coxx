@@ -135,4 +135,7 @@ void Client::run(QueryArray queryList, std::int64_t port) {
  *
  * @return Socket&
  */
-Socket& Client::getSocket() { return socket; }
+[[deprecated("only used in test")]]
+Socket& Client::getSocket() {
+  return socket;
+}

@@ -128,4 +128,7 @@ void Server::run(std::int64_t port) {
  *
  * @return Socket&
  */
-Socket& Server::getSocket() { return socket; }
+[[deprecated("only used in test")]]
+Socket& Server::getSocket() {
+  return socket;
+}

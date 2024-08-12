@@ -66,6 +66,7 @@ class Client {
    *
    * @return Socket&
    */
+  [[deprecated("only used in test")]]
   Socket& getSocket();
 
  private:
