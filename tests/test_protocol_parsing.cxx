@@ -227,7 +227,6 @@ static std::vector<std::pair<std::int32_t, std::string>> run(
     responses.emplace_back(query(clientSocket, clientSays));
   }
 
-  close(clientSocket.getFd());
   return responses;
 }
 
