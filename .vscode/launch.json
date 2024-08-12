@@ -44,10 +44,10 @@
       "miDebuggerPath": "/usr/bin/gdb"
     },
     {
-      "name": "Debug Client Server Test",
+      "name": "Debug Socket Test",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/bazel-bin/tests/test_client_server",
+      "program": "${workspaceFolder}/bazel-bin/tests/test_socket",
       "args": [],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
@@ -61,7 +61,7 @@
           "ignoreFailures": true
         }
       ],
-      "preLaunchTask": "bazel build //:test_client_server (debug)",
+      "preLaunchTask": "bazel build //:test_socket (debug)",
       "miDebuggerPath": "/usr/bin/gdb"
     },
     {

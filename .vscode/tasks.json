@@ -24,10 +24,10 @@
       }
     },
     {
-      "label": "bazel build //:test_client_server (debug)",
+      "label": "bazel build //:test_socket (debug)",
       "type": "shell",
       "command": "bazel",
-      "args": ["build", "-c", "dbg", "//tests:test_client_server"],
+      "args": ["build", "-c", "dbg", "//tests:test_socket"],
       "problemMatcher": "$gcc",
       "group": {
         "kind": "build",

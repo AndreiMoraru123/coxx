@@ -108,17 +108,17 @@ static std::string run(Socket& clientSocket) {
 }
 
 /**
- * @class ClientServerTest
+ * @class SocketTest
  * @brief Test suite for client-server interaction.
  *
  * This test suite verifies the basic functionality of client-server
  * communication. It includes a test for sending and receiving messages between
  * a single client and a server.
  */
-class ClientServerTest : public ::testing::Test {
+class SocketTest : public ::testing::Test {
  protected:
-  Server server;
-  Client client;
+  Socket serverSocket;
+  Socket clientSocket;
   std::jthread serverThread;
   std::string clientMessage;
   std::string serverResponse;
@@ -131,9 +131,8 @@ class ClientServerTest : public ::testing::Test {
    * server would be different applications, with different runtimes.
    */
   void SetUp() override {
-    serverThread = std::jthread([this] {
-      clientMessage = run(server.getSocket(), TEST_MAX_ITERATIONS);
-    });
+    serverThread = std::jthread(
+        [this] { clientMessage = run(serverSocket, TEST_MAX_ITERATIONS); });
     std::this_thread::sleep_for(std::chrono::seconds(1));
   }
 };
@@ -144,8 +143,8 @@ class ClientServerTest : public ::testing::Test {
  * Runs the client socket and asserts the received messages on both sides.
  *
  */
-TEST_F(ClientServerTest, OneServerOneClient) {
-  serverResponse = run(client.getSocket());
+TEST_F(SocketTest, ClientServerConnection) {
+  serverResponse = run(clientSocket);
 
   EXPECT_EQ(clientMessage, "hello");
   EXPECT_EQ(serverResponse, "world");

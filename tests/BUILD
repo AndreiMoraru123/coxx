@@ -5,9 +5,9 @@ cc_library(
 )
 
 cc_test(
-    name = "test_client_server",
+    name = "test_socket",
     size = "small",
-    srcs = ["test_client_server.cxx"],
+    srcs = ["test_socket.cxx"],
     copts = ["-std=c++23"],
     deps = [
         ":common",

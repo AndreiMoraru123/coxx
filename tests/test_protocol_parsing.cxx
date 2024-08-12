@@ -8,9 +8,9 @@ constexpr std::uint8_t TEST_NUM_QUERIES = 3;
  *
  * This function implements the protocol by first reading a 4-byte header to
  * determine the length of the incoming message. It then reads the message of
- * that length. If the message length exceeds the maximum allowed (MAX_MESSAGE_SIZE),
- * it returns an error. After successfully reading the message, it builds a
- * response and sends it back to the client.
+ * that length. If the message length exceeds the maximum allowed
+ * (MAX_MESSAGE_SIZE), it returns an error. After successfully reading the
+ * message, it builds a response and sends it back to the client.
  *
  * +-----+------+-----+------+--------
  * | len | msg1 | len | msg2 | more...
@@ -227,10 +227,10 @@ static std::vector<std::pair<std::int32_t, std::string>> run(
   return responses;
 }
 
-class ClientServerTest : public ::testing::Test {
+class ProtocolParsingTest : public ::testing::Test {
  protected:
-  Server server;
-  Client client;
+  Socket serverSocket;
+  Socket clientSocket;
   std::jthread serverThread;
   std::vector<std::string> clientMessages;
 
@@ -243,8 +243,7 @@ class ClientServerTest : public ::testing::Test {
    */
   void SetUp() override {
     serverThread = std::jthread([this] {
-      clientMessages =
-          run(server.getSocket(), TEST_MAX_ITERATIONS, TEST_NUM_QUERIES);
+      clientMessages = run(serverSocket, TEST_MAX_ITERATIONS, TEST_NUM_QUERIES);
     });
     std::this_thread::sleep_for(std::chrono::seconds(1));
   }
@@ -257,8 +256,8 @@ class ClientServerTest : public ::testing::Test {
  * Runs the client socket and asserts the last received messages on both sides.
  *
  */
-TEST_F(ClientServerTest, ProtocolParsing) {
-  auto serverResponses = run(client.getSocket(), TEST_NUM_QUERIES);
+TEST_F(ProtocolParsingTest, ProtocolParsing) {
+  auto serverResponses = run(clientSocket, TEST_NUM_QUERIES);
 
   for (const auto& msg : clientMessages) {
     EXPECT_EQ(msg, "hello");
