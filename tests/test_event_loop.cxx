@@ -13,7 +13,7 @@ constexpr std::int64_t TEST_PORT = 1234567;
  * run scenario as if the client and server were different remote application
  * with different runtimes
  */
-class EventLoopTest : public ::testing::TestWithParam<QueryArray> {
+class EventLoopTest : public ::testing::TestWithParam<CommandList> {
  protected:
   Server server;
   Client client;
@@ -55,11 +55,11 @@ class EventLoopTest : public ::testing::TestWithParam<QueryArray> {
 /**
  * @brief Instantiates the parametrized test suite for EventLoopTest.
  *
- * This macro provides the test suite for the even loop test, a QueryArray for
+ * This macro provides the test suite for the even loop test, a CommandList for
  * the client to run.
  */
 INSTANTIATE_TEST_SUITE_P(QueryTests, EventLoopTest,
-                         ::testing::Values(QueryArray{"get", "k"}));
+                         ::testing::Values(CommandList{"get", "k"}));
 
 /**
  * @brief Test case for sending a list of queries to the server

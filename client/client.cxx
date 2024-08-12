@@ -12,13 +12,14 @@
  * +-----+------+
  *
  * @param fd The file descriptor to which the request is sent.
-   * @param cmd The command to be send.
+ * @param commands The command to be send.
  * @return std::int32_t Error code indicating success (0) or failure (-1).
  */
-std::int32_t Client::sendRequest(std::int64_t fd, const QueryArray cmd) const {
+std::int32_t Client::sendRequest(std::int64_t fd,
+                                 const CommandList commands) const {
   std::uint32_t messageLength = 4;
 
-  for (const std::string& s : cmd) {
+  for (const std::string& s : commands) {
     messageLength += 4 + s.size();
   }
 
@@ -28,11 +29,11 @@ std::int32_t Client::sendRequest(std::int64_t fd, const QueryArray cmd) const {
 
   std::vector<char> writeBuffer(4 + MAX_MESSAGE_SIZE);
   std::memcpy(writeBuffer.data(), &messageLength, 4);
-  std::uint32_t n = cmd.size();
+  std::uint32_t n = commands.size();
   std::memcpy(writeBuffer.data() + 4, &n, messageLength);
 
   std::size_t current = 8;
-  for (const std::string& s : cmd) {
+  for (const std::string& s : commands) {
     std::uint32_t previous = static_cast<std::uint32_t>(s.size());
     std::memcpy(writeBuffer.data() + current, &previous, 4);
     std::memcpy(writeBuffer.data() + current + 4, s.data(), s.size());
@@ -112,14 +113,14 @@ std::int32_t Client::readResponse(std::int64_t fd) const {
  * list of queries to the server. It then reads the responses from the server
  * for each query.
  *
- * @param queryList The queries to send to the server.
+ * @param commands The queries to send to the server.
  * @param port The port to run the client on.
  */
-void Client::run(QueryArray queryList, std::int64_t port) {
+void Client::run(CommandList commands, std::int64_t port) {
   socket.setOptions();
   socket.configureConnection(port, CLIENT_NETADDR, "client");
 
-  std::int32_t sendErr = sendRequest(socket.getFd(), queryList);
+  std::int32_t sendErr = sendRequest(socket.getFd(), commands);
   if (sendErr) {
     std::cerr << "send request error" << std::endl;
   }

@@ -12,7 +12,7 @@
 
 constexpr std::int64_t CLIENT_NETADDR = INADDR_LOOPBACK;
 
-using QueryArray = std::vector<std::string>;
+using CommandList = std::vector<std::string>;
 
 class Client {
  public:
@@ -33,10 +33,10 @@ class Client {
    * +-----+------+
    *
    * @param fd The file descriptor to which the request is sent.
-   * @param cmd The command to be send.
+   * @param commands The command to be send.
    * @return std::int32_t Error code indicating success (0) or failure (-1).
    */
-  std::int32_t sendRequest(std::int64_t fd, const QueryArray cmd) const;
+  std::int32_t sendRequest(std::int64_t fd, const CommandList commands) const;
 
   /**
    * @brief Reads a response from the server.
@@ -57,10 +57,10 @@ class Client {
    * list of queries to the server. It then reads the responses from the server
    * for each query.
    *
-   * @param queryList The queries to send to the server.
+   * @param commands The queries to send to the server.
    * @param port The port to run the client on.
    */
-  void run(QueryArray queryList, std::int64_t port);
+  void run(CommandList commands, std::int64_t port);
   /**
    * @brief Get the Socket object
    *
