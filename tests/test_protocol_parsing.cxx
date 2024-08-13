@@ -20,9 +20,8 @@ constexpr std::uint8_t TEST_NUM_QUERIES = 3;
  * server ops.
  * @param connectionFileDescriptor The file descriptor for the connection to the
  * client.
- * @return std::pair<std::int32_t, std::string> The error code (0 on success, -1
- * on failure) along with the message received from the client (on success) or
- * an error message (on failure).
+ * @return The error code (0 on success, -1 on failure) along with the message
+ * received from the client (on success) or an error message (on failure).
  */
 static std::pair<std::int32_t, std::string> oneRequest(
     Socket& serverSocket, std::int64_t connectionFileDescriptor) {
@@ -85,9 +84,8 @@ static std::pair<std::int32_t, std::string> oneRequest(
  * @param clientSocket A reference to the Socket object configured for the
  * client ops.
  * @param text The message to send to the server.
- * @return std::pair<std::int32_t, std::string> The error code (0 on success, -1
- * on failure) along with the response received from the server (on success) or
- * an error message (on failure).
+ * @return The error code (0 on success, -1 on failure) along with the response
+ * received from the server (on success) or an error message (on failure).
  */
 static std::pair<std::int32_t, std::string> query(Socket& clientSocket,
                                                   std::string text) {
@@ -161,7 +159,7 @@ static std::pair<std::int32_t, std::string> query(Socket& clientSocket,
  * before stopping. This is just to avoid infinite runs for the testing
  * scenario. In a real scenario, this could run indefinitely.
  * @param numQueries the number of requests (messages) the server will process.
- * @return std::string The last client message the server processed.
+ * @return The last client message the server processed.
  */
 static std::vector<std::string> run(Socket& serverSocket,
                                     std::int64_t maxIterations,
@@ -212,7 +210,7 @@ static std::vector<std::string> run(Socket& serverSocket,
  * @param clientSocket A reference to the Socket object configured for the
  * client ops.
  * @param numQueries the number of requests (messages) the client will send.
- * @return std::pair<std::int32_t, std::string> The last error code along with
+ * @return The last error code along with
  * the last response received from the server for the last query.
  */
 static std::vector<std::pair<std::int32_t, std::string>> run(

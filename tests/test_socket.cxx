@@ -11,7 +11,7 @@ constexpr std::int64_t TEST_PORT = 12345;
  *
  * @param connectionFd The file descriptor for the connection to the client.
  * @param writeBuffer The message t obe send back to the client.
- * @return std::string The message received from the client. Returns an empty
+ * @return The message received from the client. Returns an empty
  * string if the read operation fails.
  */
 static std::string serverReadWrite(std::int64_t connectionFd,
@@ -43,7 +43,7 @@ static std::string serverReadWrite(std::int64_t connectionFd,
  * @param maxIterations The maximum number of client connections to accepts
  * before stopping. This is just to avoid infinite runs for the testing
  * scenario. In a real scenario, this could run indefinitely.
- * @return std::string The last message received from a client.
+ * @return The last message received from a client.
  * @throws std::runtime_error If the server fails to listen on the specified
  * port.
  */
@@ -87,7 +87,7 @@ static std::string run(Socket& serverSocket, std::int64_t maxIterations) {
  *
  * @param clientSocket A reference to the Socket object configured for the
  * client ops.
- * @return std::string The response received from the server, if any.
+ * @return The response received from the server, if any.
  */
 static std::string run(Socket& clientSocket) {
   clientSocket.setOptions();

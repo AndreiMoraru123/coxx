@@ -136,14 +136,14 @@ void Connection::stateResponse() {
 /**
  * @brief Get the connection file descriptor
  *
- * @return int Returns the file descriptor of the Connection.
+ * @return the file descriptor of the Connection.
  */
 int Connection::getFd() const { return _fd; }
 
 /**
  * @brief Get the connection state
  *
- * @return int Returns the state of the Connection.
+ * @return the state of the Connection.
  */
 ConnectionState Connection::getState() const { return state; }
 

@@ -13,7 +13,7 @@
  *
  * @param fd The file descriptor to which the request is sent.
  * @param commands The command to be send.
- * @return std::int32_t Error code indicating success (0) or failure (-1).
+ * @return Error code indicating success (0) or failure (-1).
  */
 std::int32_t Client::sendRequest(std::int64_t fd,
                                  const CommandList commands) const {
@@ -52,7 +52,7 @@ std::int32_t Client::sendRequest(std::int64_t fd,
  * itself.
  *
  * @param fd The file descriptor from which the response is read.
- * @return std::int32_t Error code indicating success (0) or failure (-1).
+ * @return Error code indicating success (0) or failure (-1).
  */
 std::int32_t Client::readResponse(std::int64_t fd) const {
   // 4 bytes header

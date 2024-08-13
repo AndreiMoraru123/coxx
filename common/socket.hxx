@@ -62,7 +62,7 @@ class Socket {
    * The function ensures that the string is resized to exactly fit the read
    * data.
    * @param numberOfBytes The number of bytes to read.
-   * @return std::int32_t Returns 0 on success, -1 if an error occurs or EOF is
+   * @return 0 on success, -1 if an error occurs or EOF is
    * encountered before reading @p numberOfBytes bytes.
    */
   std::int32_t readFull(std::int64_t fd, std::string &buffer,
@@ -77,7 +77,7 @@ class Socket {
    * The function ensures that the string is resized to exactly fit the read
    * data.
    * @param numberOfBytes The number of bytes to write.
-   * @return std::int32_t  Returns 0 on success, -1 if an error occurs during
+   * @return 0 on success, -1 if an error occurs during
    * writing
    */
   std::int32_t writeAll(std::int64_t fd, std::string &buffer,
@@ -86,7 +86,7 @@ class Socket {
   /**
    * @brief Get the Fd object
    *
-   * @return int Returns the file descriptor of the Socket.
+   * @return the file descriptor of the Socket.
    */
   int getFd() const;
 
