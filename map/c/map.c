@@ -1,4 +1,4 @@
-#include "table.h"
+#include "map.h"
 
 #include <assert.h>
 #include <stdlib.h>

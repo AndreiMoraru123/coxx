@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include "table.h"
-#include "table.hxx"
+#include "map.h"
+#include "map.hxx"
 
 auto equalityCNode = [](CNode* lhs, CNode* rhs) {
   return lhs->code == rhs->code;

@@ -1,7 +1,7 @@
 cc_library(
-    name = "ctable",
-    srcs = ["table.c"],
-    hdrs = ["table.h"],
+    name = "cxxmap",
+    srcs = ["map.cxx"],
+    hdrs = ["map.hxx"],
     includes = ["."],
     visibility = ["//visibility:public"],
 )

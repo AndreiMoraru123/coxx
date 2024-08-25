@@ -1,4 +1,4 @@
-#include <table.hxx>
+#include <map.hxx>
 
 constexpr size_t RESIZING_WORK = 128;  // constant work
 constexpr size_t MAX_LOAD_FACTOR = 8;
