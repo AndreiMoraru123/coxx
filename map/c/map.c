@@ -126,3 +126,11 @@ CNode* CMapPop(CMap* map, CNode* key, bool (*eq)(CNode*, CNode*)) {
 
   return NULL;
 }
+
+size_t CMapSize(CMap* map) { return map->table1.size + map->table2.size; }
+
+void CMapDestroy(CMap* map) {
+  free(map->table1.table);
+  free(map->table2.table);
+  initMap(map);
+}

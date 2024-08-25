@@ -120,3 +120,11 @@ std::unique_ptr<Node> mapPop(
 
   return nullptr;
 }
+
+std::size_t mapSize(Map& map) { return map.table1.size + map.table2.size; }
+
+void mapDestroy(Map& map) {
+  map.table1.table.clear();
+  map.table2.table.clear();
+  map = Map{};
+}

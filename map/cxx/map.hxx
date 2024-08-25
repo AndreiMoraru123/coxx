@@ -44,3 +44,7 @@ std::unique_ptr<Node> mapPop(
     Map& map, const std::unique_ptr<Node>& key,
     const std::function<bool(const std::unique_ptr<Node>&,
                              const std::unique_ptr<Node>&)>& equal);
+
+std::size_t mapSize(Map& map);
+
+void mapDestroy(Map& map);

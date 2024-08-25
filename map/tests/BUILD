@@ -17,3 +17,13 @@ cc_test(
         "@gtest//:gtest_main",
     ],
 )
+
+cc_test(
+    name = "test_destroy",
+    srcs = ["test_destroy.cxx"],
+    deps = [
+        "//map/c:cmap",
+        "//map/cxx:cxxmap",
+        "@gtest//:gtest_main",
+    ],
+)
