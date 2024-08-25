@@ -12,7 +12,7 @@ auto equalityNode = [](const std::unique_ptr<Node>& lhs,
   return lhs->code == rhs->code;
 };
 
-class TableTest : public ::testing::Test {
+class LookUpTest : public ::testing::Test {
  protected:
   void SetUp() override { initMap(&cMap); }
 
@@ -20,7 +20,7 @@ class TableTest : public ::testing::Test {
   Map map;
 };
 
-TEST_F(TableTest, CMapInsertAndLookUpTest) {
+TEST_F(LookUpTest, CMapInsertAndLookUpTest) {
   CNode node1 = {.code = 1};
   CNode node2 = {.code = 2};
 
@@ -41,7 +41,7 @@ TEST_F(TableTest, CMapInsertAndLookUpTest) {
   ASSERT_EQ(dummyLookUp, nullptr);
 }
 
-TEST_F(TableTest, MapInsertAndLookUpTest) {
+TEST_F(LookUpTest, MapInsertAndLookUpTest) {
   auto node1 = std::make_unique<Node>();
   node1->code = 1;
   auto node2 = std::make_unique<Node>();
@@ -55,17 +55,17 @@ TEST_F(TableTest, MapInsertAndLookUpTest) {
   auto node2ForLookUp = std::make_unique<Node>();
   node2ForLookUp->code = 2;
 
-  std::unique_ptr<Node>* lookUp1 = mapLookUp(map, node1ForLookUp, equalityNode);
-  std::unique_ptr<Node>* lookUp2 = mapLookUp(map, node2ForLookUp, equalityNode);
+  std::unique_ptr<Node> lookUp1 = mapLookUp(map, node1ForLookUp, equalityNode);
+  std::unique_ptr<Node> lookUp2 = mapLookUp(map, node2ForLookUp, equalityNode);
 
   ASSERT_NE(lookUp1, nullptr);
   ASSERT_NE(lookUp2, nullptr);
-  ASSERT_EQ((*lookUp1)->code, 1);
-  ASSERT_EQ((*lookUp2)->code, 2);
+  ASSERT_EQ(lookUp1->code, 1);
+  ASSERT_EQ(lookUp2->code, 2);
 
   auto dummyNode = std::make_unique<Node>();
   dummyNode->code = 3;
-  std::unique_ptr<Node>* dummyLookUp = mapLookUp(map, dummyNode, equalityNode);
+  std::unique_ptr<Node> dummyLookUp = mapLookUp(map, dummyNode, equalityNode);
 
   ASSERT_EQ(dummyLookUp, nullptr);
 }

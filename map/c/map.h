@@ -31,7 +31,7 @@ void initMap(CMap* map);
 
 CNode* CMapLookUp(CMap* map, CNode* key, bool (*eq)(CNode*, CNode*));
 void CMapInsert(CMap* map, CNode* node);
-CNode CMapPop(CMap* map, CNode* key);
+CNode* CMapPop(CMap* map, CNode* key, bool (*eq)(CNode*, CNode*));
 size_t CMapSize(CMap* map);
 void CMapDestroy(CMap* map);
 

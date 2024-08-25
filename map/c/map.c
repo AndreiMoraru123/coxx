@@ -111,3 +111,18 @@ void CMapInsert(CMap* map, CNode* node) {
   }
   helpResizing(map);
 }
+
+CNode* CMapPop(CMap* map, CNode* key, bool (*eq)(CNode*, CNode*)) {
+  helpResizing(map);
+  CNode** from = lookUp(&map->table1, key, eq);
+  if (from) {
+    return detach(&map->table1, from);
+  }
+
+  from = lookUp(&map->table2, key, eq);
+  if (from) {
+    return detach(&map->table2, from);
+  }
+
+  return NULL;
+}

@@ -7,3 +7,13 @@ cc_test(
         "@gtest//:gtest_main",
     ],
 )
+
+cc_test(
+    name = "test_pop",
+    srcs = ["test_pop.cxx"],
+    deps = [
+        "//map/c:cmap",
+        "//map/cxx:cxxmap",
+        "@gtest//:gtest_main",
+    ],
+)

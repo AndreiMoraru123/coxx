@@ -33,9 +33,14 @@ struct Map {
   std::size_t resizingPosition = 0;
 };
 
-std::unique_ptr<Node>* mapLookUp(
+std::unique_ptr<Node> mapLookUp(
     Map& map, const std::unique_ptr<Node>& key,
     const std::function<bool(const std::unique_ptr<Node>&,
                              const std::unique_ptr<Node>&)>& equal);
 
 void mapInsert(Map& map, std::unique_ptr<Node>&& node);
+
+std::unique_ptr<Node> mapPop(
+    Map& map, const std::unique_ptr<Node>& key,
+    const std::function<bool(const std::unique_ptr<Node>&,
+                             const std::unique_ptr<Node>&)>& equal);
