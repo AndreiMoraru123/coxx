@@ -29,12 +29,12 @@ void initNode(CNode* node);
 void initTable(CTable* table);
 void initMap(CMap* map);
 
+CNode* CMapLookUp(CMap* map, CNode* key, bool (*eq)(CNode*, CNode*));
+void CMapInsert(CMap* map, CNode* node);
+CNode CMapPop(CMap* map, CNode* key);
+size_t CMapSize(CMap* map);
+void CMapDestroy(CMap* map);
+
 #ifdef __cplusplus
 }
 #endif
-
-// Node *mapLookUp(Map *map, Node *key, bool (*eq)(Node *, Node *));
-// void mapInsert(Map *map, Node *node);
-// Node mapPop(Map *map, Node *key);
-// size_t mapSize(Map *map);
-// void mapDestroy(Map *map);
