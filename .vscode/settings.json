@@ -74,7 +74,8 @@
     "bitset": "cpp",
     "coroutine": "cpp",
     "source_location": "cpp",
-    "ranges": "cpp"
+    "ranges": "cpp",
+    "hashtable.h": "c"
   },
   "C_Cpp.intelliSenseEngineFallback": "enabled"
 }
