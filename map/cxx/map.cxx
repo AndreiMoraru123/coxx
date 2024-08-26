@@ -17,7 +17,7 @@ static void insert(Table& table, std::unique_ptr<Node>&& node) {
   table.size++;
 }
 
-static std::unique_ptr<Node>* lookUp(
+static std::unique_ptr<Node> lookUp(
     Table& table, const std::unique_ptr<Node>& key,
     const std::function<bool(const std::unique_ptr<Node>&,
                              const std::unique_ptr<Node>&)>& equal) {
@@ -30,7 +30,7 @@ static std::unique_ptr<Node>* lookUp(
 
   while (*from) {
     if ((*from)->code == key->code && equal(*from, key)) {
-      return from;
+      return std::move(*from);
     }
     from = &(*from)->next;
   }
@@ -81,9 +81,9 @@ std::unique_ptr<Node> mapLookUp(
     const std::function<bool(const std::unique_ptr<Node>&,
                              const std::unique_ptr<Node>&)>& equal) {
   helpResizing(map);
-  std::unique_ptr<Node>* from = lookUp(map.table1, key, equal);
-  from = from ? from : lookUp(map.table2, key, equal);
-  return from ? std::move(*from) : nullptr;
+  std::unique_ptr<Node> from = lookUp(map.table1, key, equal);
+  from = from ? std::move(from) : lookUp(map.table2, key, equal);
+  return from ? std::move(from) : nullptr;
 }
 
 void mapInsert(Map& map, std::unique_ptr<Node>&& node) {
@@ -108,14 +108,14 @@ std::unique_ptr<Node> mapPop(
     const std::function<bool(const std::unique_ptr<Node>&,
                              const std::unique_ptr<Node>&)>& equal) {
   helpResizing(map);
-  std::unique_ptr<Node>* from = lookUp(map.table1, key, equal);
+  std::unique_ptr<Node> from = lookUp(map.table1, key, equal);
   if (from) {
-    return detach(map.table1, *from);
+    return detach(map.table1, from);
   }
 
   from = lookUp(map.table2, key, equal);
   if (from) {
-    return detach(map.table2, *from);
+    return detach(map.table2, from);
   }
 
   return nullptr;
