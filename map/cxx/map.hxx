@@ -14,17 +14,6 @@ struct Table {
   std::vector<std::unique_ptr<Node>> table;
   std::size_t mask = 0;
   std::size_t size = 0;
-
-  // delete copy constructor and copy assignment operator
-  Table(const Table&) = delete;
-  Table& operator=(const Table&) = delete;
-
-  // default move constructor and move assignment operator
-  Table(Table&&) = default;
-  Table& operator=(Table&&) = default;
-
-  // default constructor (to be used by Map)
-  Table() = default;
 };
 
 struct Map {
