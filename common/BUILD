@@ -12,7 +12,7 @@ cc_library(
     hdrs = ["req.hxx"],
     copts = ["-std=c++23"],
     visibility = ["//visibility:public"],
-    deps = [],
+    deps = ["//map/c:cmap"],
 )
 
 cc_library(

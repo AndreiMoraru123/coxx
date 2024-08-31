@@ -1,19 +1,39 @@
 #include "req.hxx"
 
-std::map<std::string, std::string> Request::commandMap;
+CommandMap Request::commandMap;
+
+static bool entryEquality(CNode* lhs, CNode* rhs) {
+  struct Entry* le = containerOf(lhs, Entry, node);
+  struct Entry* re = containerOf(rhs, Entry, node);
+  return le->key == re->key;
+}
+
+static std::uint64_t stringHash(std::string data, std::size_t length) {
+  std::uint32_t hash = 0x811C9DC5;
+  for (auto& letter : data) {
+    hash = (hash + letter) * 0x01000193;
+  }
+  return hash;
+}
 
 bool Request::isCommand(const std::string& word, const char* commandList) {
   return 0 == strcasecmp(word.c_str(), commandList);
 }
 
-Response Request::get(const std::vector<std::string>& commandList,
+Response Request::get(std::vector<std::string>& commandList,
                       std::uint8_t& responseValue,
                       std::uint32_t& responseLength) {
-  if (!commandMap.count(commandList[1])) {
+  Entry key;
+  key.key.swap(commandList[1]);
+  key.node.code = stringHash(key.key, key.key.size());
+
+  CNode* node = CMapLookUp(&commandMap.db, &key.node, &entryEquality);
+
+  if (!node) {
     return Response::NX;
   }
 
-  const std::string& value = commandMap[commandList[1]];
+  const std::string& value = containerOf(node, Entry, node)->val;
   assert(value.size() <= MAX_MESSAGE_SIZE);
 
   std::memcpy(&responseValue, value.data(), value.size());
@@ -21,17 +41,41 @@ Response Request::get(const std::vector<std::string>& commandList,
   return Response::OK;
 }
 
-Response Request::set(const std::vector<std::string>& commandList,
+Response Request::set(std::vector<std::string>& commandList,
                       [[maybe_unused]] std::uint8_t& responseValue,
                       [[maybe_unused]] std::uint32_t& responseLength) {
-  commandMap[commandList[1]] = commandList[2];
+  Entry key;
+  key.key.swap(commandList[1]);
+  key.node.code = stringHash(key.key, key.key.size());
+
+  CNode* node = CMapLookUp(&commandMap.db, &key.node, &entryEquality);
+
+  if (node) {
+    containerOf(node, Entry, node)->val.swap(commandList[2]);
+  } else {
+    Entry* entry = new Entry();
+    entry->key.swap(key.key);
+    entry->node.code = key.node.code;
+    entry->val.swap(commandList[2]);
+    CMapInsert(&commandMap.db, &entry->node);
+  }
+
   return Response::OK;
 }
 
-Response Request::del(const std::vector<std::string>& commandList,
+Response Request::del(std::vector<std::string>& commandList,
                       [[maybe_unused]] std::uint8_t& responseValue,
                       [[maybe_unused]] std::uint32_t& responseLength) {
-  commandMap.erase(commandList[1]);
+  Entry key;
+  key.key.swap(commandList[1]);
+  key.node.code = stringHash(key.key, key.key.size());
+
+  CNode* node = CMapPop(&commandMap.db, &key.node, &entryEquality);
+
+  if (node) {
+    delete containerOf(node, Entry, node);
+  }
+
   return Response::OK;
 }
 

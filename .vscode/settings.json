@@ -75,7 +75,8 @@
     "coroutine": "cpp",
     "source_location": "cpp",
     "ranges": "cpp",
-    "map.h": "c"
+    "map.h": "c",
+    "map.c": "c"
   },
   "C_Cpp.intelliSenseEngineFallback": "enabled"
 }
