@@ -1,7 +1,7 @@
 #include "client.hxx"
 
-static std::int32_t deserialize(const std::uint8_t* data, std::size_t size) {
-  if (size < 1) {
+static std::int32_t deserialize(std::string_view data) {
+  if (data.size() < 1) {
     std::println("bad response");
     return -1;
   }
@@ -13,7 +13,7 @@ static std::int32_t deserialize(const std::uint8_t* data, std::size_t size) {
       std::println("(nil)");
       return 1;
     case Serialize::ERR:
-      if (size < 1 + 8) {
+      if (data.size() < 1 + 8) {
         std::println("bad response");
         return -1;
       }
@@ -22,34 +22,32 @@ static std::int32_t deserialize(const std::uint8_t* data, std::size_t size) {
         std::uint32_t len = 0;
         std::memcpy(&code, &data[1], 4);
         std::memcpy(&len, &data[1 + 4], 4);
-        if (size < 1 + 8 + len) {
+        if (data.size() < 1 + 8 + len) {
           std::println("bad response");
           return -1;
         }
-        std::string_view dataView(reinterpret_cast<const char*>(&data[1 + 8]),
-                                  len);
+        std::string_view dataView(&data[1 + 8], len);
         std::println("(err) {} {}", code, dataView);
         return 1 + 8 + len;
       }
     case Serialize::STR:
-      if (size < 1 + 4) {
+      if (data.size() < 1 + 4) {
         std::println("bad response");
         return -1;
       }
       {
         std::uint32_t len = 0;
         std::memcpy(&len, &data[1], 4);
-        if (size < 1 + 4 + len) {
+        if (data.size() < 1 + 4 + len) {
           std::println("bad response");
           return -1;
         }
-        std::string_view dataView(reinterpret_cast<const char*>(&data[1 + 4]),
-                                  len);
+        std::string_view dataView(&data[1 + 4], len);
         std::println("(str) {}", dataView);
         return 1 + 4 + len;
       }
     case Serialize::INT:
-      if (size < 1 + 8) {
+      if (data.size() < 1 + 8) {
         std::println("bad response");
         return -1;
       }
@@ -60,7 +58,7 @@ static std::int32_t deserialize(const std::uint8_t* data, std::size_t size) {
         return 1 + 8;
       }
     case Serialize::ARR:
-      if (size < 1 + 4) {
+      if (data.size() < 1 + 4) {
         std::println("bad response");
         return -1;
       }
@@ -70,8 +68,7 @@ static std::int32_t deserialize(const std::uint8_t* data, std::size_t size) {
         std::println("(arr) len={}", len);
         std::size_t arrayBytes = 1 + 4;
         for (std::uint32_t i = 0; i < len; ++i) {
-          std::int32_t responseValue =
-              deserialize(&data[arrayBytes], size - arrayBytes);
+          std::int32_t responseValue = deserialize(data.substr(arrayBytes));
           if (responseValue < 0) {
             return responseValue;
           }
@@ -177,8 +174,8 @@ std::int32_t Client::readResponse(std::int64_t fd) const {
   std::memcpy(readBuffer.data() + 4, responseBody.data(), messageLength);
 
   // Print the result
-  std::int32_t responseValue = deserialize(
-      reinterpret_cast<std::uint8_t*>(readBuffer.data() + 4), messageLength);
+  std::int32_t responseValue =
+      deserialize(std::string_view(readBuffer.data() + 4, messageLength));
   if (responseValue > 0 &&
       static_cast<std::uint32_t>(responseValue) != messageLength) {
     std::println("bad response");
