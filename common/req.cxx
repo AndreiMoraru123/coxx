@@ -8,6 +8,11 @@ static bool entryEquality(CNode* lhs, CNode* rhs) {
   return le->key == re->key;
 }
 
+static void keyScan(CNode* node, void* arg) {
+  std::string& output = *static_cast<std::string*>(arg);
+  out::str(output, containerOf(node, Entry, node)->key);
+}
+
 static std::uint64_t stringHash(std::string data, std::size_t length) {
   std::uint32_t hash = 0x811C9DC5;
   for (auto& letter : data) {

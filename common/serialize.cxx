@@ -45,8 +45,3 @@ void scan(CTable &table, const std::function<void(CNode *, void *)> &fn,
     }
   }
 }
-
-void keyScan(CNode *node, void *arg) {
-  std::string &output = *static_cast<std::string *>(arg);
-  out::str(output, containerOf(node, Entry, node)->key);
-}
