@@ -23,8 +23,8 @@ bool Request::isCommand(const std::string& word, const char* commandList) {
 void Request::keys([[maybe_unused]] std::vector<std::string>& cmd,
                    std::string& output) {
   out::arr(output, static_cast<std::uint32_t>(CMapSize(&commandMap.db)));
-  scan(&commandMap.db.table1, &keyScan, &output);
-  scan(&commandMap.db.table2, &keyScan, &output);
+  scan(commandMap.db.table1, &keyScan, &output);
+  scan(commandMap.db.table2, &keyScan, &output);
 }
 
 void Request::get(std::vector<std::string>& commandList, std::string& output) {

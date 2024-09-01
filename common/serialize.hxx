@@ -36,6 +36,6 @@ void arr(std::string &out, std::uint32_t n);
 
 }  // namespace out
 
-void scan(CTable *table, const std::function<void(CNode *, void *)> &fn,
+void scan(CTable &table, const std::function<void(CNode *, void *)> &fn,
           void *arg);
 void keyScan(CNode *node, void *arg);
