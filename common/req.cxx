@@ -2,12 +2,6 @@
 
 CommandMap Request::commandMap;
 
-static bool entryEquality(CNode* lhs, CNode* rhs) {
-  struct Entry* le = containerOf(lhs, Entry, node);
-  struct Entry* re = containerOf(rhs, Entry, node);
-  return le->key == re->key;
-}
-
 static void keyScan(CNode* node, void* arg) {
   std::string& output = *static_cast<std::string*>(arg);
   out::str(output, containerOf(node, Entry, node)->key);

@@ -1,10 +1,7 @@
 #pragma once
 
 #include <cstdint>
-#include <functional>
 #include <string>
-
-#include "map/c/map.h"
 
 enum class Serialize : std::uint8_t {
   NIL = 0,
@@ -23,6 +20,3 @@ void err(std::string &out, std::int32_t code, const std::string &msg);
 void arr(std::string &out, std::uint32_t n);
 
 }  // namespace out
-
-void scan(CTable &table, const std::function<void(CNode *, void *)> &fn,
-          void *arg);
