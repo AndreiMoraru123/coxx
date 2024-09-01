@@ -33,13 +33,14 @@ void arr(std::string &out, std::uint32_t n) {
 
 }  // namespace out
 
-void scan(CTable *table, void (*f)(CNode *, void *), void *arg) {
+void scan(CTable *table, const std::function<void(CNode *, void *)> &fn,
+          void *arg) {
   if (table->size == 0) return;
 
   for (std::size_t i = 0; i < table->mask + 1; ++i) {
     CNode *node = table->table[i];
     while (node) {
-      f(node, arg);
+      fn(node, arg);
       node = node->next;
     }
   }
