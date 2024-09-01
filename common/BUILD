@@ -7,12 +7,20 @@ cc_library(
 )
 
 cc_library(
+    name = "serialize",
+    srcs = ["serialize.cxx"],
+    hdrs = ["serialize.hxx"],
+    visibility = ["//visibility:public"],
+    deps = ["//map/c:cmap"],
+)
+
+cc_library(
     name = "req",
     srcs = ["req.cxx"],
     hdrs = ["req.hxx"],
     copts = ["-std=c++23"],
     visibility = ["//visibility:public"],
-    deps = ["//map/c:cmap"],
+    deps = [":serialize"],
 )
 
 cc_library(

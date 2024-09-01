@@ -20,9 +20,14 @@ bool Request::isCommand(const std::string& word, const char* commandList) {
   return 0 == strcasecmp(word.c_str(), commandList);
 }
 
-Response Request::get(std::vector<std::string>& commandList,
-                      std::uint8_t& responseValue,
-                      std::uint32_t& responseLength) {
+void Request::keys([[maybe_unused]] std::vector<std::string>& cmd,
+                   std::string& output) {
+  out::arr(output, static_cast<std::uint32_t>(CMapSize(&commandMap.db)));
+  scan(&commandMap.db.table1, &keyScan, &output);
+  scan(&commandMap.db.table2, &keyScan, &output);
+}
+
+void Request::get(std::vector<std::string>& commandList, std::string& output) {
   Entry key;
   key.key.swap(commandList[1]);
   key.node.code = stringHash(key.key, key.key.size());
@@ -30,20 +35,14 @@ Response Request::get(std::vector<std::string>& commandList,
   CNode* node = CMapLookUp(&commandMap.db, &key.node, &entryEquality);
 
   if (!node) {
-    return Response::NX;
+    return out::nil(output);
   }
 
   const std::string& value = containerOf(node, Entry, node)->val;
-  assert(value.size() <= MAX_MESSAGE_SIZE);
-
-  std::memcpy(&responseValue, value.data(), value.size());
-  responseLength = static_cast<std::uint32_t>(value.size());
-  return Response::OK;
+  out::str(output, value);
 }
 
-Response Request::set(std::vector<std::string>& commandList,
-                      [[maybe_unused]] std::uint8_t& responseValue,
-                      [[maybe_unused]] std::uint32_t& responseLength) {
+void Request::set(std::vector<std::string>& commandList, std::string& output) {
   Entry key;
   key.key.swap(commandList[1]);
   key.node.code = stringHash(key.key, key.key.size());
@@ -60,12 +59,10 @@ Response Request::set(std::vector<std::string>& commandList,
     CMapInsert(&commandMap.db, &entry->node);
   }
 
-  return Response::OK;
+  return out::nil(output);
 }
 
-Response Request::del(std::vector<std::string>& commandList,
-                      [[maybe_unused]] std::uint8_t& responseValue,
-                      [[maybe_unused]] std::uint32_t& responseLength) {
+void Request::del(std::vector<std::string>& commandList, std::string& output) {
   Entry key;
   key.key.swap(commandList[1]);
   key.node.code = stringHash(key.key, key.key.size());
@@ -76,7 +73,7 @@ Response Request::del(std::vector<std::string>& commandList,
     delete containerOf(node, Entry, node);
   }
 
-  return Response::OK;
+  return out::num(output, node ? 1 : 0);
 }
 
 std::uint32_t Request::parse(std::uint8_t& requestData, std::size_t length,
@@ -118,30 +115,18 @@ std::uint32_t Request::parse(std::uint8_t& requestData, std::size_t length,
   return 0;
 }
 
-std::int32_t Request::operator()(std::uint8_t& requestData,
-                                 std::uint32_t requestLength,
-                                 Response& response,
-                                 std::uint8_t& responseValue,
-                                 std::uint32_t& responseLength) {
-  std::vector<std::string> commandList;
-
-  if (0 != parse(requestData, requestLength, commandList)) {
-    std::println("bad request");
-    return -1;
-  }
-
-  if (commandList.size() == 2 && isCommand(commandList[0], "get")) {
-    response = get(commandList, responseValue, responseLength);
+void Request::operator()(std::vector<std::string>& commandList,
+                         std::string& out) {
+  if (commandList.size() == 1 && isCommand(commandList[0], "keys")) {
+    keys(commandList, out);
+  } else if (commandList.size() == 2 && isCommand(commandList[0], "get")) {
+    get(commandList, out);
   } else if (commandList.size() == 3 && isCommand(commandList[0], "set")) {
-    response = set(commandList, responseValue, responseLength);
+    set(commandList, out);
   } else if (commandList.size() == 2 && isCommand(commandList[0], "del")) {
-    response = del(commandList, responseValue, responseLength);
+    del(commandList, out);
   } else {
-    response = Response::ERR;
-    const std::string msg = "Unknown command";
-    std::strcpy(reinterpret_cast<char*>(&responseValue), msg.c_str());
-    responseLength = std::strlen(msg.c_str());
-    return 0;
+    out::err(out, static_cast<std::underlying_type_t<Error>>(Error::UNKNOWN),
+             "Unknown cmd");
   }
-  return 0;
 }

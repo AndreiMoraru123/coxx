@@ -20,26 +20,33 @@ bool Connection::tryOneRequest() {
     return false;  // not enough data in the buffer;
   }
 
-  auto response = Response::OK;
-  std::uint32_t writeLength = 0;
   std::uint8_t& requestData = *(readBuffer.data() + 4);
-  std::uint8_t& responseData = *(writeBuffer.data() + 4 + 4);
 
-  std::int32_t err =
-      request(requestData, messageLength, response, responseData, writeLength);
-
-  if (err) {
+  // parse the request
+  std::vector<std::string> command;
+  if (0 != request.parse(requestData, messageLength, command)) {
+    std::println("bad request");
     state = ConnectionState::END;
     return false;
   }
 
-  writeLength += 4;
+  // got one request, generate the response
+  std::string output;
+  request(command, output);
+
+  // pack the response into the buffer
+  if (4 + output.size() > MAX_MESSAGE_SIZE) {
+    output.clear();
+    out::err(output, static_cast<std::underlying_type_t<Error>>(Error::TOO_BIG),
+             "response is too big");
+  }
+
+  std::uint32_t writeLength = static_cast<std::uint32_t>(output.size());
   std::memcpy(writeBuffer.data(), &writeLength, 4);
-  auto responseValue =
-      static_cast<std::underlying_type<Response>::type>(response);
-  std::memcpy(writeBuffer.data() + 4, &responseValue, 4);
+  std::memcpy(writeBuffer.data() + 4, output.data(), output.size());
   writeBufferSize = 4 + writeLength;
 
+  // TODO: frequent memmove is efficient, need better handling
   std::size_t remainingSize = readBufferSize - 4 - messageLength;
   if (remainingSize) {
     std::memmove(readBuffer.data(), readBuffer.data() + 4 + messageLength,
@@ -47,9 +54,11 @@ bool Connection::tryOneRequest() {
   }
   readBufferSize = remainingSize;
 
+  // change state
   state = ConnectionState::RES;
   stateResponse();
 
+  // continue to the outer loop if the request was fully processed
   return (state == ConnectionState::REQ);
 }
 
