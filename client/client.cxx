@@ -6,7 +6,7 @@ static std::int32_t deserialize(std::string_view data) {
     return -1;
   }
 
-  Serialize type = static_cast<Serialize>(data[0]);
+  auto type = static_cast<Serialize>(data[0]);
 
   switch (type) {
     case Serialize::NIL:
