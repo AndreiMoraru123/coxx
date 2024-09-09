@@ -76,7 +76,9 @@
     "source_location": "cpp",
     "ranges": "cpp",
     "map.h": "c",
-    "map.c": "c"
+    "map.c": "c",
+    "avl.h": "c"
   },
-  "C_Cpp.intelliSenseEngineFallback": "enabled"
+  "C_Cpp.intelliSenseEngineFallback": "enabled",
+  "vscode-neovim.useWSL": false
 }
