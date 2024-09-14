@@ -1,124 +1,78 @@
 #include "avl.hxx"
 
-std::uint32_t depth(const std::shared_ptr<AVL> &node) {
-  return node ? node->depth : 0;
+AVLNode *AVLTree::root() {
+  if (tree.empty()) return nullptr;
+
+  auto it = tree.find(0, RootComp());
+  return (it != tree.end()) ? &(*it) : nullptr;
 }
 
-std::uint32_t count(const std::shared_ptr<AVL> &node) {
-  return node ? node->count : 0;
+void AVLTree::init(AVLNode *node) {
+  node->depth = 1;
+  node->count = 1;
 }
 
-void update(std::shared_ptr<AVL> &node) {
-  node->depth = 1 + std::max(depth(node->left), depth(node->right));
-  node->count = 1 + count(node->left) + count(node->right);
+std::uint32_t AVLTree::depth(AVLNode *node) { return node ? node->depth : 0; }
+
+std::uint32_t AVLTree::count(AVLNode *node) { return node ? node->count : 0; }
+
+AVLNode *AVLTree::find_left(AVLNode *node) {
+  if (!node) return nullptr;
+
+  auto it = tree.iterator_to(*node);
+  if (it == tree.begin()) return nullptr;  // no left node
+
+  --it;
+  return &(*it);
 }
 
-std::shared_ptr<AVL> rotateLeft(std::shared_ptr<AVL> &node) {
-  std::shared_ptr<AVL> newNode = node->right;
-  if (newNode->left) {
-    newNode->left->parent = node;
-  }
-  node->right = newNode->left;  // rotation
-  newNode->left = node;         // rotation
-  newNode->parent = node->parent;
-  node->parent = newNode;
-  update(node);
-  update(newNode);
-  return newNode;
+AVLNode *AVLTree::find_right(AVLNode *node) {
+  if (!node) return nullptr;
+
+  auto it = tree.iterator_to(*node);
+  ++it;
+  if (it == tree.end()) return nullptr;  // no right node
+
+  return &(*it);
 }
 
-std::shared_ptr<AVL> rotateRight(std::shared_ptr<AVL> &node) {
-  std::shared_ptr<AVL> newNode = node->left;
-  if (newNode->right) {
-    newNode->right->parent = node;
-  }
-  node->left = newNode->right;  // rotation
-  newNode->right = node;        // rotation
-  newNode->parent = node->parent;
-  node->parent = newNode;
-  update(node);
-  update(newNode);
-  return newNode;
+void AVLTree::update(AVLNode *node) {
+  if (!node) return;
+
+  std::uint32_t leftDepth = depth(find_left(node));
+  std::uint32_t rightDepth = depth(find_right(node));
+  node->depth = 1 + std::max(leftDepth, rightDepth);
+
+  std::uint32_t leftCount = depth(find_left(node));
+  std::uint32_t rightCount = depth(find_right(node));
+  node->count = 1 + std::max(leftCount, rightCount);
 }
 
-std::shared_ptr<AVL> fixLeft(std::shared_ptr<AVL> &root) {
-  // the left subtree is too deep
-  if (depth(root->left->left) < depth(root->left->right)) {
-    root->left = rotateLeft(root->left);  // rule 2
-  }
-  return rotateRight(root);
-}
-
-std::shared_ptr<AVL> fixRight(std::shared_ptr<AVL> &root) {
-  // the right subtree is too deep
-  if (depth(root->right->right) < depth(root->right->left)) {
-    root->right = rotateRight(root->right);  // rule 2
-  }
-  return rotateLeft(root);
-}
-
-std::shared_ptr<AVL> fix(std::shared_ptr<AVL> &node) {
-  // fix imbalanced nodes and maintain invariants until the root is reached
-  while (true) {
+void AVLTree::fix(AVLNode *node) {
+  while (node) {
     update(node);
-    uint32_t l = depth(node->left);
-    uint32_t r = depth(node->right);
-    std::shared_ptr<AVL> *from = nullptr;
-    std::shared_ptr<AVL> p = node->parent.lock();
-    if (p) {
-      from = (p->left == node) ? &p->left : &p->right;
-    }
-    if (l == r + 2) {
-      node = fixLeft(node);
-    } else if (l + 2 == r) {
-      node = fixRight(node);
-    }
-    if (!from) {
-      return node;
-    }
-    *from = node;
-    node = node->parent.lock();
+    node = node->parent;
   }
 }
 
-std::shared_ptr<AVL> del(std::shared_ptr<AVL> &node) {
-  if (node->right == NULL) {
-    // no right subtree, replace the node with the left subtree
-    std::shared_ptr<AVL> parent = node->parent.lock();
-    if (node->left) {
-      // link the lft subtree to the parent
-      node->left->parent = parent;
+void AVLTree::insert(AVLNode *node) {
+  auto [iter, inserted] = tree.insert_unique(*node);
+  if (inserted) {
+    auto parentIter = tree.iterator_to(*node);
+    if (parentIter != tree.begin()) {
+      --parentIter;
+      AVLNode *parentNode = &(*parentIter);
+      node->parent = parentNode;
     }
-    if (parent) {
-      // attach the left subtree to the parent
-      (parent->left == node ? parent->left : parent->right) = node->left;
-      return fix(parent);
-    } else {
-      // removing root
-      return node->left;
-    }
-  } else {
-    // swap the node with its next sibling
-    std::shared_ptr<AVL> victim = node->right;
-    while (victim->left) {
-      victim = victim->left;
-    }
-    std::shared_ptr<AVL> root = del(victim);
+  }
 
-    *victim = *node;
-    if (victim->left) {
-      victim->left->parent = victim;
-    }
-    if (victim->right) {
-      victim->right->parent = victim;
-    }
-    std::shared_ptr<AVL> parent = node->parent.lock();
-    if (parent) {
-      (parent->left == node ? parent->left : parent->right) = victim;
-      return root;
-    } else {
-      // removing root
-      return victim;
-    }
+  fix(node);
+}
+
+void AVLTree::erase(AVLNode *node) {
+  tree.erase(tree.iterator_to(*node));
+  AVLNode *parent = node->parent;
+  if (parent) {
+    fix(parent);
   }
 }

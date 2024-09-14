@@ -1,22 +1,45 @@
 #pragma once
 #include <algorithm>
+#include <boost/intrusive/avl_set.hpp>
 #include <cstdint>
 #include <memory>
 
-struct AVL {
-  std::uint32_t depth = 1;  // subtree height
-  std::uint32_t count = 1;  // subtree size
-  std::shared_ptr<AVL> left = nullptr;
-  std::shared_ptr<AVL> right = nullptr;
-  std::weak_ptr<AVL> parent;
+using namespace boost::intrusive;
+
+class AVLNode : public avl_set_base_hook<> {
+ public:
+  std::uint32_t depth;
+  std::uint32_t count;
+  AVLNode *parent;
+
+  AVLNode() : depth(1), count(1), parent(nullptr) {}
+
+  bool operator<(const AVLNode &other) const {
+    return this->depth < other.depth;
+  }
 };
 
-std::uint32_t depth(const std::unique_ptr<AVL> &node);
-std::uint32_t count(const std::unique_ptr<AVL> &node);
-void update(std::unique_ptr<AVL> &node);
-std::shared_ptr<AVL> rotateLeft(std::shared_ptr<AVL> &node);
-std::shared_ptr<AVL> rotateRight(std::shared_ptr<AVL> &node);
-std::shared_ptr<AVL> fixLeft(std::shared_ptr<AVL> &root);
-std::shared_ptr<AVL> fixRight(std::shared_ptr<AVL> &root);
-std::shared_ptr<AVL> fix(std::shared_ptr<AVL> &node);
-std::shared_ptr<AVL> del(std::shared_ptr<AVL> &node);
+class RootComp {
+ public:
+  bool operator()(const AVLNode &a, const AVLNode &b) const { return false; }
+  bool operator()(const AVLNode &a, const int b) const { return false; }
+  bool operator()(const int a, const AVLNode &b) const { return false; }
+};
+
+class AVLTree {
+ private:
+  using AVLSet = avl_set<AVLNode, constant_time_size<true>>;
+
+ public:
+  AVLSet tree;
+  void fix(AVLNode *node);
+  AVLNode *root();
+  AVLNode *find_left(AVLNode *node);
+  AVLNode *find_right(AVLNode *node);
+  static void init(AVLNode *node);
+  static std::uint32_t depth(AVLNode *node);
+  static std::uint32_t count(AVLNode *node);
+  void update(AVLNode *node);
+  void insert(AVLNode *node);
+  void erase(AVLNode *node);
+};

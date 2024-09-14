@@ -5,30 +5,29 @@
 #include <set>
 
 #include "avl.h"
-#include "avl.hxx"
 
-#define containerOf(ptr, type, member)                   \
-  ({                                                     \
-    const decltype(((type *)0)->member) *__mptr = (ptr); \
-    (type *)((char *)__mptr - offsetof(type, member));   \
+#define containerOf(ptr, type, member)                           \
+  ({                                                             \
+    const decltype(std::declval<type>().member) *__mptr = (ptr); \
+    (type *)((char *)__mptr - offsetof(type, member));           \
   })
 
 struct Data {
-  C_AVL_Node node;
+  AVLNode node;
   std::uint32_t val = 0;
 };
 
 struct Container {
-  C_AVL_Node *root = nullptr;
+  AVLNode *root = nullptr;
 };
 
 static void add(Container &c, std::uint32_t val) {
   Data *data = new Data();
-  initAVL(&data->node);
+  init(&data->node);
   data->val = val;
 
-  C_AVL_Node *curr = nullptr;   // current node
-  C_AVL_Node **from = &c.root;  // the incoming pointer to the next node
+  AVLNode *curr = nullptr;   // current node
+  AVLNode **from = &c.root;  // the incoming pointer to the next node
 
   while (*from) {  // tree search
     curr = *from;
@@ -42,7 +41,7 @@ static void add(Container &c, std::uint32_t val) {
 }
 
 static bool del(Container &c, std::uint32_t val) {
-  C_AVL_Node *curr = c.root;
+  AVLNode *curr = c.root;
   while (curr) {
     std::uint32_t nodeValue = containerOf(curr, Data, node)->val;
     if (val == nodeValue) {
@@ -60,7 +59,7 @@ static bool del(Container &c, std::uint32_t val) {
   return true;
 }
 
-static void verify(C_AVL_Node *parent, C_AVL_Node *node) {
+static void verify(AVLNode *parent, AVLNode *node) {
   if (!node) return;
 
   // verify subtrees recursively
@@ -91,7 +90,7 @@ static void verify(C_AVL_Node *parent, C_AVL_Node *node) {
   }
 }
 
-static void extract(C_AVL_Node *node, std::multiset<std::uint32_t> &extracted) {
+static void extract(AVLNode *node, std::multiset<std::uint32_t> &extracted) {
   if (!node) return;
 
   extract(node->left, extracted);
@@ -109,7 +108,7 @@ static void verify(Container &c, const std::multiset<std::uint32_t> &ref) {
 
 static void dispose(Container &c) {
   while (c.root) {
-    C_AVL_Node *node = c.root;
+    AVLNode *node = c.root;
     c.root = del(c.root);
     delete containerOf(node, Data, node);
   }
