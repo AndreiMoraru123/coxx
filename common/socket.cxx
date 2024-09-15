@@ -73,7 +73,7 @@ void Socket::setOptions() const {
  * whatnot.
  */
 void Socket::configureConnection(std::int64_t port, std::uint32_t netaddr,
-                                 std::string connectionType) const {
+                                 const std::string &connectionType) const {
   sockaddr_in addr = {};
   addr.sin_family = AF_INET;
   addr.sin_port = ntohs(port);

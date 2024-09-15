@@ -51,7 +51,7 @@ class Socket {
    * whatnot.
    */
   void configureConnection(std::int64_t port, std::uint32_t netaddr,
-                           std::string connectionType) const;
+                           const std::string &connectionType) const;
 
   /**
    * @brief Reads @p numberOfBytes bytes from the file descriptor @p fd into the
