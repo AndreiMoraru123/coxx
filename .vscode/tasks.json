@@ -66,6 +66,31 @@
         "kind": "build",
         "isDefault": true
       }
+    },
+    {
+      "label": "bazel build //... (debug)",
+      "type": "shell",
+      "command": "bazel",
+      "args": ["build", "-c", "dbg", "//..."],
+      "problemMatcher": "$gcc",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "clang-tidy",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-c",
+        "clang-tidy -p=. $(find . -name '*.cxx' -o -name '*.hxx')"
+      ],
+      "dependsOn": "bazel build //... (debug)",
+      "group": {
+        "kind": "test",
+        "isDefault": false
+      }
     }
   ]
 }
