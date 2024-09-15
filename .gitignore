@@ -41,3 +41,6 @@ bazel-*/external/
 *.tmp
 *.bak
 *.swp
+
+# Compile commands
+compile_commands.json

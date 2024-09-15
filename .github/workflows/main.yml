@@ -16,14 +16,33 @@ jobs:
       image: gcc:14
 
     steps:
+      - name: Install Clang-Tidy
+        run: apt-get update && apt-get install -y clang-tidy sudo
+
+      - name: Create non-root user
+        run: |
+          useradd -m builder
+          echo "builder ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
       - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Set up Bazelisk
         uses: philwo/setup-bazelisk@v1
 
+      - name: Switch to non-root user
+        run: |
+          chown -R builder:builder .
+          su builder
+
       - name: Build project with GCC 14
-        run: bazel build --cxxopt='-std=c++23' //...
+        run: su builder -c 'bazel build --cxxopt='-std=c++23' //...'
+
+      - name: Generate compile_commands.json
+        run: su builder -c 'bazel run @hedron_compile_commands//:refresh_all -- --cxxopt="-std=c++23"'
+
+      - name: Run Clang-Tidy over the project & supress failure
+        run: su builder -c 'clang-tidy -p=. $(find . -name "*.cxx" -o -name "*.hxx") || true'
 
       - name: Run tests with GCC 14
-        run: bazel test --cxxopt='-std=c++23' //...
+        run: su builder -c 'bazel test --cxxopt="-std=c++23" //...'
