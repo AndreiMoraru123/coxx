@@ -23,8 +23,9 @@ constexpr std::uint8_t TEST_NUM_QUERIES = 3;
  * @return The error code (0 on success, -1 on failure) along with the message
  * received from the client (on success) or an error message (on failure).
  */
-static std::pair<std::int32_t, std::string> oneRequest(
-    Socket& serverSocket, std::int64_t connectionFileDescriptor) {
+static auto oneRequest(Socket& serverSocket,
+                       std::int64_t connectionFileDescriptor)
+    -> std::pair<std::int32_t, std::string> {
   std::vector<char> readBuffer(4 + MAX_MESSAGE_SIZE + 1);
   errno = 0;
 
@@ -90,7 +91,7 @@ static std::pair<std::int32_t, std::string> oneRequest(
 static std::pair<std::int32_t, std::string> query(Socket& clientSocket,
                                                   std::string text) {
   std::int64_t fd = clientSocket.getFd();
-  std::uint32_t len = static_cast<uint32_t>(text.size());
+  auto len = static_cast<uint32_t>(text.size());
 
   if (len > MAX_MESSAGE_SIZE) {
     return {-1, "query too long"};
@@ -161,9 +162,8 @@ static std::pair<std::int32_t, std::string> query(Socket& clientSocket,
  * @param numQueries the number of requests (messages) the server will process.
  * @return The last client message the server processed.
  */
-static std::vector<std::string> run(Socket& serverSocket,
-                                    std::int64_t maxIterations,
-                                    std::uint8_t numQueries) {
+static auto run(Socket& serverSocket, std::int64_t maxIterations,
+                std::uint8_t numQueries) -> std::vector<std::string> {
   serverSocket.setOptions();
   serverSocket.configureConnection(TEST_PORT, TEST_SERVER_NETADDR, "server");
 
@@ -213,8 +213,8 @@ static std::vector<std::string> run(Socket& serverSocket,
  * @return The last error code along with
  * the last response received from the server for the last query.
  */
-static std::vector<std::pair<std::int32_t, std::string>> run(
-    Socket& clientSocket, std::uint8_t numQueries) {
+static auto run(Socket& clientSocket, std::uint8_t numQueries)
+    -> std::vector<std::pair<std::int32_t, std::string>> {
   std::vector<std::pair<std::int32_t, std::string>> responses;
 
   clientSocket.setOptions();

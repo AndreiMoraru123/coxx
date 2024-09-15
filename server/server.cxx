@@ -18,7 +18,7 @@ static void registerEpollEvent(std::int64_t epollFd, std::int64_t fd,
   epollEvent.events = events;
   epollEvent.data.fd = fd;
   if (epoll_ctl(epollFd, EPOLL_CTL_ADD, fd, &epollEvent) == -1) [[unlikely]] {
-    std::cerr << "epoll_ctl() error" << std::endl;
+    std::cerr << "epoll_ctl() error" << '\n';
   }
 }
 
@@ -31,14 +31,14 @@ static void makeNonBlocking(std::int64_t fd) {
   errno = 0;
   std::int64_t flags = fcntl(fd, F_GETFL, 0);
   if (errno) [[unlikely]] {
-    std::cerr << "fcntl error" << std::endl;
+    std::cerr << "fcntl error" << '\n';
   }
 
   flags |= O_NONBLOCK;
 
   fcntl(fd, F_SETFL, flags);
   if (errno) [[unlikely]] {
-    std::cerr << "fcntl error" << std::endl;
+    std::cerr << "fcntl error" << '\n';
   }
 }
 
@@ -104,7 +104,7 @@ void Server::run(std::int64_t port) {
         auto& conn = connectionByFileDescriptor[events[i].data.fd];
         if (!conn) {
           std::cerr << "Connection not found for fd: " << events[i].data.fd
-                    << std::endl;
+                    << '\n';
         }
         if (events[i].events & (EPOLLIN | EPOLLOUT)) {
           conn->io();

@@ -1,7 +1,7 @@
 
 #include "entry.hxx"
 
-bool entryEquality(CNode* lhs, CNode* rhs) {
+auto entryEquality(CNode* lhs, CNode* rhs) -> bool {
   Entry* le = containerOf(lhs, Entry, node);
   Entry* re = containerOf(rhs, Entry, node);
   return le->key == re->key;

@@ -34,7 +34,7 @@ class EventLoopTest : public ::testing::TestWithParam<CommandList> {
     } else if (serverPid > 0) {
       std::this_thread::sleep_for(std::chrono::seconds(1));
     } else {
-      std::cerr << "Failed to fork server process" << std::endl;
+      std::cerr << "Failed to fork server process" << '\n';
       exit(1);
     }
   }

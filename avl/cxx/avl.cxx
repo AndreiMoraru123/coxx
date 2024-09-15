@@ -1,6 +1,6 @@
 #include "avl.hxx"
 
-AVLNode *AVLTree::root() {
+auto AVLTree::root() -> AVLNode * {
   if (tree.empty()) return nullptr;
 
   auto it = tree.find(0, RootComp());
@@ -12,11 +12,15 @@ void AVLTree::init(AVLNode *node) {
   node->count = 1;
 }
 
-std::uint32_t AVLTree::depth(AVLNode *node) { return node ? node->depth : 0; }
+auto AVLTree::depth(AVLNode *node) -> std::uint32_t {
+  return node ? node->depth : 0;
+}
 
-std::uint32_t AVLTree::count(AVLNode *node) { return node ? node->count : 0; }
+auto AVLTree::count(AVLNode *node) -> std::uint32_t {
+  return node ? node->count : 0;
+}
 
-AVLNode *AVLTree::find_left(AVLNode *node) {
+auto AVLTree::find_left(AVLNode *node) -> AVLNode * {
   if (!node) return nullptr;
 
   auto it = tree.iterator_to(*node);
@@ -26,7 +30,7 @@ AVLNode *AVLTree::find_left(AVLNode *node) {
   return &(*it);
 }
 
-AVLNode *AVLTree::find_right(AVLNode *node) {
+auto AVLTree::find_right(AVLNode *node) -> AVLNode * {
   if (!node) return nullptr;
 
   auto it = tree.iterator_to(*node);

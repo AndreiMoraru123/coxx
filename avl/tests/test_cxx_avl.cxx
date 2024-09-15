@@ -35,7 +35,7 @@ static void add(Container &c, std::uint32_t val) {
   }
 }
 
-static bool del(Container &c, std::uint32_t val) {
+static auto del(Container &c, std::uint32_t val) -> bool {
   auto it = c.tree.tree.begin();
   auto end = c.tree.tree.end();
   while (it != end) {

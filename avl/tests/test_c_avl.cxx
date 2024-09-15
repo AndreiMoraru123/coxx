@@ -40,7 +40,7 @@ static void add(Container &c, std::uint32_t val) {
   c.root = fix(&data->node);
 }
 
-static bool del(Container &c, std::uint32_t val) {
+static auto del(Container &c, std::uint32_t val) -> bool {
   AVLNode *curr = c.root;
   while (curr) {
     std::uint32_t nodeValue = containerOf(curr, Data, node)->val;
@@ -99,7 +99,7 @@ static void extract(AVLNode *node, std::multiset<std::uint32_t> &extracted) {
 }
 
 static void verify(Container &c, const std::multiset<std::uint32_t> &ref) {
-  verify(NULL, c.root);
+  verify(nullptr, c.root);
   assert(count(c.root) == ref.size());
   std::multiset<std::uint32_t> extracted;
   extract(c.root, extracted);

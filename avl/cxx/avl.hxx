@@ -33,12 +33,12 @@ class AVLTree {
  public:
   AVLSet tree;
   void fix(AVLNode *node);
-  AVLNode *root();
-  AVLNode *find_left(AVLNode *node);
-  AVLNode *find_right(AVLNode *node);
+  auto root() -> AVLNode *;
+  auto find_left(AVLNode *node) -> AVLNode *;
+  auto find_right(AVLNode *node) -> AVLNode *;
   static void init(AVLNode *node);
-  static std::uint32_t depth(AVLNode *node);
-  static std::uint32_t count(AVLNode *node);
+  static auto depth(AVLNode *node) -> std::uint32_t;
+  static auto count(AVLNode *node) -> std::uint32_t;
   void update(AVLNode *node);
   void insert(AVLNode *node);
   void erase(AVLNode *node);

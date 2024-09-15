@@ -1,6 +1,6 @@
 #include "client.hxx"
 
-static std::int32_t deserialize(std::string_view data) {
+static auto deserialize(std::string_view data) -> std::int32_t {
   if (data.size() < 1) {
     std::println("bad response");
     return -1;
@@ -98,8 +98,8 @@ static std::int32_t deserialize(std::string_view data) {
  * @param commands The command to be send.
  * @return Error code indicating success (0) or failure (-1).
  */
-std::int32_t Client::sendRequest(std::int64_t fd,
-                                 const CommandList commands) const {
+auto Client::sendRequest(std::int64_t fd,
+                         const CommandList& commands) const -> std::int32_t {
   std::uint32_t messageLength = 4;
 
   for (const std::string& s : commands) {
@@ -117,7 +117,7 @@ std::int32_t Client::sendRequest(std::int64_t fd,
 
   std::size_t current = 8;
   for (const std::string& s : commands) {
-    std::uint32_t previous = static_cast<std::uint32_t>(s.size());
+    auto previous = static_cast<std::uint32_t>(s.size());
     std::memcpy(writeBuffer.data() + current, &previous, 4);
     std::memcpy(writeBuffer.data() + current + 4, s.data(), s.size());
     current += 4 + s.size();
@@ -137,7 +137,7 @@ std::int32_t Client::sendRequest(std::int64_t fd,
  * @param fd The file descriptor from which the response is read.
  * @return Error code indicating success (0) or failure (-1).
  */
-std::int32_t Client::readResponse(std::int64_t fd) const {
+auto Client::readResponse(std::int64_t fd) const -> std::int32_t {
   // 4 bytes header
   std::string header(4, '\0');
   std::vector<char> readBuffer(4 + MAX_MESSAGE_SIZE + 1);
@@ -147,7 +147,7 @@ std::int32_t Client::readResponse(std::int64_t fd) const {
     if (errno == 0) {
       std::println("EOF");
     } else {
-      std::cerr << "read() error" << std::endl;
+      std::cerr << "read() error" << '\n';
     }
     return readError;
   }
@@ -166,7 +166,7 @@ std::int32_t Client::readResponse(std::int64_t fd) const {
   std::string responseBody(messageLength, '\0');
   readError = socket.readFull(fd, responseBody, messageLength);
   if (readError) {
-    std::cerr << "read() error" << std::endl;
+    std::cerr << "read() error" << '\n';
     return readError;
   }
 
@@ -195,17 +195,17 @@ std::int32_t Client::readResponse(std::int64_t fd) const {
  * @param commands The queries to send to the server.
  * @param port The port to run the client on.
  */
-void Client::run(CommandList commands, std::int64_t port) {
+void Client::run(const CommandList& commands, std::int64_t port) {
   socket.setOptions();
   socket.configureConnection(port, CLIENT_NETADDR, "client");
 
   std::int32_t sendErr = sendRequest(socket.getFd(), commands);
   if (sendErr) {
-    std::cerr << "send request error" << std::endl;
+    std::cerr << "send request error" << '\n';
   }
 
   std::int32_t readError = readResponse(socket.getFd());
   if (readError == -1) {
-    std::cerr << "read response error" << std::endl;
+    std::cerr << "read response error" << '\n';
   }
 }

@@ -7,7 +7,7 @@ static void keyScan(CNode* node, void* arg) {
   out::str(output, containerOf(node, Entry, node)->key);
 }
 
-static std::uint64_t stringHash(std::string data, std::size_t length) {
+static auto stringHash(const std::string& data) -> std::uint64_t {
   std::uint32_t hash = 0x811C9DC5;
   for (auto& letter : data) {
     hash = (hash + letter) * 0x01000193;
@@ -15,7 +15,8 @@ static std::uint64_t stringHash(std::string data, std::size_t length) {
   return hash;
 }
 
-bool Request::isCommand(const std::string& word, const char* commandList) {
+auto Request::isCommand(const std::string& word,
+                        const char* commandList) -> bool {
   return 0 == strcasecmp(word.c_str(), commandList);
 }
 
@@ -29,7 +30,7 @@ void Request::keys([[maybe_unused]] std::vector<std::string>& cmd,
 void Request::get(std::vector<std::string>& commandList, std::string& output) {
   Entry key;
   key.key.swap(commandList[1]);
-  key.node.code = stringHash(key.key, key.key.size());
+  key.node.code = stringHash(key.key);
 
   CNode* node = CMapLookUp(&commandMap.db, &key.node, &entryEquality);
 
@@ -44,14 +45,14 @@ void Request::get(std::vector<std::string>& commandList, std::string& output) {
 void Request::set(std::vector<std::string>& commandList, std::string& output) {
   Entry key;
   key.key.swap(commandList[1]);
-  key.node.code = stringHash(key.key, key.key.size());
+  key.node.code = stringHash(key.key);
 
   CNode* node = CMapLookUp(&commandMap.db, &key.node, &entryEquality);
 
   if (node) {
     containerOf(node, Entry, node)->val.swap(commandList[2]);
   } else {
-    Entry* entry = new Entry();
+    auto entry = new Entry();
     entry->key.swap(key.key);
     entry->node.code = key.node.code;
     entry->val.swap(commandList[2]);
@@ -64,7 +65,7 @@ void Request::set(std::vector<std::string>& commandList, std::string& output) {
 void Request::del(std::vector<std::string>& commandList, std::string& output) {
   Entry key;
   key.key.swap(commandList[1]);
-  key.node.code = stringHash(key.key, key.key.size());
+  key.node.code = stringHash(key.key);
 
   CNode* node = CMapPop(&commandMap.db, &key.node, &entryEquality);
 
@@ -75,8 +76,8 @@ void Request::del(std::vector<std::string>& commandList, std::string& output) {
   return out::num(output, node ? 1 : 0);
 }
 
-std::uint32_t Request::parse(std::uint8_t& requestData, std::size_t length,
-                             std::vector<std::string>& outputData) {
+auto Request::parse(std::uint8_t& requestData, std::size_t length,
+                    std::vector<std::string>& outputData) -> std::uint32_t {
   if (length < 4) {
     return -1;
   }
@@ -100,9 +101,9 @@ std::uint32_t Request::parse(std::uint8_t& requestData, std::size_t length,
       return -1;
     }
 
-    outputData.push_back(
-        std::string(reinterpret_cast<char*>(&requestData + currentPosition + 4),
-                    sizeOfData));
+    outputData.emplace_back(
+        reinterpret_cast<char*>(&requestData + currentPosition + 4),
+        sizeOfData);
 
     currentPosition += 4 + sizeOfData;
   }

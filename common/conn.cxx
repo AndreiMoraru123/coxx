@@ -2,7 +2,7 @@
 
 Connection::~Connection() { close(_fd); }
 
-bool Connection::tryOneRequest() {
+auto Connection::tryOneRequest() -> bool {
   if (readBufferSize < 4) {
     // Not enough data in the buffer, will retry next iteration.
     return false;
@@ -41,7 +41,7 @@ bool Connection::tryOneRequest() {
              "response is too big");
   }
 
-  std::uint32_t writeLength = static_cast<std::uint32_t>(output.size());
+  auto writeLength = static_cast<std::uint32_t>(output.size());
   std::memcpy(writeBuffer.data(), &writeLength, 4);
   std::memcpy(writeBuffer.data() + 4, output.data(), output.size());
   writeBufferSize = 4 + writeLength;
@@ -62,7 +62,7 @@ bool Connection::tryOneRequest() {
   return (state == ConnectionState::REQ);
 }
 
-bool Connection::tryFlushBuffer() {
+auto Connection::tryFlushBuffer() -> bool {
   ssize_t writtenBytes = 0;
   do {
     std::size_t remainingSize = writeBufferSize - writeBufferSent;
@@ -75,7 +75,7 @@ bool Connection::tryFlushBuffer() {
   }
 
   if (writtenBytes < 0) {
-    std::cerr << "write() error" << std::endl;
+    std::cerr << "write() error" << '\n';
     state = ConnectionState::END;
     return false;
   }
@@ -94,7 +94,7 @@ bool Connection::tryFlushBuffer() {
   return true;
 }
 
-bool Connection::tryFillBuffer() {
+auto Connection::tryFillBuffer() -> bool {
   assert(readBufferSize < readBuffer.capacity());
   ssize_t readBytes = 0;
 
@@ -109,7 +109,7 @@ bool Connection::tryFillBuffer() {
   }
 
   if (readBytes < 0) {
-    std::cerr << "read() error" << std::endl;
+    std::cerr << "read() error" << '\n';
     state = ConnectionState::END;
     return false;
   }
@@ -147,14 +147,14 @@ void Connection::stateResponse() {
  *
  * @return the file descriptor of the Connection.
  */
-int Connection::getFd() const { return _fd; }
+auto Connection::getFd() const -> int { return _fd; }
 
 /**
  * @brief Get the connection state
  *
  * @return the state of the Connection.
  */
-ConnectionState Connection::getState() const { return state; }
+auto Connection::getState() const -> ConnectionState { return state; }
 
 void Connection::io() {
   if (state == ConnectionState::REQ) {

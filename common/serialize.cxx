@@ -8,7 +8,7 @@ void nil(std::string &out) {
 
 void str(std::string &out, const std::string &val) {
   out.push_back(static_cast<std::underlying_type_t<Serialize>>(Serialize::STR));
-  std::uint32_t len = static_cast<std::uint32_t>(val.size());
+  auto len = static_cast<std::uint32_t>(val.size());
   out.append(reinterpret_cast<char *>(&len), 4);
   out.append(val);
 }
@@ -21,7 +21,7 @@ void num(std::string &out, std::int64_t val) {
 void err(std::string &out, std::int32_t code, const std::string &msg) {
   out.push_back(static_cast<std::underlying_type_t<Serialize>>(Serialize::ERR));
   out.append(reinterpret_cast<char *>(&code), 4);
-  std::uint32_t len = static_cast<std::uint32_t>(msg.size());
+  auto len = static_cast<std::uint32_t>(msg.size());
   out.append(reinterpret_cast<char *>(&len), 4);
   out.append(msg);
 }

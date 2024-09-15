@@ -36,7 +36,8 @@ class Client {
    * @param commands The command to be send.
    * @return Error code indicating success (0) or failure (-1).
    */
-  std::int32_t sendRequest(std::int64_t fd, const CommandList commands) const;
+  auto sendRequest(std::int64_t fd,
+                   const CommandList &commands) const -> std::int32_t;
 
   /**
    * @brief Reads a response from the server.
@@ -48,7 +49,7 @@ class Client {
    * @param fd The file descriptor from which the response is read.
    * @return Error code indicating success (0) or failure (-1).
    */
-  std::int32_t readResponse(std::int64_t fd) const;
+  auto readResponse(std::int64_t fd) const -> std::int32_t;
 
   /**
    * @brief Runs the client with the provided queries to the server.
@@ -60,7 +61,7 @@ class Client {
    * @param commands The queries to send to the server.
    * @param port The port to run the client on.
    */
-  void run(CommandList commands, std::int64_t port);
+  void run(const CommandList &commands, std::int64_t port);
 
  private:
   Socket socket;

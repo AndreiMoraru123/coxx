@@ -17,10 +17,10 @@ static void insert(Table& table, std::unique_ptr<Node>&& node) {
   table.size++;
 }
 
-static std::unique_ptr<Node> lookUp(
-    Table& table, const std::unique_ptr<Node>& key,
-    const std::function<bool(const std::unique_ptr<Node>&,
-                             const std::unique_ptr<Node>&)>& equal) {
+static auto lookUp(Table& table, const std::unique_ptr<Node>& key,
+                   const std::function<bool(const std::unique_ptr<Node>&,
+                                            const std::unique_ptr<Node>&)>&
+                       equal) -> std::unique_ptr<Node> {
   if (table.table.empty()) {
     return nullptr;
   }
@@ -38,7 +38,8 @@ static std::unique_ptr<Node> lookUp(
   return nullptr;
 }
 
-static std::unique_ptr<Node> detach(Table& table, std::unique_ptr<Node>& from) {
+static auto detach(Table& table,
+                   std::unique_ptr<Node>& from) -> std::unique_ptr<Node> {
   if (!from) {
     return nullptr;
   }
@@ -76,10 +77,10 @@ static void startResizing(Map& map) {
   map.resizingPosition = 0;
 }
 
-std::unique_ptr<Node> mapLookUp(
-    Map& map, const std::unique_ptr<Node>& key,
-    const std::function<bool(const std::unique_ptr<Node>&,
-                             const std::unique_ptr<Node>&)>& equal) {
+auto mapLookUp(Map& map, const std::unique_ptr<Node>& key,
+               const std::function<bool(const std::unique_ptr<Node>&,
+                                        const std::unique_ptr<Node>&)>& equal)
+    -> std::unique_ptr<Node> {
   helpResizing(map);
   std::unique_ptr<Node> from = lookUp(map.table1, key, equal);
   from = from ? std::move(from) : lookUp(map.table2, key, equal);
@@ -103,10 +104,10 @@ void mapInsert(Map& map, std::unique_ptr<Node>&& node) {
   helpResizing(map);
 }
 
-std::unique_ptr<Node> mapPop(
-    Map& map, const std::unique_ptr<Node>& key,
-    const std::function<bool(const std::unique_ptr<Node>&,
-                             const std::unique_ptr<Node>&)>& equal) {
+auto mapPop(Map& map, const std::unique_ptr<Node>& key,
+            const std::function<bool(const std::unique_ptr<Node>&,
+                                     const std::unique_ptr<Node>&)>& equal)
+    -> std::unique_ptr<Node> {
   helpResizing(map);
   std::unique_ptr<Node> from = lookUp(map.table1, key, equal);
   if (from) {
@@ -121,7 +122,9 @@ std::unique_ptr<Node> mapPop(
   return nullptr;
 }
 
-std::size_t mapSize(Map& map) { return map.table1.size + map.table2.size; }
+auto mapSize(Map& map) -> std::size_t {
+  return map.table1.size + map.table2.size;
+}
 
 void mapDestroy(Map& map) {
   map.table1.table.clear();

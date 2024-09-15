@@ -17,6 +17,6 @@ struct Entry {
   std::string val;
 };
 
-bool entryEquality(CNode *lhs, CNode *rhs);
+auto entryEquality(CNode *lhs, CNode *rhs) -> bool;
 void scan(CTable &table, const std::function<void(CNode *, void *)> &fn,
           void *arg);

@@ -103,8 +103,8 @@ void Socket::configureConnection(std::int64_t port, std::uint32_t netaddr,
  * @return 0 on success, -1 if an error occurs or EOF is
  * encountered before reading @p numberOfBytes bytes.
  */
-std::int32_t Socket::readFull(std::int64_t fd, std::string &buffer,
-                              std::size_t numberOfBytes) const {
+auto Socket::readFull(std::int64_t fd, std::string &buffer,
+                      std::size_t numberOfBytes) const -> std::int32_t {
   buffer.resize(numberOfBytes);
   std::size_t bytesRead = 0;
 
@@ -131,8 +131,8 @@ std::int32_t Socket::readFull(std::int64_t fd, std::string &buffer,
  * @return std::int32_t 0 on success, -1 if an error occurs during
  * writing
  */
-std::int32_t Socket::writeAll(std::int64_t fd, std::string &buffer,
-                              std::size_t numberOfBytes) const {
+auto Socket::writeAll(std::int64_t fd, std::string &buffer,
+                      std::size_t numberOfBytes) const -> std::int32_t {
   buffer.resize(numberOfBytes);
   std::size_t bytesWrote = 0;
 
@@ -153,4 +153,4 @@ std::int32_t Socket::writeAll(std::int64_t fd, std::string &buffer,
  *
  * @return the file descriptor of the Socket.
  */
-int Socket::getFd() const { return _fd; }
+auto Socket::getFd() const -> int { return _fd; }

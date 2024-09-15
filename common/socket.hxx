@@ -65,8 +65,8 @@ class Socket {
    * @return 0 on success, -1 if an error occurs or EOF is
    * encountered before reading @p numberOfBytes bytes.
    */
-  std::int32_t readFull(std::int64_t fd, std::string &buffer,
-                        std::size_t numberOfBytes) const;
+  auto readFull(std::int64_t fd, std::string &buffer,
+                std::size_t numberOfBytes) const -> std::int32_t;
 
   /**
    * @brief Writes @p numberOfBytes bytes from the @p buffer to the file
@@ -80,15 +80,15 @@ class Socket {
    * @return 0 on success, -1 if an error occurs during
    * writing
    */
-  std::int32_t writeAll(std::int64_t fd, std::string &buffer,
-                        std::size_t numberOfBytes) const;
+  auto writeAll(std::int64_t fd, std::string &buffer,
+                std::size_t numberOfBytes) const -> std::int32_t;
 
   /**
    * @brief Get the Fd object
    *
    * @return the file descriptor of the Socket.
    */
-  int getFd() const;
+  auto getFd() const -> int;
 
  private:
   /**
@@ -98,5 +98,5 @@ class Socket {
    * the socket is not currently open. It's used internally for all socket
    * operations.
    */
-  int _fd;
+  std::int64_t _fd;
 };

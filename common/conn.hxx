@@ -79,14 +79,14 @@ class Connection {
    *
    * @return the file descriptor of the Connection.
    */
-  int getFd() const;
+  auto getFd() const -> int;
 
   /**
    * @brief Get the connection state
    *
    * @return the state of the Connection.
    */
-  ConnectionState getState() const;
+  auto getState() const -> ConnectionState;
 
   void io();
 
@@ -99,9 +99,9 @@ class Connection {
   std::size_t writeBufferSize;
   std::size_t readBufferSize;
   Request request;
-  bool tryOneRequest();
-  bool tryFlushBuffer();
-  bool tryFillBuffer();
+  auto tryOneRequest() -> bool;
+  auto tryFlushBuffer() -> bool;
+  auto tryFillBuffer() -> bool;
   void stateRequest();
   void stateResponse();
 };

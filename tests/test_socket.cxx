@@ -14,12 +14,12 @@ constexpr std::int64_t TEST_PORT = 12345;
  * @return The message received from the client. Returns an empty
  * string if the read operation fails.
  */
-static std::string serverReadWrite(std::int64_t connectionFd,
-                                   std::string writeBuffer) {
+static auto serverReadWrite(std::int64_t connectionFd,
+                            const std::string& writeBuffer) -> std::string {
   std::vector<char> readBuffer(TEST_BUFFER_SIZE);
   ssize_t n = read(connectionFd, readBuffer.data(), readBuffer.size() - 1);
   if (n < 0) {
-    std::cerr << "read() error" << std::endl;
+    std::cerr << "read() error" << '\n';
     return "";
   }
 
@@ -47,7 +47,8 @@ static std::string serverReadWrite(std::int64_t connectionFd,
  * @throws std::runtime_error If the server fails to listen on the specified
  * port.
  */
-static std::string run(Socket& serverSocket, std::int64_t maxIterations) {
+static auto run(Socket& serverSocket,
+                std::int64_t maxIterations) -> std::string {
   serverSocket.setOptions();
   serverSocket.configureConnection(TEST_PORT, TEST_SERVER_NETADDR, "server");
 
@@ -89,7 +90,7 @@ static std::string run(Socket& serverSocket, std::int64_t maxIterations) {
  * client ops.
  * @return The response received from the server, if any.
  */
-static std::string run(Socket& clientSocket) {
+static auto run(Socket& clientSocket) -> std::string {
   clientSocket.setOptions();
   clientSocket.configureConnection(TEST_PORT, TEST_CLIENT_NETADDR, "client");
 
@@ -99,7 +100,7 @@ static std::string run(Socket& clientSocket) {
   ssize_t n =
       read(clientSocket.getFd(), readBuffer.data(), readBuffer.size() - 1);
   if (n < 0) {
-    std::cerr << "read() error" << std::endl;
+    std::cerr << "read() error" << '\n';
     return "";
   }
   std::string serverMsg(readBuffer.begin(), readBuffer.begin() + n);

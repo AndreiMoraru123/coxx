@@ -28,8 +28,8 @@ class Request {
   Request() = default;
   void operator()(std::vector<std::string>& commandList, std::string& out);
 
-  std::uint32_t parse(std::uint8_t& requestData, std::size_t length,
-                      std::vector<std::string>& outputData);
+  auto parse(std::uint8_t& requestData, std::size_t length,
+             std::vector<std::string>& outputData) -> std::uint32_t;
 
  private:
   static CommandMap commandMap;
@@ -38,5 +38,5 @@ class Request {
   void get(std::vector<std::string>& commandList, std::string& output);
   void set(std::vector<std::string>& commandList, std::string& output);
   void del(std::vector<std::string>& commandList, std::string& output);
-  bool isCommand(const std::string& word, const char* commandList);
+  auto isCommand(const std::string& word, const char* commandList) -> bool;
 };
