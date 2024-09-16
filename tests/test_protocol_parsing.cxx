@@ -172,7 +172,7 @@ static auto run(const Socket& serverSocket, std::int64_t maxIterations,
 
   std::vector<std::string> clientMessages;
 
-  for (int i = 0; i < maxIterations; ++i) {
+  std::ranges::for_each(std::views::iota(0, maxIterations), [&](auto) {
     sockaddr_in clientAddress = {};
     socklen_t socketLength = sizeof(clientAddress);
     std::int64_t connectionFileDescriptor =
@@ -180,7 +180,7 @@ static auto run(const Socket& serverSocket, std::int64_t maxIterations,
                reinterpret_cast<sockaddr*>(&clientAddress), &socketLength);
 
     if (connectionFileDescriptor == -1) {
-      continue;
+      return false;  // This will come back to bite me
     }
 
     std::ranges::for_each(std::views::iota(0, numQueries), [&](auto) {
@@ -193,10 +193,10 @@ static auto run(const Socket& serverSocket, std::int64_t maxIterations,
     });
 
     close(connectionFileDescriptor);
-  }
+    return true;
+  });
   return clientMessages;
 }
-
 /**
  * @brief Simulates client operations for testing.
  *
