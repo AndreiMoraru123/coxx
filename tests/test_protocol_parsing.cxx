@@ -183,13 +183,15 @@ static auto run(const Socket& serverSocket, std::int64_t maxIterations,
       continue;
     }
 
-    for (int q : std::views::iota(0, numQueries)) {
+    std::ranges::for_each(std::views::iota(0, numQueries), [&](auto) {
       auto [err, msg] = oneRequest(serverSocket, connectionFileDescriptor);
       if (err) {
-        break;
+        return false;
       }
       clientMessages.push_back(msg);
-    }
+      return true;
+    });
+
     close(connectionFileDescriptor);
   }
   return clientMessages;
@@ -198,8 +200,8 @@ static auto run(const Socket& serverSocket, std::int64_t maxIterations,
 /**
  * @brief Simulates client operations for testing.
  *
- * Initializes the server socket, binds it to the global common port and server
- * network address.
+ * Initializes the server socket, binds it to the global common port and
+ * server network address.
  *
  * Sends @p numQueries to the server and awaits a response back for each.
  *
@@ -253,7 +255,8 @@ class ProtocolParsingTest : public ::testing::Test {
  * @test Test case for a multiple requests from a client to a server via a
  * splitting protocol.
  *
- * Runs the client socket and asserts the last received messages on both sides.
+ * Runs the client socket and asserts the last received messages on both
+ * sides.
  *
  */
 TEST_F(ProtocolParsingTest, ProtocolParsing) {
