@@ -1,7 +1,7 @@
 #include "common.hxx"
 
 constexpr std::int64_t TEST_PORT = 123456;
-constexpr std::uint8_t TEST_NUM_QUERIES = 3;
+constexpr std::int64_t TEST_NUM_QUERIES = 3;
 
 /**
  * @brief Processes a single request from a client and sends back a response.
@@ -23,7 +23,7 @@ constexpr std::uint8_t TEST_NUM_QUERIES = 3;
  * @return The error code (0 on success, -1 on failure) along with the message
  * received from the client (on success) or an error message (on failure).
  */
-static auto oneRequest(Socket& serverSocket,
+static auto oneRequest(const Socket& serverSocket,
                        std::int64_t connectionFileDescriptor)
     -> std::pair<std::int32_t, std::string> {
   std::vector<char> readBuffer(4 + MAX_MESSAGE_SIZE + 1);
@@ -88,7 +88,7 @@ static auto oneRequest(Socket& serverSocket,
  * @return The error code (0 on success, -1 on failure) along with the response
  * received from the server (on success) or an error message (on failure).
  */
-static std::pair<std::int32_t, std::string> query(Socket& clientSocket,
+static std::pair<std::int32_t, std::string> query(const Socket& clientSocket,
                                                   std::string text) {
   std::int64_t fd = clientSocket.getFd();
   auto len = static_cast<uint32_t>(text.size());
@@ -102,9 +102,8 @@ static std::pair<std::int32_t, std::string> query(Socket& clientSocket,
   std::memcpy(writeBuffer.data() + 4, text.data(), len);
 
   std::string writeBufferString(writeBuffer.begin(), writeBuffer.end());
-  std::int32_t writeError =
-      clientSocket.writeAll(fd, writeBufferString, 4 + len);
-  if (writeError) {
+  if (std::int32_t writeError =
+          clientSocket.writeAll(fd, writeBufferString, 4 + len)) {
     return {writeError, "write() error"};
   }
 
@@ -162,8 +161,8 @@ static std::pair<std::int32_t, std::string> query(Socket& clientSocket,
  * @param numQueries the number of requests (messages) the server will process.
  * @return The last client message the server processed.
  */
-static auto run(Socket& serverSocket, std::int64_t maxIterations,
-                std::uint8_t numQueries) -> std::vector<std::string> {
+static auto run(const Socket& serverSocket, std::int64_t maxIterations,
+                std::int64_t numQueries) -> std::vector<std::string> {
   serverSocket.setOptions();
   serverSocket.configureConnection(TEST_PORT, TEST_SERVER_NETADDR, "server");
 
@@ -184,7 +183,7 @@ static auto run(Socket& serverSocket, std::int64_t maxIterations,
       continue;
     }
 
-    for (int i = 0; i < numQueries; ++i) {
+    for (int q : std::views::iota(0, numQueries)) {
       auto [err, msg] = oneRequest(serverSocket, connectionFileDescriptor);
       if (err) {
         break;
@@ -213,7 +212,7 @@ static auto run(Socket& serverSocket, std::int64_t maxIterations,
  * @return The last error code along with
  * the last response received from the server for the last query.
  */
-static auto run(Socket& clientSocket, std::uint8_t numQueries)
+static auto run(const Socket& clientSocket, std::uint8_t numQueries)
     -> std::vector<std::pair<std::int32_t, std::string>> {
   std::vector<std::pair<std::int32_t, std::string>> responses;
 

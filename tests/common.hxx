@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <cstring>
+#include <ranges>
 #include <thread>
 
 #include "client/client.hxx"
