@@ -67,6 +67,6 @@ INSTANTIATE_TEST_SUITE_P(QueryTests, EventLoopTest,
  * Runs the client on the dummy query array.
  */
 TEST_P(EventLoopTest, SendAndReceive) {
-  auto queryList = GetParam();
+  auto const& queryList = GetParam();
   client.run(queryList, TEST_PORT);
 }
