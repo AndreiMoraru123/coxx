@@ -22,18 +22,18 @@ struct Map {
   std::size_t resizingPosition = 0;
 };
 
-std::unique_ptr<Node> mapLookUp(
-    Map& map, const std::unique_ptr<Node>& key,
-    const std::function<bool(const std::unique_ptr<Node>&,
-                             const std::unique_ptr<Node>&)>& equal);
+auto mapLookUp(
+    Map& map, const Node& key,
+    const std::function<bool(const std::unique_ptr<Node>&, const Node&)>& equal)
+    -> std::unique_ptr<Node>;
 
 void mapInsert(Map& map, std::unique_ptr<Node>&& node);
 
-std::unique_ptr<Node> mapPop(
-    Map& map, const std::unique_ptr<Node>& key,
-    const std::function<bool(const std::unique_ptr<Node>&,
-                             const std::unique_ptr<Node>&)>& equal);
+auto mapPop(
+    Map& map, const Node& key,
+    const std::function<bool(const std::unique_ptr<Node>&, const Node&)>& equal)
+    -> std::unique_ptr<Node>;
 
-std::size_t mapSize(Map& map);
+std::size_t mapSize(const Map& map);
 
 void mapDestroy(Map& map);

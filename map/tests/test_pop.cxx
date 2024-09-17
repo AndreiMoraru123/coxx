@@ -8,9 +8,8 @@ auto equalityCNode = [](CNode* lhs, CNode* rhs) {
   return lhs->code == rhs->code;
 };
 
-auto equalityNode = [](const std::unique_ptr<Node>& lhs,
-                       const std::unique_ptr<Node>& rhs) {
-  return lhs->code == rhs->code;
+auto equalityNode = [](const std::unique_ptr<Node>& lhs, const Node& rhs) {
+  return lhs->code == rhs.code;
 };
 
 class PopTest : public ::testing::Test {
@@ -43,9 +42,7 @@ TEST_F(PopTest, MapPopTest) {
 
   mapInsert(map, std::move(node));
 
-  auto nodeForLookUp = std::make_unique<Node>();
-  nodeForLookUp->code = 1;
-
+  Node nodeForLookUp = {.code = 1};
   std::unique_ptr<Node> lookUp = mapLookUp(map, nodeForLookUp, equalityNode);
 
   ASSERT_NE(lookUp, nullptr);
