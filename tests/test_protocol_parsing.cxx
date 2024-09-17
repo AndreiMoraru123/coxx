@@ -3,6 +3,8 @@
 constexpr std::int64_t TEST_PORT = 123456;
 constexpr std::int64_t TEST_NUM_QUERIES = 3;
 
+using ErrCodeMsgTuple = std::pair<std::int32_t, std::string>;
+
 /**
  * @brief Processes a single request from a client and sends back a response.
  *
@@ -25,7 +27,7 @@ constexpr std::int64_t TEST_NUM_QUERIES = 3;
  */
 static auto oneRequest(const Socket& serverSocket,
                        std::int64_t connectionFileDescriptor)
-    -> std::pair<std::int32_t, std::string> {
+    -> ErrCodeMsgTuple {
   std::vector<char> readBuffer(4 + MAX_MESSAGE_SIZE + 1);
   errno = 0;
 
@@ -88,8 +90,8 @@ static auto oneRequest(const Socket& serverSocket,
  * @return The error code (0 on success, -1 on failure) along with the response
  * received from the server (on success) or an error message (on failure).
  */
-static std::pair<std::int32_t, std::string> query(const Socket& clientSocket,
-                                                  std::string text) {
+static auto query(const Socket& clientSocket,
+                  std::string text) -> ErrCodeMsgTuple {
   std::int64_t fd = clientSocket.getFd();
   auto len = static_cast<uint32_t>(text.size());
 
@@ -214,14 +216,13 @@ static auto run(const Socket& serverSocket, std::int64_t maxIterations,
  * @return The last error code along with
  * the last response received from the server for the last query.
  */
-static auto run(const Socket& clientSocket, std::uint8_t numQueries)
-    -> std::vector<std::pair<std::int32_t, std::string>> {
-  std::vector<std::pair<std::int32_t, std::string>> responses;
+static auto run(const Socket& clientSocket,
+                std::uint8_t numQueries) -> std::vector<ErrCodeMsgTuple> {
+  std::vector<ErrCodeMsgTuple> responses;
 
   clientSocket.setOptions();
   clientSocket.configureConnection(TEST_PORT, TEST_CLIENT_NETADDR, "client");
 
-  std::pair<std::int32_t, std::string> response;
   for (int i = 0; i < numQueries; ++i) {
     responses.emplace_back(query(clientSocket, clientSays));
   }
