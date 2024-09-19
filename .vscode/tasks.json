@@ -91,6 +91,22 @@
         "kind": "test",
         "isDefault": false
       }
+    },
+    {
+      "label": "generate compile_commands.json",
+      "type": "shell",
+      "command": "bazel",
+      "args": [
+        "run",
+        "@hedron_compile_commands//:refresh_all",
+        "--",
+        "--cxxopt=-std=c++23"
+      ],
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      }
     }
   ]
 }
