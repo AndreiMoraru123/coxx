@@ -99,5 +99,6 @@
     "valarray": "cpp",
     "variant": "cpp"
   },
-  "sonarlint.pathToCompileCommands": "${workspaceFolder}/compile_commands.json"
+  "sonarlint.pathToCompileCommands": "${workspaceFolder}/compile_commands.json",
+  "C_Cpp.intelliSenseEngine": "disabled"
 }
