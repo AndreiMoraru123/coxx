@@ -26,8 +26,8 @@ AVLNode *rotateLeft(AVLNode *node) {
   if (newNode->left) {
     newNode->left->parent = node;
   }
-  node->right = newNode->left;  // rotation
-  newNode->left = node;         // rotation
+  node->right = newNode->left; // rotation
+  newNode->left = node;        // rotation
   newNode->parent = node->parent;
   node->parent = newNode;
   update(node);
@@ -40,8 +40,8 @@ AVLNode *rotateRight(AVLNode *node) {
   if (newNode->right) {
     newNode->right->parent = node;
   }
-  node->left = newNode->right;  // rotation
-  newNode->right = node;        // rotation
+  node->left = newNode->right; // rotation
+  newNode->right = node;       // rotation
   newNode->parent = node->parent;
   node->parent = newNode;
   update(node);
@@ -52,7 +52,7 @@ AVLNode *rotateRight(AVLNode *node) {
 AVLNode *fixLeft(AVLNode *root) {
   // the left subtree is too deep
   if (depth(root->left->left) < depth(root->left->right)) {
-    root->left = rotateLeft(root->left);  // rule 2
+    root->left = rotateLeft(root->left); // rule 2
   }
   return rotateRight(root);
 }
@@ -60,7 +60,7 @@ AVLNode *fixLeft(AVLNode *root) {
 AVLNode *fixRight(AVLNode *root) {
   // the right subtree is too deep
   if (depth(root->right->right) < depth(root->right->left)) {
-    root->right = rotateRight(root->right);  // rule 2
+    root->right = rotateRight(root->right); // rule 2
   }
   return rotateLeft(root);
 }
@@ -137,4 +137,31 @@ AVLNode *del(AVLNode *node) {
       return victim;
     }
   }
+}
+
+AVLNode *offset(AVLNode *node, int64_t offset) {
+  int64_t pos = 0; // relative to the starting node
+  while (offset != pos) {
+    if (pos < offset && pos + count(node->right) >= offset) {
+      // the target is in the right subtree
+      node = node->right;
+      pos += count(node->left) + 1;
+    } else if (pos > offset && pos - count(node->left) <= offset) {
+      // the target is in the left subtree
+      node = node->left;
+      pos -= count(node->right) + 1;
+    } else {
+      // go to the parent
+      AVLNode *parent = node->parent;
+      if (!parent)
+        return NULL; // out of range
+      if (parent->right == node) {
+        pos -= count(node->left) + 1;
+      } else {
+        pos += count(node->right) + 1;
+      }
+      node = parent;
+    }
+  }
+  return node;
 }

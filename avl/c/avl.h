@@ -1,6 +1,6 @@
 #pragma once
 #include <stdbool.h>
-#include <stddef.h>  // NULL
+#include <stddef.h> // NULL
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -8,8 +8,8 @@ extern "C" {
 #endif
 
 typedef struct AVLNode {
-  uint32_t depth;  // subtree height
-  uint32_t count;  // subtree size
+  uint32_t depth; // subtree height
+  uint32_t count; // subtree size
   struct AVLNode *left;
   struct AVLNode *right;
   struct AVLNode *parent;
@@ -25,6 +25,7 @@ AVLNode *fixLeft(AVLNode *root);
 AVLNode *fixRight(AVLNode *root);
 AVLNode *fix(AVLNode *node);
 AVLNode *del(AVLNode *node);
+AVLNode *offset(AVLNode *node, int64_t offset);
 
 #ifdef __cplusplus
 }

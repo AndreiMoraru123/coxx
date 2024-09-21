@@ -1,3 +1,4 @@
+#include <cstdint>
 #include <gtest/gtest.h>
 
 #include <cassert>
@@ -6,10 +7,10 @@
 
 #include "avl.h"
 
-#define containerOf(ptr, type, member)                           \
-  ({                                                             \
-    const decltype(std::declval<type>().member) *__mptr = (ptr); \
-    (type *)((char *)__mptr - offsetof(type, member));           \
+#define containerOf(ptr, type, member)                                         \
+  ({                                                                           \
+    const decltype(std::declval<type>().member) *__mptr = (ptr);               \
+    (type *)((char *)__mptr - offsetof(type, member));                         \
   })
 
 struct Data {
@@ -26,16 +27,16 @@ static void add(Container &c, std::uint32_t val) {
   init(&data->node);
   data->val = val;
 
-  AVLNode *curr = nullptr;   // current node
-  AVLNode **from = &c.root;  // the incoming pointer to the next node
+  AVLNode *curr = nullptr;  // current node
+  AVLNode **from = &c.root; // the incoming pointer to the next node
 
-  while (*from) {  // tree search
+  while (*from) { // tree search
     curr = *from;
     std::uint32_t nodeValue = containerOf(curr, Data, node)->val;
     from = (val < nodeValue) ? &curr->left : &curr->right;
   }
 
-  *from = &data->node;  // attach the new node
+  *from = &data->node; // attach the new node
   data->node.parent = curr;
   c.root = fix(&data->node);
 }
@@ -60,7 +61,8 @@ static auto del(Container &c, std::uint32_t val) -> bool {
 }
 
 static void verify(AVLNode *parent, AVLNode *node) {
-  if (!node) return;
+  if (!node)
+    return;
 
   // verify subtrees recursively
   verify(node, node->left);
@@ -91,7 +93,8 @@ static void verify(AVLNode *parent, AVLNode *node) {
 }
 
 static void extract(AVLNode *node, std::multiset<std::uint32_t> &extracted) {
-  if (!node) return;
+  if (!node)
+    return;
 
   extract(node->left, extracted);
   extracted.insert(containerOf(node, Data, node)->val);
@@ -170,8 +173,36 @@ static void testRemove(std::uint32_t size) {
   }
 }
 
+static void testOffset(std::uint32_t size) {
+  Container c;
+  for (std::uint32_t i = 0; i < size; ++i) {
+    add(c, i);
+  }
+  AVLNode *min = c.root;
+  while (min->left) {
+    min = min->left;
+  }
+  // for each starting rank
+  for (std::uint32_t i = 0; i < size; ++i) {
+    AVLNode *node = offset(min, static_cast<std::int64_t>(i));
+    assert(containerOf(node, Data, node)->val == i);
+    // test all possible offset
+    for (std::uint32_t j = 0; j < size; ++j) {
+      std::int64_t off =
+          static_cast<std::int64_t>(j) - static_cast<std::int64_t>(i);
+      AVLNode *offNode = offset(node, off);
+      assert(containerOf(offNode, Data, node)->val == j);
+    }
+    // out of range by one
+    assert(!offset(node, -static_cast<std::int64_t>(i) - 1));
+    assert(!offset(node, size - i));
+  }
+
+  dispose(c);
+}
+
 class AVLTest : public ::testing::Test {
- public:
+public:
   Container c;
   std::multiset<std::uint32_t> ref;
 
@@ -232,3 +263,5 @@ TEST_F(AVLTest, InsertionDeletionTest) {
     testRemove(i);
   }
 }
+
+TEST_F(AVLTest, OffsetTest) { testOffset(200); }
