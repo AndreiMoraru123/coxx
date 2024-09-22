@@ -16,8 +16,8 @@ typedef struct AVLNode {
 } AVLNode;
 
 void init(AVLNode *node);
-uint32_t depth(AVLNode *node);
-uint32_t count(AVLNode *node);
+uint32_t depth(const AVLNode *node);
+uint32_t count(const AVLNode *node);
 void update(AVLNode *node);
 AVLNode *rotateLeft(AVLNode *node);
 AVLNode *rotateRight(AVLNode *node);

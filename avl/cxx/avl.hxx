@@ -37,8 +37,8 @@ public:
   auto find_left(AVLNode *node) -> AVLNode *;
   auto find_right(AVLNode *node) -> AVLNode *;
   static void init(AVLNode *node);
-  static auto depth(AVLNode *node) -> std::uint32_t;
-  static auto count(AVLNode *node) -> std::uint32_t;
+  static auto depth(const AVLNode *node) -> std::uint32_t;
+  static auto count(const AVLNode *node) -> std::uint32_t;
   void update(AVLNode *node);
   void insert(AVLNode *node);
   void erase(AVLNode *node);

@@ -1,7 +1,8 @@
 #include "avl.hxx"
 
 auto AVLTree::root() -> AVLNode * {
-  if (tree.empty()) return nullptr;
+  if (tree.empty())
+    return nullptr;
 
   auto it = tree.find(0, RootComp());
   return (it != tree.end()) ? &(*it) : nullptr;
@@ -12,36 +13,41 @@ void AVLTree::init(AVLNode *node) {
   node->count = 1;
 }
 
-auto AVLTree::depth(AVLNode *node) -> std::uint32_t {
+auto AVLTree::depth(const AVLNode *node) -> std::uint32_t {
   return node ? node->depth : 0;
 }
 
-auto AVLTree::count(AVLNode *node) -> std::uint32_t {
+auto AVLTree::count(const AVLNode *node) -> std::uint32_t {
   return node ? node->count : 0;
 }
 
 auto AVLTree::find_left(AVLNode *node) -> AVLNode * {
-  if (!node) return nullptr;
+  if (!node)
+    return nullptr;
 
   auto it = tree.iterator_to(*node);
-  if (it == tree.begin()) return nullptr;  // no left node
+  if (it == tree.begin())
+    return nullptr; // no left node
 
   --it;
   return &(*it);
 }
 
 auto AVLTree::find_right(AVLNode *node) -> AVLNode * {
-  if (!node) return nullptr;
+  if (!node)
+    return nullptr;
 
   auto it = tree.iterator_to(*node);
   ++it;
-  if (it == tree.end()) return nullptr;  // no right node
+  if (it == tree.end())
+    return nullptr; // no right node
 
   return &(*it);
 }
 
 void AVLTree::update(AVLNode *node) {
-  if (!node) return;
+  if (!node)
+    return;
 
   std::uint32_t leftDepth = depth(find_left(node));
   std::uint32_t rightDepth = depth(find_right(node));

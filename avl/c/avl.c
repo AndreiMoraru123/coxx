@@ -12,9 +12,9 @@ static uint32_t max(uint32_t lhs, uint32_t rhs) {
   return lhs < rhs ? rhs : lhs;
 }
 
-uint32_t depth(AVLNode *node) { return node ? node->depth : 0; }
+uint32_t depth(const AVLNode *node) { return node ? node->depth : 0; }
 
-uint32_t count(AVLNode *node) { return node ? node->count : 0; }
+uint32_t count(const AVLNode *node) { return node ? node->count : 0; }
 
 void update(AVLNode *node) {
   node->depth = 1 + max(depth(node->left), depth(node->right));
