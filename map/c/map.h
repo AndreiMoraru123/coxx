@@ -9,12 +9,12 @@ extern "C" {
 #endif
 
 typedef struct CNode {
-  struct CNode* next;
+  struct CNode *next;
   uint64_t code;
 } CNode;
 
 typedef struct CTable {
-  CNode** table;
+  CNode **table;
   size_t mask;
   size_t size;
 } CTable;
@@ -25,15 +25,15 @@ typedef struct CMap {
   size_t resizingPosition;
 } CMap;
 
-void initNode(CNode* node);
-void initTable(CTable* table);
-void initMap(CMap* map);
+void initNode(CNode *node);
+void initTable(CTable *table);
+void initMap(CMap *map);
 
-CNode* CMapLookUp(CMap* map, CNode* key, bool (*eq)(CNode*, CNode*));
-void CMapInsert(CMap* map, CNode* node);
-CNode* CMapPop(CMap* map, CNode* key, bool (*eq)(CNode*, CNode*));
-size_t CMapSize(CMap* map);
-void CMapDestroy(CMap* map);
+CNode *CMapLookUp(CMap *map, CNode *key, bool (*eq)(CNode *, CNode *));
+void CMapInsert(CMap *map, CNode *node);
+CNode *CMapPop(CMap *map, CNode *key, bool (*eq)(CNode *, CNode *));
+size_t CMapSize(const CMap *map);
+void CMapDestroy(CMap *map);
 
 #ifdef __cplusplus
 }
