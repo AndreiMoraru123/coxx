@@ -3,16 +3,16 @@
 #include "map.h"
 #include "map.hxx"
 
-auto equalityCNode = [](CNode* lhs, CNode* rhs) {
+auto equalityCNode = [](CNode *lhs, CNode *rhs) {
   return lhs->code == rhs->code;
 };
 
-auto equalityNode = [](const std::unique_ptr<Node>& lhs, const Node& rhs) {
+auto equalityNode = [](const std::unique_ptr<Node> &lhs, const Node &rhs) {
   return lhs->code == rhs.code;
 };
 
 class LookUpTest : public ::testing::Test {
- protected:
+protected:
   void SetUp() override { initMap(&cMap); }
 
   CMap cMap;
@@ -26,8 +26,8 @@ TEST_F(LookUpTest, CMapInsertAndLookUpTest) {
   CMapInsert(&cMap, &node1);
   CMapInsert(&cMap, &node2);
 
-  CNode* lookUp1 = CMapLookUp(&cMap, &node1, equalityCNode);
-  CNode* lookUp2 = CMapLookUp(&cMap, &node2, equalityCNode);
+  CNode *lookUp1 = CMapLookUp(&cMap, &node1, equalityCNode);
+  CNode *lookUp2 = CMapLookUp(&cMap, &node2, equalityCNode);
 
   ASSERT_NE(lookUp1, nullptr);
   ASSERT_NE(lookUp2, nullptr);
@@ -35,7 +35,7 @@ TEST_F(LookUpTest, CMapInsertAndLookUpTest) {
   ASSERT_EQ(lookUp2->code, 2);
 
   CNode dummyNode = {.code = 3};
-  CNode* dummyLookUp = CMapLookUp(&cMap, &dummyNode, equalityCNode);
+  CNode *dummyLookUp = CMapLookUp(&cMap, &dummyNode, equalityCNode);
 
   ASSERT_EQ(dummyLookUp, nullptr);
 }

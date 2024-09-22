@@ -30,19 +30,14 @@ enum class ConnectionState : std::uint8_t {
  *
  */
 class Connection {
- public:
+public:
   /**
    * @brief Construct a new Connection object
    *
    */
   Connection()
-      : _fd(-1),
-        state(ConnectionState::REQ),
-        readBuffer(),
-        writeBuffer(),
-        writeBufferSent(0),
-        writeBufferSize(0),
-        readBufferSize(0) {
+      : _fd(-1), state(ConnectionState::REQ), readBuffer(), writeBuffer(),
+        writeBufferSent(0), writeBufferSize(0), readBufferSize(0) {
     readBuffer.reserve(4 + MAX_MESSAGE_SIZE);
     writeBuffer.reserve(4 + MAX_MESSAGE_SIZE);
   }
@@ -56,12 +51,8 @@ class Connection {
    */
   Connection(std::int64_t fd, ConnectionState state,
              std::size_t writeBufferSent)
-      : _fd(fd),
-        state(state),
-        readBuffer(),
-        writeBuffer(),
-        writeBufferSent(writeBufferSent),
-        writeBufferSize(0),
+      : _fd(fd), state(state), readBuffer(), writeBuffer(),
+        writeBufferSent(writeBufferSent), writeBufferSize(0),
         readBufferSize(0) {
     readBuffer.reserve(4 + MAX_MESSAGE_SIZE);
     writeBuffer.reserve(4 + MAX_MESSAGE_SIZE);
@@ -90,7 +81,7 @@ class Connection {
 
   void io();
 
- private:
+private:
   std::int64_t _fd;
   ConnectionState state;
   std::vector<std::uint8_t> readBuffer;

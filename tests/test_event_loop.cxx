@@ -14,7 +14,7 @@ constexpr std::int64_t TEST_PORT = 1234567;
  * with different runtimes
  */
 class EventLoopTest : public ::testing::TestWithParam<CommandList> {
- protected:
+protected:
   Server server;
   Client client;
   pid_t serverPid;
@@ -67,6 +67,6 @@ INSTANTIATE_TEST_SUITE_P(QueryTests, EventLoopTest,
  * Runs the client on the dummy query array.
  */
 TEST_P(EventLoopTest, SendAndReceive) {
-  auto const& queryList = GetParam();
+  auto const &queryList = GetParam();
   client.run(queryList, TEST_PORT);
 }

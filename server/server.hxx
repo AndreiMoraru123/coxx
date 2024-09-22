@@ -17,7 +17,7 @@ constexpr std::int16_t SERVER_BACKLOG = SOMAXCONN;
 constexpr std::int64_t MAX_EVENTS = 32;
 
 class Server {
- public:
+public:
   /**
    * @brief Construct a new Server object.
    *
@@ -39,6 +39,6 @@ class Server {
    */
   void run(std::int64_t port);
 
- private:
+private:
   Socket socket;
 };

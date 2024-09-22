@@ -4,16 +4,16 @@
 #include "map.h"
 #include "map.hxx"
 
-auto equalityCNode = [](CNode* lhs, CNode* rhs) {
+auto equalityCNode = [](CNode *lhs, CNode *rhs) {
   return lhs->code == rhs->code;
 };
 
-auto equalityNode = [](const std::unique_ptr<Node>& lhs, const Node& rhs) {
+auto equalityNode = [](const std::unique_ptr<Node> &lhs, const Node &rhs) {
   return lhs->code == rhs.code;
 };
 
 class PopTest : public ::testing::Test {
- protected:
+protected:
   void SetUp() override { initMap(&cMap); }
 
   CMap cMap;
@@ -25,7 +25,7 @@ TEST_F(PopTest, CMapPopTest) {
 
   CMapInsert(&cMap, &node);
 
-  CNode* lookUp = CMapLookUp(&cMap, &node, equalityCNode);
+  CNode *lookUp = CMapLookUp(&cMap, &node, equalityCNode);
 
   ASSERT_NE(lookUp, nullptr);
   ASSERT_EQ(lookUp->code, 1);

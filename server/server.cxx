@@ -82,7 +82,7 @@ void Server::run(std::int64_t port) {
     for (std::int64_t i = 0; i < numFileDescriptors; ++i) {
       if (events[i].data.fd == socket.getFd()) {
         std::int64_t connectionFd =
-            accept(socket.getFd(), reinterpret_cast<sockaddr*>(&clientAddress),
+            accept(socket.getFd(), reinterpret_cast<sockaddr *>(&clientAddress),
                    &socketAddressLength);
         if (connectionFd < 0) {
           std::cerr << "accept() error";
@@ -101,7 +101,7 @@ void Server::run(std::int64_t port) {
             std::make_unique<Connection>(connectionFd, ConnectionState::REQ, 0);
 
       } else {
-        auto& conn = connectionByFileDescriptor[events[i].data.fd];
+        auto &conn = connectionByFileDescriptor[events[i].data.fd];
         if (!conn) {
           std::cerr << "Connection not found for fd: " << events[i].data.fd
                     << '\n';

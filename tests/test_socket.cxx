@@ -15,7 +15,7 @@ constexpr std::int64_t TEST_PORT = 12345;
  * string if the read operation fails.
  */
 static auto serverReadWrite(std::int64_t connectionFd,
-                            const std::string& writeBuffer) -> std::string {
+                            const std::string &writeBuffer) -> std::string {
   std::vector<char> readBuffer(TEST_BUFFER_SIZE);
   ssize_t n = read(connectionFd, readBuffer.data(), readBuffer.size() - 1);
   if (n < 0) {
@@ -47,8 +47,8 @@ static auto serverReadWrite(std::int64_t connectionFd,
  * @throws std::runtime_error If the server fails to listen on the specified
  * port.
  */
-static auto run(Socket& serverSocket,
-                std::int64_t maxIterations) -> std::string {
+static auto run(Socket &serverSocket, std::int64_t maxIterations)
+    -> std::string {
   serverSocket.setOptions();
   serverSocket.configureConnection(TEST_PORT, TEST_SERVER_NETADDR, "server");
 
@@ -63,7 +63,7 @@ static auto run(Socket& serverSocket,
     socklen_t socketLength = sizeof(clientAddress);
     std::int64_t connectionFd =
         accept(serverSocket.getFd(),
-               reinterpret_cast<sockaddr*>(&clientAddress), &socketLength);
+               reinterpret_cast<sockaddr *>(&clientAddress), &socketLength);
 
     if (connectionFd == -1) {
       continue;
@@ -90,7 +90,7 @@ static auto run(Socket& serverSocket,
  * client ops.
  * @return The response received from the server, if any.
  */
-static auto run(Socket& clientSocket) -> std::string {
+static auto run(Socket &clientSocket) -> std::string {
   clientSocket.setOptions();
   clientSocket.configureConnection(TEST_PORT, TEST_CLIENT_NETADDR, "client");
 
@@ -117,7 +117,7 @@ static auto run(Socket& clientSocket) -> std::string {
  * a single client and a server.
  */
 class SocketTest : public ::testing::Test {
- protected:
+protected:
   Socket serverSocket;
   Socket clientSocket;
   std::jthread serverThread;

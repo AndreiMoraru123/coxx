@@ -111,7 +111,7 @@ auto Socket::readFull(std::int64_t fd, std::string &buffer,
   while (bytesRead < numberOfBytes) {
     ssize_t readBytes = read(fd, &buffer[bytesRead], numberOfBytes - bytesRead);
     if (readBytes <= 0) {
-      return -1;  // Error, or unexpected EOF
+      return -1; // Error, or unexpected EOF
     }
     bytesRead += static_cast<std::size_t>(readBytes);
   }
@@ -140,7 +140,7 @@ auto Socket::writeAll(std::int64_t fd, std::string &buffer,
     ssize_t writtenBytes =
         write(fd, &buffer[bytesWrote], numberOfBytes - bytesWrote);
     if (writtenBytes <= 0) {
-      return -1;  // Error
+      return -1; // Error
     }
     bytesWrote += static_cast<std::size_t>(writtenBytes);
   }

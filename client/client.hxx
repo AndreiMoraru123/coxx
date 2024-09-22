@@ -15,7 +15,7 @@ constexpr std::int64_t CLIENT_NETADDR = INADDR_LOOPBACK;
 using CommandList = std::vector<std::string>;
 
 class Client {
- public:
+public:
   /**
    * @brief Construct a new Client object.
    *
@@ -36,8 +36,8 @@ class Client {
    * @param commands The command to be send.
    * @return Error code indicating success (0) or failure (-1).
    */
-  auto sendRequest(std::int64_t fd,
-                   const CommandList &commands) const -> std::int32_t;
+  auto sendRequest(std::int64_t fd, const CommandList &commands) const
+      -> std::int32_t;
 
   /**
    * @brief Reads a response from the server.
@@ -63,6 +63,6 @@ class Client {
    */
   void run(const CommandList &commands, std::int64_t port);
 
- private:
+private:
   Socket socket;
 };

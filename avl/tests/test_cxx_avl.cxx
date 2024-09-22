@@ -7,10 +7,10 @@
 
 #include "avl.hxx"
 
-#define containerOf(ptr, type, member)                           \
-  ({                                                             \
-    const decltype(std::declval<type>().member) *__mptr = (ptr); \
-    (type *)((char *)__mptr - offsetof(type, member));           \
+#define containerOf(ptr, type, member)                                         \
+  ({                                                                           \
+    const decltype(std::declval<type>().member) *__mptr = (ptr);               \
+    (type *)((char *)__mptr - offsetof(type, member));                         \
   })
 
 struct Data {
@@ -52,7 +52,8 @@ static auto del(Container &c, std::uint32_t val) -> bool {
 }
 
 static void verify(AVLNode *parent, AVLNode *node, Container &c) {
-  if (!node) return;
+  if (!node)
+    return;
 
   AVLNode *leftNode = c.tree.find_left(node);
   AVLNode *rightNode = c.tree.find_right(node);
@@ -88,7 +89,8 @@ static void verify(AVLNode *parent, AVLNode *node, Container &c) {
 
 static void extract(AVLNode *node, std::multiset<std::uint32_t> &extracted,
                     Container &c) {
-  if (!node) return;
+  if (!node)
+    return;
 
   extract(c.tree.find_left(node), extracted, c);
   extracted.insert(containerOf(node, Data, node)->val);
@@ -112,7 +114,7 @@ static void dispose(Container &c) {
 }
 
 class AVLTest : public ::testing::Test {
- public:
+public:
   Container c;
   std::multiset<std::uint32_t> ref;
 

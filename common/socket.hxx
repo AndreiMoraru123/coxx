@@ -5,7 +5,7 @@
 #include <string>
 
 class Socket {
- public:
+public:
   /**
    * @brief Construct a new Socket:: Socket object
    *
@@ -90,7 +90,7 @@ class Socket {
    */
   auto getFd() const -> int;
 
- private:
+private:
   /**
    * @brief The file descriptor associated with a Socket instance.
    *

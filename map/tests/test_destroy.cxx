@@ -4,7 +4,7 @@
 #include "map.hxx"
 
 class DestroyTest : public ::testing::Test {
- protected:
+protected:
   void SetUp() override { initMap(&cMap); }
 
   CMap cMap;

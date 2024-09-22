@@ -25,7 +25,7 @@ using ErrCodeMsgTuple = std::pair<std::int32_t, std::string>;
  * @return The error code (0 on success, -1 on failure) along with the message
  * received from the client (on success) or an error message (on failure).
  */
-static auto oneRequest(const Socket& serverSocket,
+static auto oneRequest(const Socket &serverSocket,
                        std::int64_t connectionFileDescriptor)
     -> ErrCodeMsgTuple {
   std::vector<char> readBuffer(4 + MAX_MESSAGE_SIZE + 1);
@@ -90,8 +90,8 @@ static auto oneRequest(const Socket& serverSocket,
  * @return The error code (0 on success, -1 on failure) along with the response
  * received from the server (on success) or an error message (on failure).
  */
-static auto query(const Socket& clientSocket,
-                  std::string text) -> ErrCodeMsgTuple {
+static auto query(const Socket &clientSocket, std::string text)
+    -> ErrCodeMsgTuple {
   std::int64_t fd = clientSocket.getFd();
   auto len = static_cast<uint32_t>(text.size());
 
@@ -163,7 +163,7 @@ static auto query(const Socket& clientSocket,
  * @param numQueries the number of requests (messages) the server will process.
  * @return The last client message the server processed.
  */
-static auto run(const Socket& serverSocket, std::int64_t maxIterations,
+static auto run(const Socket &serverSocket, std::int64_t maxIterations,
                 std::int64_t numQueries) -> std::vector<std::string> {
   serverSocket.setOptions();
   serverSocket.configureConnection(TEST_PORT, TEST_SERVER_NETADDR, "server");
@@ -179,10 +179,10 @@ static auto run(const Socket& serverSocket, std::int64_t maxIterations,
     socklen_t socketLength = sizeof(clientAddress);
     std::int64_t connectionFileDescriptor =
         accept(serverSocket.getFd(),
-               reinterpret_cast<sockaddr*>(&clientAddress), &socketLength);
+               reinterpret_cast<sockaddr *>(&clientAddress), &socketLength);
 
     if (connectionFileDescriptor == -1) {
-      return false;  // This will come back to bite me
+      return false; // This will come back to bite me
     }
 
     std::ranges::for_each(std::views::iota(0, numQueries), [&](auto) {
@@ -216,8 +216,8 @@ static auto run(const Socket& serverSocket, std::int64_t maxIterations,
  * @return The last error code along with
  * the last response received from the server for the last query.
  */
-static auto run(const Socket& clientSocket,
-                std::uint8_t numQueries) -> std::vector<ErrCodeMsgTuple> {
+static auto run(const Socket &clientSocket, std::uint8_t numQueries)
+    -> std::vector<ErrCodeMsgTuple> {
   std::vector<ErrCodeMsgTuple> responses;
 
   clientSocket.setOptions();
@@ -231,7 +231,7 @@ static auto run(const Socket& clientSocket,
 }
 
 class ProtocolParsingTest : public ::testing::Test {
- protected:
+protected:
   Socket serverSocket;
   Socket clientSocket;
   std::jthread serverThread;
@@ -263,11 +263,11 @@ class ProtocolParsingTest : public ::testing::Test {
 TEST_F(ProtocolParsingTest, ProtocolParsing) {
   auto serverResponses = run(clientSocket, TEST_NUM_QUERIES);
 
-  for (const auto& msg : clientMessages) {
+  for (const auto &msg : clientMessages) {
     EXPECT_EQ(msg, "hello");
   }
 
-  for (const auto& [err, msg] : serverResponses) {
+  for (const auto &[err, msg] : serverResponses) {
     EXPECT_EQ(err, 0);
     EXPECT_EQ(msg, "world");
   }
