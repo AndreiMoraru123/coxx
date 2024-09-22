@@ -97,7 +97,7 @@ try:
             expected_output == actual_output
         ), f"command: {cmd} returned: {actual_output} but expected {expected_output}"
 
-except Exception as e:
+except AssertionError as e:
     print(Fore.RED + f"✖ Test failed: {e}")
     sys.exit(1)  # make sure the build fails
 
