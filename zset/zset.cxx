@@ -56,7 +56,7 @@ static void treeAdd(ZSet *set, ZNode *node) {
 
 auto zNew(const std::string &name, std::size_t len, std::double_t score)
     -> ZNode * {
-  auto node = (ZNode *)malloc(sizeof(ZNode) + len);
+  auto node = new ZNode();
   init(&node->tree);
   node->map.next = nullptr;
   node->map.code = stringHash(name);

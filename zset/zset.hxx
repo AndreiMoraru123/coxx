@@ -36,7 +36,7 @@ struct ZNode {
 auto stringHash(const std::string &data) -> std::uint64_t;
 auto zAdd(ZSet *set, const std::string &name, std::size_t len,
           std::double_t score) -> bool;
-auto zLookUp(ZSet *zset, const std::string &name, std::size_t len) -> ZNode *;
+auto zLookUp(ZSet *set, const std::string &name, std::size_t len) -> ZNode *;
 auto zPop(ZSet *set, const std::string &name, std::size_t len) -> ZNode *;
 auto zQuery(ZSet *set, std::double_t score, const std::string &name,
             std::size_t len) -> ZNode *;
