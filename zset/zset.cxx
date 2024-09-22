@@ -116,7 +116,7 @@ auto zPop(ZSet *set, const std::string &name, std::size_t len) -> ZNode * {
   key.name = name;
   key.len = len;
 
-  CNode *found = CMapPop(&set->map, &key.node, mapCmp);
+  const CNode *found = CMapPop(&set->map, &key.node, mapCmp);
   if (!found) {
     return nullptr;
   }
@@ -128,7 +128,7 @@ auto zPop(ZSet *set, const std::string &name, std::size_t len) -> ZNode * {
 
 auto zQuery(ZSet *set, std::double_t score, const std::string &name,
             std::size_t len) -> ZNode * {
-  AVLNode *found = nullptr;
+  const AVLNode *found = nullptr;
   AVLNode *curr = set->tree;
   while (curr) {
     if (zLess(curr, score, name, len)) {
@@ -142,7 +142,7 @@ auto zQuery(ZSet *set, std::double_t score, const std::string &name,
 }
 
 auto zOffset(ZNode *node, std::int64_t off) -> ZNode * {
-  AVLNode *offsetNode = node ? offset(&node->tree, off) : nullptr;
+  const AVLNode *offsetNode = node ? offset(&node->tree, off) : nullptr;
   return offsetNode ? containerOf(offsetNode, ZNode, tree) : nullptr;
 }
 

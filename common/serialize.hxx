@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cmath>
 #include <cstdint>
 #include <string>
 
@@ -17,7 +18,7 @@ namespace out {
 void nil(std::string &out);
 void str(std::string &out, const std::string &val);
 void num(std::string &out, std::int64_t val);
-void dbl(std::string &out, double val);
+void dbl(std::string &out, std::double_t val);
 void err(std::string &out, std::int32_t code, const std::string &msg);
 void arr(std::string &out, std::uint32_t n);
 auto begin_arr(std::string &out) -> void *;

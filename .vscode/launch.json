@@ -107,7 +107,28 @@
       "miDebuggerPath": "/usr/bin/gdb"
     },
     {
-      "name": "Debug AVL Test",
+      "name": "Debug C AVL Test",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/bazel-bin/avl/tests/test_c_avl",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "preLaunchTask": "bazel build //:test_c_avl (debug)",
+      "miDebuggerPath": "/usr/bin/gdb"
+    },
+    {
+      "name": "Debug CXX AVL Test",
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/bazel-bin/avl/tests/test_cxx_avl",

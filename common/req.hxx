@@ -36,14 +36,14 @@ public:
 private:
   static CommandMap commandMap;
   void keys([[maybe_unused]] std::vector<std::string> &commandList,
-            std::string &output);
-  void get(std::vector<std::string> &commandList, std::string &output);
-  void set(std::vector<std::string> &commandList, std::string &output);
-  void del(std::vector<std::string> &commandList, std::string &output);
-  void zadd(std::vector<std::string> &commandList, std::string &output);
-  void zrem(std::vector<std::string> &commandList, std::string &output);
-  void zscore(std::vector<std::string> &commandList, std::string &output);
-  void zquery(std::vector<std::string> &commandList, std::string &output);
-  auto isCommand(const std::string &word, const char *commandList) -> bool;
+            std::string &output) const;
+  void get(std::vector<std::string> &commandList, std::string &output) const;
+  void set(std::vector<std::string> &commandList, std::string &output) const;
+  void del(std::vector<std::string> &commandList, std::string &output) const;
+  void zadd(std::vector<std::string> &commandList, std::string &output) const;
+  void zrem(std::vector<std::string> &commandList, std::string &output) const;
+  void zscore(std::vector<std::string> &commandList, std::string &output) const;
+  void zquery(std::vector<std::string> &commandList, std::string &output) const;
+  auto isCommand(const std::string &word, const char *commandList) const;
   auto expectZSet(std::string &output, std::string &s, Entry **entry) const;
 };

@@ -1,6 +1,7 @@
 #include "serialize.hxx"
 
 #include <cassert>
+#include <cmath>
 #include <cstddef>
 #include <cstring>
 #include <utility>
@@ -23,7 +24,7 @@ void num(std::string &out, std::int64_t val) {
   out.append(reinterpret_cast<char *>(&val), 8);
 }
 
-void dbl(std::string &out, double val) {
+void dbl(std::string &out, std::double_t val) {
   out.push_back(std::to_underlying(Serialize::DBL));
   out.append(reinterpret_cast<char *>(&val), 8);
 }

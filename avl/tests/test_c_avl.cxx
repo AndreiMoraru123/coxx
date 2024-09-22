@@ -190,7 +190,7 @@ static void testOffset(std::uint32_t size) {
     for (std::uint32_t j = 0; j < size; ++j) {
       std::int64_t off =
           static_cast<std::int64_t>(j) - static_cast<std::int64_t>(i);
-      AVLNode *offNode = offset(node, off);
+      const AVLNode *offNode = offset(node, off);
       assert(containerOf(offNode, Data, node)->val == j);
     }
     // out of range by one

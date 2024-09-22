@@ -57,6 +57,17 @@
       }
     },
     {
+      "label": "bazel build //:test_c_avl (debug)",
+      "type": "shell",
+      "command": "bazel",
+      "args": ["build", "-c", "dbg", "//avl/tests:test_c_avl"],
+      "problemMatcher": "$gcc",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
       "label": "bazel build //:test_cxx_avl (debug)",
       "type": "shell",
       "command": "bazel",

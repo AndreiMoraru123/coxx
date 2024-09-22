@@ -1,5 +1,7 @@
 #include "conn.hxx"
 
+#include <utility>
+
 Connection::~Connection() { close(_fd); }
 
 auto Connection::tryOneRequest() -> bool {
@@ -17,10 +19,10 @@ auto Connection::tryOneRequest() -> bool {
   }
 
   if (4 + messageLength > readBufferSize) {
-    return false;  // not enough data in the buffer;
+    return false; // not enough data in the buffer;
   }
 
-  std::uint8_t& requestData = *(readBuffer.data() + 4);
+  std::uint8_t &requestData = *(readBuffer.data() + 4);
 
   // parse the request
   std::vector<std::string> command;
@@ -37,8 +39,7 @@ auto Connection::tryOneRequest() -> bool {
   // pack the response into the buffer
   if (4 + output.size() > MAX_MESSAGE_SIZE) {
     output.clear();
-    out::err(output, static_cast<std::underlying_type_t<Error>>(Error::TOO_BIG),
-             "response is too big");
+    out::err(output, std::to_underlying(Error::TOO_BIG), "response is too big");
   }
 
   auto writeLength = static_cast<std::uint32_t>(output.size());
@@ -71,7 +72,7 @@ auto Connection::tryFlushBuffer() -> bool {
   } while (writtenBytes < 0 && errno == EINTR);
 
   if (writtenBytes < 0 && errno == EAGAIN) {
-    return false;  // stop
+    return false; // stop
   }
 
   if (writtenBytes < 0) {
@@ -105,7 +106,7 @@ auto Connection::tryFillBuffer() -> bool {
   } while (readBytes < 0 && errno == EINTR);
 
   if (readBytes < 0 && errno == EAGAIN) {
-    return false;  // stop
+    return false; // stop
   }
 
   if (readBytes < 0) {
@@ -128,17 +129,20 @@ auto Connection::tryFillBuffer() -> bool {
   assert(readBufferSize <= readBuffer.capacity());
 
   while (tryOneRequest()) {
+    // trying a request
   }
   return (state == ConnectionState::REQ);
 }
 
 void Connection::stateRequest() {
   while (tryFillBuffer()) {
+    // trying to read into buffer
   }
 }
 
 void Connection::stateResponse() {
   while (tryFlushBuffer()) {
+    // trying to write to buffer
   }
 }
 

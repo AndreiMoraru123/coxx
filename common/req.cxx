@@ -5,14 +5,13 @@
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
-#include <map.h>
 #include <memory>
 #include <utility>
 #include <vector>
 
 CommandMap Request::commandMap;
 
-static void keyScan(CNode *node, void *arg) {
+static void keyScan(const CNode *node, void *arg) {
   std::string &output = *static_cast<std::string *>(arg);
   out::str(output, containerOf(node, Entry, node)->key);
 }
@@ -51,7 +50,8 @@ auto Request::expectZSet(std::string &output, std::string &s,
   return true;
 }
 
-void Request::zadd(std::vector<std::string> &commandList, std::string &output) {
+void Request::zadd(std::vector<std::string> &commandList,
+                   std::string &output) const {
   std::double_t score = 0;
   if (!strToDouble(commandList[2], score)) {
     return out::err(output, std::to_underlying(Error::ARG), "expect fp number");
@@ -84,7 +84,8 @@ void Request::zadd(std::vector<std::string> &commandList, std::string &output) {
   return out::num(output, static_cast<std::int64_t>(added));
 }
 
-void Request::zrem(std::vector<std::string> &commandList, std::string &output) {
+void Request::zrem(std::vector<std::string> &commandList,
+                   std::string &output) const {
   Entry *entry = nullptr;
   if (!expectZSet(output, commandList[1], &entry)) {
     return;
@@ -98,7 +99,7 @@ void Request::zrem(std::vector<std::string> &commandList, std::string &output) {
 }
 
 void Request::zscore(std::vector<std::string> &commandList,
-                     std::string &output) {
+                     std::string &output) const {
 
   Entry *entry = nullptr;
   if (!expectZSet(output, commandList[1], &entry)) {
@@ -111,7 +112,7 @@ void Request::zscore(std::vector<std::string> &commandList,
 }
 
 void Request::zquery(std::vector<std::string> &commandList,
-                     std::string &output) {
+                     std::string &output) const {
   std::double_t score = 0;
   if (!strToDouble(commandList[2], score)) {
     return out::err(output, std::to_underlying(Error::ARG), "expect fp number");
@@ -158,24 +159,25 @@ void Request::zquery(std::vector<std::string> &commandList,
   out::end_arr(output, arr, n);
 }
 
-auto Request::isCommand(const std::string &word, const char *commandList)
-    -> bool {
+auto Request::isCommand(const std::string &word,
+                        const char *commandList) const {
   return 0 == strcasecmp(word.c_str(), commandList);
 }
 
 void Request::keys([[maybe_unused]] std::vector<std::string> &commandList,
-                   std::string &output) {
+                   std::string &output) const {
   out::arr(output, static_cast<std::uint32_t>(CMapSize(&commandMap.db)));
   scan(commandMap.db.table1, &keyScan, &output);
   scan(commandMap.db.table2, &keyScan, &output);
 }
 
-void Request::get(std::vector<std::string> &commandList, std::string &output) {
+void Request::get(std::vector<std::string> &commandList,
+                  std::string &output) const {
   Entry key;
   key.key.swap(commandList[1]);
   key.node.code = stringHash(key.key);
 
-  CNode *node = CMapLookUp(&commandMap.db, &key.node, &entryEquality);
+  const CNode *node = CMapLookUp(&commandMap.db, &key.node, &entryEquality);
 
   if (!node) {
     return out::nil(output);
@@ -185,12 +187,13 @@ void Request::get(std::vector<std::string> &commandList, std::string &output) {
   out::str(output, value);
 }
 
-void Request::set(std::vector<std::string> &commandList, std::string &output) {
+void Request::set(std::vector<std::string> &commandList,
+                  std::string &output) const {
   Entry key;
   key.key.swap(commandList[1]);
   key.node.code = stringHash(key.key);
 
-  CNode *node = CMapLookUp(&commandMap.db, &key.node, &entryEquality);
+  const CNode *node = CMapLookUp(&commandMap.db, &key.node, &entryEquality);
 
   if (node) {
     containerOf(node, Entry, node)->val.swap(commandList[2]);
@@ -205,12 +208,13 @@ void Request::set(std::vector<std::string> &commandList, std::string &output) {
   return out::nil(output);
 }
 
-void Request::del(std::vector<std::string> &commandList, std::string &output) {
+void Request::del(std::vector<std::string> &commandList,
+                  std::string &output) const {
   Entry key;
   key.key.swap(commandList[1]);
   key.node.code = stringHash(key.key);
 
-  CNode *node = CMapPop(&commandMap.db, &key.node, &entryEquality);
+  const CNode *node = CMapPop(&commandMap.db, &key.node, &entryEquality);
 
   if (node) {
     delete containerOf(node, Entry, node);
