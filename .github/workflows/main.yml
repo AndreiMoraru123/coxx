@@ -16,8 +16,8 @@ jobs:
       image: gcc:14
 
     steps:
-      - name: Install Clang-Tidy
-        run: apt-get update && apt-get install -y clang-tidy sudo
+      - name: Install Clang-Tidy & Clang-Format
+        run: apt-get update && apt-get install -y clang-tidy clang-format sudo
 
       - name: Create non-root user
         run: |
@@ -34,6 +34,9 @@ jobs:
         run: |
           chown -R builder:builder .
           su builder
+
+      - name: Format code with Clang-Format
+        run: su builder -c 'find . -name "*.cxx" -o -name "*.hxx" -o -name "*.c" -o -name "*.h" | xargs clang-format -i'
 
       - name: Build project with GCC 14
         run: su builder -c 'bazel build --cxxopt='-std=c++23' //...'
