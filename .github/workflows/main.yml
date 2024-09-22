@@ -30,13 +30,24 @@ jobs:
       - name: Set up Bazelisk
         uses: philwo/setup-bazelisk@v1
 
+      - name: Set Git safe directory
+        run: git config --global --add safe.directory /__w/coxx/coxx
+
+      - name: Format code with Clang-Format
+        run: |
+          find . -name "*.cxx" -o -name "*.hxx" -o -name "*.c" -o -name "*.h" | xargs clang-format -i
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git add .
+          if ! git diff --quiet && ! git diff --staged --quiet; then
+            git commit -m "Apply clang-format changes"
+            git push "https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" HEAD:${{ github.ref }}
+          fi
+
       - name: Switch to non-root user
         run: |
           chown -R builder:builder .
           su builder
-
-      - name: Format code with Clang-Format
-        run: su builder -c 'find . -name "*.cxx" -o -name "*.hxx" -o -name "*.c" -o -name "*.h" | xargs clang-format -i'
 
       - name: Build project with GCC 14
         run: su builder -c 'bazel build --cxxopt='-std=c++23' //...'
