@@ -11,13 +11,14 @@ cc_library(
     srcs = ["entry.cxx"],
     hdrs = ["entry.hxx"],
     visibility = ["//visibility:public"],
-    deps = ["//map/c:cmap"],
+    deps = ["//zset"],
 )
 
 cc_library(
     name = "serialize",
     srcs = ["serialize.cxx"],
     hdrs = ["serialize.hxx"],
+    copts = ["-std=c++23"],
     visibility = ["//visibility:public"],
 )
 

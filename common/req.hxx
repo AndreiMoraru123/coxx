@@ -17,6 +17,8 @@ constexpr std::size_t MAX_NUM_ARGS = 1024;
 enum class Error : std::int32_t {
   UNKNOWN = 1,
   TOO_BIG = 2,
+  TYPE = 3,
+  ARG = 4,
 };
 
 struct CommandMap {
@@ -24,19 +26,24 @@ struct CommandMap {
 };
 
 class Request {
- public:
+public:
   Request() = default;
-  void operator()(std::vector<std::string>& commandList, std::string& out);
+  void operator()(std::vector<std::string> &commandList, std::string &out);
 
-  auto parse(std::uint8_t& requestData, std::size_t length,
-             std::vector<std::string>& outputData) -> std::uint32_t;
+  auto parse(std::uint8_t &requestData, std::size_t length,
+             std::vector<std::string> &outputData) -> std::uint32_t;
 
- private:
+private:
   static CommandMap commandMap;
-  void keys([[maybe_unused]] std::vector<std::string>& cmd,
-            std::string& output);
-  void get(std::vector<std::string>& commandList, std::string& output);
-  void set(std::vector<std::string>& commandList, std::string& output);
-  void del(std::vector<std::string>& commandList, std::string& output);
-  auto isCommand(const std::string& word, const char* commandList) -> bool;
+  void keys([[maybe_unused]] std::vector<std::string> &commandList,
+            std::string &output);
+  void get(std::vector<std::string> &commandList, std::string &output);
+  void set(std::vector<std::string> &commandList, std::string &output);
+  void del(std::vector<std::string> &commandList, std::string &output);
+  void zadd(std::vector<std::string> &commandList, std::string &output);
+  void zrem(std::vector<std::string> &commandList, std::string &output);
+  void zscore(std::vector<std::string> &commandList, std::string &output);
+  void zquery(std::vector<std::string> &commandList, std::string &output);
+  auto isCommand(const std::string &word, const char *commandList) -> bool;
+  auto expectZSet(std::string &output, std::string &s, Entry **entry) const;
 };

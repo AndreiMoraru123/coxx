@@ -1,22 +1,25 @@
 #pragma once
 
 #include <functional>
+#include <memory>
 #include <string>
 
 #include "map/c/map.h"
+#include "zset/zset.hxx"
 
-#define containerOf(ptr, type, member)                   \
-  ({                                                     \
-    const decltype(((type *)0)->member) *__mptr = (ptr); \
-    (type *)((char *)__mptr - offsetof(type, member));   \
-  })
+enum class KeyType : std::uint8_t {
+  STR = 0,
+  ZSET = 1,
+};
 
 struct Entry {
   CNode node;
   std::string key;
+  std::uint32_t type = 0;
   std::string val;
+  std::unique_ptr<ZSet> set = nullptr;
 };
 
 auto entryEquality(CNode *lhs, CNode *rhs) -> bool;
-void scan(CTable &table, const std::function<void(CNode *, void *)> &fn,
+void scan(const CTable &table, const std::function<void(CNode *, void *)> &fn,
           void *arg);

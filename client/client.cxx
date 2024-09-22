@@ -1,4 +1,6 @@
 #include "client.hxx"
+#include "common/serialize.hxx"
+#include <cmath>
 
 static auto deserialize(std::string_view data) -> std::int32_t {
   if (data.size() < 1) {
@@ -9,77 +11,88 @@ static auto deserialize(std::string_view data) -> std::int32_t {
   auto type = static_cast<Serialize>(data[0]);
 
   switch (type) {
-    case Serialize::NIL:
-      std::println("(nil)");
-      return 1;
-    case Serialize::ERR:
-      if (data.size() < 1 + 8) {
-        std::println("bad response");
-        return -1;
-      }
-      {
-        std::int32_t code = 0;
-        std::uint32_t len = 0;
-        std::memcpy(&code, &data[1], 4);
-        std::memcpy(&len, &data[1 + 4], 4);
-        if (data.size() < 1 + 8 + len) {
-          std::println("bad response");
-          return -1;
-        }
-        std::string_view dataView(&data[1 + 8], len);
-        std::println("(err) {} {}", code, dataView);
-        return 1 + 8 + len;
-      }
-    case Serialize::STR:
-      if (data.size() < 1 + 4) {
-        std::println("bad response");
-        return -1;
-      }
-      {
-        std::uint32_t len = 0;
-        std::memcpy(&len, &data[1], 4);
-        if (data.size() < 1 + 4 + len) {
-          std::println("bad response");
-          return -1;
-        }
-        std::string_view dataView(&data[1 + 4], len);
-        std::println("(str) {}", dataView);
-        return 1 + 4 + len;
-      }
-    case Serialize::INT:
-      if (data.size() < 1 + 8) {
-        std::println("bad response");
-        return -1;
-      }
-      {
-        std::int64_t val = 0;
-        std::memcpy(&val, &data[1], 8);
-        std::println("(int) {}", val);
-        return 1 + 8;
-      }
-    case Serialize::ARR:
-      if (data.size() < 1 + 4) {
-        std::println("bad response");
-        return -1;
-      }
-      {
-        std::uint32_t len = 0;
-        std::memcpy(&len, &data[1], 4);
-        std::println("(arr) len={}", len);
-        std::size_t arrayBytes = 1 + 4;
-        for (std::uint32_t i = 0; i < len; ++i) {
-          std::int32_t responseValue = deserialize(data.substr(arrayBytes));
-          if (responseValue < 0) {
-            return responseValue;
-          }
-          arrayBytes += static_cast<std::size_t>(responseValue);
-        }
-        std::println("(arr) end");
-        return static_cast<std::int32_t>(arrayBytes);
-      }
-    default:
+  case Serialize::NIL:
+    std::println("(nil)");
+    return 1;
+  case Serialize::ERR:
+    if (data.size() < 1 + 8) {
       std::println("bad response");
       return -1;
+    }
+    {
+      std::int32_t code = 0;
+      std::uint32_t len = 0;
+      std::memcpy(&code, &data[1], 4);
+      std::memcpy(&len, &data[1 + 4], 4);
+      if (data.size() < 1 + 8 + len) {
+        std::println("bad response");
+        return -1;
+      }
+      std::string_view dataView(&data[1 + 8], len);
+      std::println("(err) {} {}", code, dataView);
+      return 1 + 8 + len;
+    }
+  case Serialize::STR:
+    if (data.size() < 1 + 4) {
+      std::println("bad response");
+      return -1;
+    }
+    {
+      std::uint32_t len = 0;
+      std::memcpy(&len, &data[1], 4);
+      if (data.size() < 1 + 4 + len) {
+        std::println("bad response");
+        return -1;
+      }
+      std::string_view dataView(&data[1 + 4], len);
+      std::println("(str) {}", dataView);
+      return 1 + 4 + len;
+    }
+  case Serialize::INT:
+    if (data.size() < 1 + 8) {
+      std::println("bad response");
+      return -1;
+    }
+    {
+      std::int64_t val = 0;
+      std::memcpy(&val, &data[1], 8);
+      std::println("(int) {}", val);
+      return 1 + 8;
+    }
+  case Serialize::DBL:
+    if (data.size() < 1 + 8) {
+      std::println("bad response");
+      return -1;
+    }
+    {
+      std::double_t val = 0;
+      std::memcpy(&val, &data[1], 8);
+      std::println("(double) {}", val);
+      return 1 + 8;
+    }
+  case Serialize::ARR:
+    if (data.size() < 1 + 4) {
+      std::println("bad response");
+      return -1;
+    }
+    {
+      std::uint32_t len = 0;
+      std::memcpy(&len, &data[1], 4);
+      std::println("(arr) len={}", len);
+      std::size_t arrayBytes = 1 + 4;
+      for (std::uint32_t i = 0; i < len; ++i) {
+        std::int32_t responseValue = deserialize(data.substr(arrayBytes));
+        if (responseValue < 0) {
+          return responseValue;
+        }
+        arrayBytes += static_cast<std::size_t>(responseValue);
+      }
+      std::println("(arr) end");
+      return static_cast<std::int32_t>(arrayBytes);
+    }
+  default:
+    std::println("bad response");
+    return -1;
   }
 }
 
@@ -98,11 +111,11 @@ static auto deserialize(std::string_view data) -> std::int32_t {
  * @param commands The command to be send.
  * @return Error code indicating success (0) or failure (-1).
  */
-auto Client::sendRequest(std::int64_t fd,
-                         const CommandList& commands) const -> std::int32_t {
+auto Client::sendRequest(std::int64_t fd, const CommandList &commands) const
+    -> std::int32_t {
   std::uint32_t messageLength = 4;
 
-  for (const std::string& s : commands) {
+  for (const std::string &s : commands) {
     messageLength += 4 + s.size();
   }
 
@@ -116,7 +129,7 @@ auto Client::sendRequest(std::int64_t fd,
   std::memcpy(writeBuffer.data() + 4, &n, messageLength);
 
   std::size_t current = 8;
-  for (const std::string& s : commands) {
+  for (const std::string &s : commands) {
     auto previous = static_cast<std::uint32_t>(s.size());
     std::memcpy(writeBuffer.data() + current, &previous, 4);
     std::memcpy(writeBuffer.data() + current + 4, s.data(), s.size());
@@ -195,7 +208,7 @@ auto Client::readResponse(std::int64_t fd) const -> std::int32_t {
  * @param commands The queries to send to the server.
  * @param port The port to run the client on.
  */
-void Client::run(const CommandList& commands, std::int64_t port) {
+void Client::run(const CommandList &commands, std::int64_t port) {
   socket.setOptions();
   socket.configureConnection(port, CLIENT_NETADDR, "client");
 
