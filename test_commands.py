@@ -5,6 +5,11 @@ import subprocess
 import sys
 import time
 
+from colorama import Fore, init
+from tqdm import tqdm
+
+init(autoreset=True)
+
 
 def start_server():
     """Starts a server process.
@@ -82,13 +87,19 @@ for x in lines:
 
 try:
     assert len(commands) == len(outputs)
-    for cmd, expected_output in zip(commands, outputs):
+    for cmd, expected_output in tqdm(zip(commands, outputs), total=len(commands)):
         actual_output = subprocess.check_output(shlex.split(cmd)).decode("utf-8")
+
+        if expected_output == actual_output:
+            print(Fore.GREEN + f"✔ Test passed: {cmd}")
+
         assert (
             expected_output == actual_output
         ), f"command: {cmd} returned: {actual_output} but expected {expected_output}"
+
 except Exception as e:
-    print(f"Test failed: {e}")
+    print(Fore.RED + f"✖ Test failed: {e}")
     sys.exit(1)  # make sure the build fails
+
 finally:
     server_process.terminate()

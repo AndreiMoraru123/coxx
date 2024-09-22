@@ -20,7 +20,7 @@ jobs:
         run: apt-get update && apt-get install -y clang-tidy clang-format sudo
 
       - name: Install Python
-        run: apt-get install python3 sudo
+        run: apt-get update && apt-get install -y python-is-python3 python3-pip python3-venv sudo
 
       - name: Create non-root user
         run: |
@@ -52,6 +52,11 @@ jobs:
           chown -R builder:builder .
           su builder
 
+      - name: Create virtual environment & install dependencies
+        run: |
+          su builder -c 'python -m venv venv'
+          su builder -c '. venv/bin/activate && pip install tqdm colorama'
+
       - name: Build project with GCC 14
         run: su builder -c 'bazel build --cxxopt='-std=c++23' //...'
 
@@ -65,4 +70,4 @@ jobs:
         run: su builder -c 'bazel test --cxxopt="-std=c++23" //...'
 
       - name: Run integration test with Python
-        run: su builder -c 'python3 test_commands.py'
+        run: su builder -c '. venv/bin/activate && python test_commands.py'
