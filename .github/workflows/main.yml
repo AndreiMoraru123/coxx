@@ -19,6 +19,9 @@ jobs:
       - name: Install Clang-Tidy & Clang-Format
         run: apt-get update && apt-get install -y clang-tidy clang-format sudo
 
+      - name: Install Python
+        run: apt-get install python3 sudo
+
       - name: Create non-root user
         run: |
           useradd -m builder
@@ -58,5 +61,8 @@ jobs:
       - name: Run Clang-Tidy over the project & supress failure
         run: su builder -c 'clang-tidy -p=. $(find . -name "*.cxx" -o -name "*.hxx") || true'
 
-      - name: Run tests with GCC 14
+      - name: Run unit tests with GCC 14
         run: su builder -c 'bazel test --cxxopt="-std=c++23" //...'
+
+      - name: Run integration test with Python
+        run: su builder -c 'python3 test_commands.py'
