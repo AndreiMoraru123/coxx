@@ -30,6 +30,9 @@ jobs:
       - name: Set up Bazelisk
         uses: philwo/setup-bazelisk@v1
 
+      - name: Set Git safe directory
+        run: git config --global --add safe.directory /__w/coxx/coxx
+
       - name: Format code with Clang-Format
         run: |
           find . -name "*.cxx" -o -name "*.hxx" -o -name "*.c" -o -name "*.h" | xargs clang-format -i
