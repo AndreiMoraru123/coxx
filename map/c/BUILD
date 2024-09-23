@@ -5,3 +5,11 @@ cc_library(
     includes = ["."],
     visibility = ["//visibility:public"],
 )
+
+cc_library(
+    name = "map",
+    hdrs = ["wrap.hxx"],
+    includes = ["."],
+    visibility = ["//visibility:public"],
+    deps = ["cmap"],
+)

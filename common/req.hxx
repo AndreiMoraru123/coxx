@@ -2,7 +2,6 @@
 #include <cassert>
 #include <cstdint>
 #include <cstring>
-#include <map>
 #include <print>
 #include <string>
 #include <vector>
@@ -22,7 +21,7 @@ enum class Error : std::int32_t {
 };
 
 struct CommandMap {
-  CMap db;
+  Map db;
 };
 
 class Request {

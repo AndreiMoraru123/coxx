@@ -6,6 +6,6 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//avl/c:cavl",
-        "//map/c:cmap",
+        "//map/c:map",
     ],
 )

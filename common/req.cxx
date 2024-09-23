@@ -1,6 +1,7 @@
 #include "req.hxx"
 #include "common/entry.hxx"
 #include "common/serialize.hxx"
+#include "map/c/wrap.hxx"
 
 #include <cmath>
 #include <cstdint>
@@ -11,7 +12,7 @@
 
 CommandMap Request::commandMap;
 
-static void keyScan(const CNode *node, void *arg) {
+static void keyScan(const Node *node, void *arg) {
   std::string &output = *static_cast<std::string *>(arg);
   out::str(output, containerOf(node, Entry, node)->key);
 }
@@ -34,7 +35,7 @@ auto Request::expectZSet(std::string &output, std::string &s,
   key.key.swap(s);
   key.node.code = stringHash(key.key);
 
-  const CNode *node = CMapLookUp(&commandMap.db, &key.node, &entryEquality);
+  const auto *node = map::lookup(&commandMap.db, &key.node, &entryEquality);
 
   if (!node) {
     out::nil(output);
@@ -61,7 +62,7 @@ void Request::zadd(std::vector<std::string> &commandList,
   key.key.swap(commandList[1]);
   key.node.code = stringHash(key.key);
 
-  const CNode *node = CMapLookUp(&commandMap.db, &key.node, &entryEquality);
+  const auto *node = map::lookup(&commandMap.db, &key.node, &entryEquality);
   Entry *entry = nullptr;
 
   if (!node) {
@@ -70,7 +71,7 @@ void Request::zadd(std::vector<std::string> &commandList,
     entry->node.code = key.node.code;
     entry->type = std::to_underlying(KeyType::ZSET);
     entry->set = std::make_unique<ZSet>();
-    CMapInsert(&commandMap.db, &entry->node);
+    map::insert(&commandMap.db, &entry->node);
   } else {
     entry = containerOf(node, Entry, node);
     if (entry->type != std::to_underlying(KeyType::ZSET)) {
@@ -166,7 +167,7 @@ auto Request::isCommand(const std::string &word,
 
 void Request::keys([[maybe_unused]] std::vector<std::string> &commandList,
                    std::string &output) const {
-  out::arr(output, static_cast<std::uint32_t>(CMapSize(&commandMap.db)));
+  out::arr(output, static_cast<std::uint32_t>(map::size(&commandMap.db)));
   scan(commandMap.db.table1, &keyScan, &output);
   scan(commandMap.db.table2, &keyScan, &output);
 }
@@ -177,7 +178,7 @@ void Request::get(std::vector<std::string> &commandList,
   key.key.swap(commandList[1]);
   key.node.code = stringHash(key.key);
 
-  const CNode *node = CMapLookUp(&commandMap.db, &key.node, &entryEquality);
+  const auto *node = map::lookup(&commandMap.db, &key.node, &entryEquality);
 
   if (!node) {
     return out::nil(output);
@@ -193,7 +194,7 @@ void Request::set(std::vector<std::string> &commandList,
   key.key.swap(commandList[1]);
   key.node.code = stringHash(key.key);
 
-  const CNode *node = CMapLookUp(&commandMap.db, &key.node, &entryEquality);
+  const auto *node = map::lookup(&commandMap.db, &key.node, &entryEquality);
 
   if (node) {
     containerOf(node, Entry, node)->val.swap(commandList[2]);
@@ -202,7 +203,7 @@ void Request::set(std::vector<std::string> &commandList,
     entry->key.swap(key.key);
     entry->node.code = key.node.code;
     entry->val.swap(commandList[2]);
-    CMapInsert(&commandMap.db, &entry->node);
+    map::insert(&commandMap.db, &entry->node);
   }
 
   return out::nil(output);
@@ -214,7 +215,7 @@ void Request::del(std::vector<std::string> &commandList,
   key.key.swap(commandList[1]);
   key.node.code = stringHash(key.key);
 
-  const CNode *node = CMapPop(&commandMap.db, &key.node, &entryEquality);
+  const auto *node = map::pop(&commandMap.db, &key.node, &entryEquality);
 
   if (node) {
     delete containerOf(node, Entry, node);

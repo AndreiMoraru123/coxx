@@ -1,10 +1,9 @@
 #include "zset.hxx"
 #include "avl/c/avl.h"
-#include "map/c/map.h"
 #include <cstddef>
 #include <cstdint>
 
-auto mapCmp = [](CNode *node, CNode *key) {
+auto mapCmp = [](Node *node, Node *key) {
   ZNode *znode = containerOf(node, ZNode, map);
   Key *nodeKey = containerOf(key, Key, node);
   if (znode->len != nodeKey->len)
@@ -79,7 +78,7 @@ auto zLookUp(ZSet *set, const std::string &name, std::size_t len) -> ZNode * {
   key.node.code = stringHash(name);
   key.name = name;
   key.len = len;
-  CNode const *found = CMapLookUp(&set->map, &key.node, mapCmp);
+  Node const *found = map::lookup(&set->map, &key.node, mapCmp);
   return found ? containerOf(found, ZNode, map) : nullptr;
 }
 
@@ -101,7 +100,7 @@ auto zAdd(ZSet *set, const std::string &name, std::size_t len,
     return false;
   } else {
     node = zNew(name, len, score);
-    CMapInsert(&set->map, &node->map);
+    map::insert(&set->map, &node->map);
     treeAdd(set, node);
     return true;
   }
@@ -116,7 +115,7 @@ auto zPop(ZSet *set, const std::string &name, std::size_t len) -> ZNode * {
   key.name = name;
   key.len = len;
 
-  const CNode *found = CMapPop(&set->map, &key.node, mapCmp);
+  const Node *found = map::pop(&set->map, &key.node, mapCmp);
   if (!found) {
     return nullptr;
   }
@@ -148,4 +147,4 @@ auto zOffset(ZNode *node, std::int64_t off) -> ZNode * {
 
 void zDel(ZNode *node) { free(node); }
 
-void zDispose(ZSet *set) { CMapDestroy(&set->map); }
+void zDispose(ZSet *set) { map::destroy(&set->map); }

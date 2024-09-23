@@ -6,7 +6,7 @@
 #include <string>
 
 #include "avl/c/avl.h"
-#include "map/c/map.h"
+#include "map/c/wrap.hxx"
 
 #define containerOf(ptr, type, member)                                         \
   ({                                                                           \
@@ -16,18 +16,18 @@
 
 struct ZSet {
   AVLNode *tree = nullptr;
-  CMap map;
+  Map map;
 };
 
 struct Key {
-  CNode node;
+  Node node;
   std::string name;
   std::size_t len = 0;
 };
 
 struct ZNode {
   AVLNode tree;
-  CNode map;
+  Node map;
   std::double_t score = 0;
   std::size_t len = 0;
   std::string name;
