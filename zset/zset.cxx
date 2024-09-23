@@ -18,7 +18,7 @@ auto stringHash(const std::string &data) -> std::uint64_t {
   return hash;
 }
 
-static auto less(const AVLNode *lhs, std::double_t score, std::string name,
+static auto less(const AVLNode *lhs, std::double_t score, std::string_view name,
                  std::size_t len) -> bool {
   ZNode *zl = containerOf(lhs, ZNode, tree);
   if (zl->score != score) {
@@ -79,7 +79,7 @@ auto lookup(ZSet *set, const std::string &name, std::size_t len) -> ZNode * {
   key.node.code = stringHash(name);
   key.name = name;
   key.len = len;
-  Node const *found = map::lookup(&set->map, &key.node, mapCmp);
+  auto const *found = map::lookup(&set->map, &key.node, mapCmp);
   return found ? containerOf(found, ZNode, map) : nullptr;
 }
 

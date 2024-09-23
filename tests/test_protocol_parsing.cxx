@@ -90,7 +90,7 @@ static auto oneRequest(const Socket &serverSocket,
  * @return The error code (0 on success, -1 on failure) along with the response
  * received from the server (on success) or an error message (on failure).
  */
-static auto query(const Socket &clientSocket, std::string text)
+static auto query(const Socket &clientSocket, std::string_view text)
     -> ErrCodeMsgTuple {
   std::int64_t fd = clientSocket.getFd();
   auto len = static_cast<uint32_t>(text.size());
@@ -223,6 +223,7 @@ static auto run(const Socket &clientSocket, std::uint8_t numQueries)
   clientSocket.setOptions();
   clientSocket.configureConnection(TEST_PORT, TEST_CLIENT_NETADDR, "client");
 
+  responses.reserve(numQueries);
   for (int i = 0; i < numQueries; ++i) {
     responses.emplace_back(query(clientSocket, clientSays));
   }
