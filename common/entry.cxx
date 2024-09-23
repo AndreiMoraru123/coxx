@@ -25,7 +25,7 @@ void scan(const Table &table, const std::function<void(Node *, void *)> &fn,
     return;
 
   for (std::size_t i = 0; i < table.mask + 1; ++i) {
-    Node *node = table.table[i];
+    auto *node = table.table[i];
     while (node) {
       fn(node, arg);
       node = node->next;

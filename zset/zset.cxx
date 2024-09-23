@@ -3,8 +3,8 @@
 #include <cstdint>
 
 auto mapCmp = [](Node *node, Node *key) {
-  ZNode *znode = containerOf(node, ZNode, map);
-  Key *nodeKey = containerOf(key, Key, node);
+  auto *znode = containerOf(node, ZNode, map);
+  auto *nodeKey = containerOf(key, Key, node);
   if (znode->len != nodeKey->len)
     return false;
   return 0 == std::memcmp(znode->name.data(), nodeKey->name.data(), znode->len);
@@ -20,7 +20,7 @@ auto stringHash(const std::string &data) -> std::uint64_t {
 
 static auto less(const AVLNode *lhs, std::double_t score, std::string_view name,
                  std::size_t len) -> bool {
-  ZNode *zl = containerOf(lhs, ZNode, tree);
+  auto *zl = containerOf(lhs, ZNode, tree);
   if (zl->score != score) {
     return zl->score < score;
   }
@@ -95,7 +95,7 @@ static void update(ZSet *set, ZNode *node, std::double_t score) {
 
 auto add(ZSet *set, const std::string &name, std::size_t len,
          std::double_t score) -> bool {
-  ZNode *node = lookup(set, name, len);
+  auto *node = lookup(set, name, len);
   if (node) { // update the score of an existing pair
     update(set, node, score);
     return false;
@@ -121,7 +121,7 @@ auto pop(ZSet *set, const std::string &name, std::size_t len) -> ZNode * {
     return nullptr;
   }
 
-  ZNode *node = containerOf(found, ZNode, map);
+  auto *node = containerOf(found, ZNode, map);
   set->tree = avl::del(&node->tree);
   return node;
 }
@@ -129,7 +129,7 @@ auto pop(ZSet *set, const std::string &name, std::size_t len) -> ZNode * {
 auto query(ZSet *set, std::double_t score, const std::string &name,
            std::size_t len) -> ZNode * {
   const AVLNode *found = nullptr;
-  AVLNode *curr = set->tree;
+  auto *curr = set->tree;
   while (curr) {
     if (less(curr, score, name, len)) {
       curr = curr->right;
@@ -142,7 +142,7 @@ auto query(ZSet *set, std::double_t score, const std::string &name,
 }
 
 auto offset(ZNode *node, std::int64_t off) -> ZNode * {
-  const AVLNode *offsetNode = node ? avl::offset(&node->tree, off) : nullptr;
+  const auto *offsetNode = node ? avl::offset(&node->tree, off) : nullptr;
   return offsetNode ? containerOf(offsetNode, ZNode, tree) : nullptr;
 }
 

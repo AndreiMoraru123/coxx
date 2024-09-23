@@ -80,7 +80,7 @@ void Request::zadd(std::vector<std::string> &commandList,
   }
 
   // add or update the tuple
-  const std::string &name = commandList[3];
+  const auto &name = commandList[3];
   auto added = zset::add(entry->set.get(), name.data(), name.size(), score);
   return out::num(output, static_cast<std::int64_t>(added));
 }
@@ -92,7 +92,7 @@ void Request::zrem(std::vector<std::string> &commandList,
     return;
   }
 
-  const std::string &name = commandList[2];
+  const auto &name = commandList[2];
   auto *node = zset::pop(entry->set.get(), name.data(), name.size());
   if (node)
     zset::del(node);
@@ -107,7 +107,7 @@ void Request::zscore(std::vector<std::string> &commandList,
     return;
   }
 
-  const std::string &name = commandList[2];
+  const auto &name = commandList[2];
   const auto *node = zset::lookup(entry->set.get(), name.data(), name.size());
   return node ? out::dbl(output, node->score) : out::nil(output);
 }
@@ -119,7 +119,7 @@ void Request::zquery(std::vector<std::string> &commandList,
     return out::err(output, std::to_underlying(Error::ARG), "expect fp number");
   }
 
-  const std::string &name = commandList[3];
+  const auto &name = commandList[3];
   std::int64_t off = 0;
   std::int64_t limit = 0;
 
@@ -184,7 +184,7 @@ void Request::get(std::vector<std::string> &commandList,
     return out::nil(output);
   }
 
-  const std::string &value = containerOf(node, Entry, node)->val;
+  const auto &value = containerOf(node, Entry, node)->val;
   out::str(output, value);
 }
 

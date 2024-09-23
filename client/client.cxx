@@ -80,7 +80,7 @@ static auto deserialize(std::string_view data) -> std::int32_t {
       std::memcpy(&len, &data[1], 4);
       std::println("(arr) len={}", len);
       std::size_t arrayBytes = 1 + 4;
-      for (std::uint32_t i = 0; i < len; ++i) {
+      for (auto i = 0; i < len; ++i) {
         std::int32_t responseValue = deserialize(data.substr(arrayBytes));
         if (responseValue < 0) {
           return responseValue;
@@ -115,7 +115,7 @@ auto Client::sendRequest(std::int64_t fd, const CommandList &commands) const
     -> std::int32_t {
   std::uint32_t messageLength = 4;
 
-  for (const std::string &s : commands) {
+  for (const auto &s : commands) {
     messageLength += 4 + s.size();
   }
 
@@ -129,7 +129,7 @@ auto Client::sendRequest(std::int64_t fd, const CommandList &commands) const
   std::memcpy(writeBuffer.data() + 4, &n, messageLength);
 
   std::size_t current = 8;
-  for (const std::string &s : commands) {
+  for (const auto &s : commands) {
     auto previous = static_cast<std::uint32_t>(s.size());
     std::memcpy(writeBuffer.data() + current, &previous, 4);
     std::memcpy(writeBuffer.data() + current + 4, s.data(), s.size());
@@ -154,7 +154,7 @@ auto Client::readResponse(std::int64_t fd) const -> std::int32_t {
   // 4 bytes header
   std::string header(4, '\0');
   std::vector<char> readBuffer(4 + MAX_MESSAGE_SIZE + 1);
-  std::int32_t readError = socket.readFull(fd, header, 4);
+  auto readError = socket.readFull(fd, header, 4);
   errno = 0;
   if (readError) {
     if (errno == 0) {
@@ -187,7 +187,7 @@ auto Client::readResponse(std::int64_t fd) const -> std::int32_t {
   std::memcpy(readBuffer.data() + 4, responseBody.data(), messageLength);
 
   // Print the result
-  std::int32_t responseValue =
+  auto responseValue =
       deserialize(std::string_view(readBuffer.data() + 4, messageLength));
   if (responseValue > 0 &&
       static_cast<std::uint32_t>(responseValue) != messageLength) {
@@ -212,12 +212,12 @@ void Client::run(const CommandList &commands, std::int64_t port) {
   socket.setOptions();
   socket.configureConnection(port, CLIENT_NETADDR, "client");
 
-  std::int32_t sendErr = sendRequest(socket.getFd(), commands);
+  auto sendErr = sendRequest(socket.getFd(), commands);
   if (sendErr) {
     std::cerr << "send request error" << '\n';
   }
 
-  std::int32_t readError = readResponse(socket.getFd());
+  auto readError = readResponse(socket.getFd());
   if (readError == -1) {
     std::cerr << "read response error" << '\n';
   }

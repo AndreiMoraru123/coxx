@@ -79,7 +79,7 @@ void Server::run(std::int64_t port) {
   while (true) {
     numFileDescriptors = epoll_wait(epollFd, events.data(), MAX_EVENTS, -1);
     // connection fds
-    for (std::int64_t i = 0; i < numFileDescriptors; ++i) {
+    for (auto i = 0; i < numFileDescriptors; ++i) {
       if (events[i].data.fd == socket.getFd()) {
         std::int64_t connectionFd =
             accept(socket.getFd(), reinterpret_cast<sockaddr *>(&clientAddress),
