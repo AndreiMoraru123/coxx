@@ -5,7 +5,7 @@
 #include <memory>
 #include <string>
 
-#include "avl/c/avl.h"
+#include "avl/c/wrap.hxx"
 #include "map/c/wrap.hxx"
 
 #define containerOf(ptr, type, member)                                         \

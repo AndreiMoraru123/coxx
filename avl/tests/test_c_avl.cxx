@@ -38,7 +38,7 @@ static void add(Container &c, std::uint32_t val) {
 
   *from = &data->node; // attach the new node
   data->node.parent = curr;
-  c.root = fix(&data->node);
+  c.root = fixAVL(&data->node);
 }
 
 static auto del(Container &c, std::uint32_t val) -> bool {
@@ -55,7 +55,7 @@ static auto del(Container &c, std::uint32_t val) -> bool {
     return false;
   }
 
-  c.root = del(curr);
+  c.root = delAVL(curr);
   delete containerOf(curr, Data, node);
   return true;
 }
@@ -112,7 +112,7 @@ static void verify(Container &c, const std::multiset<std::uint32_t> &ref) {
 static void dispose(Container &c) {
   while (c.root) {
     AVLNode *node = c.root;
-    c.root = del(c.root);
+    c.root = delAVL(c.root);
     delete containerOf(node, Data, node);
   }
 }
@@ -184,18 +184,18 @@ static void testOffset(std::uint32_t size) {
   }
   // for each starting rank
   for (std::uint32_t i = 0; i < size; ++i) {
-    AVLNode *node = offset(min, static_cast<std::int64_t>(i));
+    AVLNode *node = offsetAVL(min, static_cast<std::int64_t>(i));
     assert(containerOf(node, Data, node)->val == i);
     // test all possible offset
     for (std::uint32_t j = 0; j < size; ++j) {
       std::int64_t off =
           static_cast<std::int64_t>(j) - static_cast<std::int64_t>(i);
-      const AVLNode *offNode = offset(node, off);
+      const AVLNode *offNode = offsetAVL(node, off);
       assert(containerOf(offNode, Data, node)->val == j);
     }
     // out of range by one
-    assert(!offset(node, -static_cast<std::int64_t>(i) - 1));
-    assert(!offset(node, size - i));
+    assert(!offsetAVL(node, -static_cast<std::int64_t>(i) - 1));
+    assert(!offsetAVL(node, size - i));
   }
 
   dispose(c);

@@ -23,9 +23,9 @@ AVLNode *rotateLeft(AVLNode *node);
 AVLNode *rotateRight(AVLNode *node);
 AVLNode *fixLeft(AVLNode *root);
 AVLNode *fixRight(AVLNode *root);
-AVLNode *fix(AVLNode *node);
-AVLNode *del(AVLNode *node);
-AVLNode *offset(AVLNode *node, int64_t offset);
+AVLNode *fixAVL(AVLNode *node);
+AVLNode *delAVL(AVLNode *node);
+AVLNode *offsetAVL(AVLNode *node, int64_t offset);
 
 #ifdef __cplusplus
 }

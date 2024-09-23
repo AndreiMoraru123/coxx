@@ -1,5 +1,4 @@
 #include "zset.hxx"
-#include "avl/c/avl.h"
 #include <cstddef>
 #include <cstdint>
 
@@ -50,7 +49,7 @@ static void treeAdd(ZSet *set, ZNode *node) {
   }
   *from = &node->tree; // attach the new node
   node->tree.parent = curr;
-  set->tree = fix(&node->tree);
+  set->tree = avl::fix(&node->tree);
 }
 
 auto zNew(const std::string &name, std::size_t len, std::double_t score)
@@ -86,7 +85,7 @@ static void zUpdate(ZSet *set, ZNode *node, std::double_t score) {
   if (node->score == score) {
     return;
   }
-  set->tree = del(&node->tree);
+  set->tree = avl::del(&node->tree);
   node->score = score;
   init(&node->tree);
   treeAdd(set, node);
@@ -121,7 +120,7 @@ auto zPop(ZSet *set, const std::string &name, std::size_t len) -> ZNode * {
   }
 
   ZNode *node = containerOf(found, ZNode, map);
-  set->tree = del(&node->tree);
+  set->tree = avl::del(&node->tree);
   return node;
 }
 
@@ -141,7 +140,7 @@ auto zQuery(ZSet *set, std::double_t score, const std::string &name,
 }
 
 auto zOffset(ZNode *node, std::int64_t off) -> ZNode * {
-  const AVLNode *offsetNode = node ? offset(&node->tree, off) : nullptr;
+  const AVLNode *offsetNode = node ? avl::offset(&node->tree, off) : nullptr;
   return offsetNode ? containerOf(offsetNode, ZNode, tree) : nullptr;
 }
 

@@ -65,7 +65,7 @@ AVLNode *fixRight(AVLNode *root) {
   return rotateLeft(root);
 }
 
-AVLNode *fix(AVLNode *node) {
+AVLNode *fixAVL(AVLNode *node) {
   // fix imbalanced nodes and maintain invariants until the root is reached
   while (true) {
     update(node);
@@ -89,7 +89,7 @@ AVLNode *fix(AVLNode *node) {
   }
 }
 
-AVLNode *del(AVLNode *node) {
+AVLNode *delAVL(AVLNode *node) {
   if (node->right == NULL) {
     // no right subtree, replace the node with the left subtree
     AVLNode *parent = node->parent;
@@ -104,7 +104,7 @@ AVLNode *del(AVLNode *node) {
       } else {
         parent->right = node->left;
       }
-      return fix(parent);
+      return fixAVL(parent);
     } else {
       // removing root
       return node->left;
@@ -115,7 +115,7 @@ AVLNode *del(AVLNode *node) {
     while (victim->left) {
       victim = victim->left;
     }
-    AVLNode *root = del(victim);
+    AVLNode *root = delAVL(victim);
 
     *victim = *node;
     if (victim->left) {
@@ -139,7 +139,7 @@ AVLNode *del(AVLNode *node) {
   }
 }
 
-AVLNode *offset(AVLNode *node, int64_t offset) {
+AVLNode *offsetAVL(AVLNode *node, int64_t offset) {
   int64_t pos = 0; // relative to the starting node
   while (offset != pos) {
     if (pos < offset && pos + count(node->right) >= offset) {

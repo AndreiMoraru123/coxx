@@ -5,7 +5,7 @@ cc_library(
     copts = ["-std=c++23"],
     visibility = ["//visibility:public"],
     deps = [
-        "//avl/c:cavl",
+        "//avl/c:avl",
         "//map/c:map",
     ],
 )
