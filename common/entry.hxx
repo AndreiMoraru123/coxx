@@ -5,7 +5,7 @@
 #include <string>
 
 #include "map/c/wrap.hxx"
-#include "zset/zset.hxx"
+#include "zset/wrap.hxx"
 
 enum class KeyType : std::uint8_t {
   STR = 0,

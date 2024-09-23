@@ -12,7 +12,7 @@ void entryDelete(const Entry &entry) {
 
   switch (type) {
   case KeyType::ZSET:
-    zDispose(entry.set.get());
+    zset::dispose(entry.set.get());
     break;
   case KeyType::STR:
     return;

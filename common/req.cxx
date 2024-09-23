@@ -81,7 +81,7 @@ void Request::zadd(std::vector<std::string> &commandList,
 
   // add or update the tuple
   const std::string &name = commandList[3];
-  auto added = zAdd(entry->set.get(), name.data(), name.size(), score);
+  auto added = zset::add(entry->set.get(), name.data(), name.size(), score);
   return out::num(output, static_cast<std::int64_t>(added));
 }
 
@@ -93,9 +93,9 @@ void Request::zrem(std::vector<std::string> &commandList,
   }
 
   const std::string &name = commandList[2];
-  ZNode *node = zPop(entry->set.get(), name.data(), name.size());
+  auto *node = zset::pop(entry->set.get(), name.data(), name.size());
   if (node)
-    zDel(node);
+    zset::del(node);
   return out::num(output, node ? 1 : 0);
 }
 
@@ -108,7 +108,7 @@ void Request::zscore(std::vector<std::string> &commandList,
   }
 
   const std::string &name = commandList[2];
-  const ZNode *node = zLookUp(entry->set.get(), name.data(), name.size());
+  const auto *node = zset::lookup(entry->set.get(), name.data(), name.size());
   return node ? out::dbl(output, node->score) : out::nil(output);
 }
 
@@ -144,7 +144,7 @@ void Request::zquery(std::vector<std::string> &commandList,
   if (limit <= 0) {
     return out::arr(output, 0);
   }
-  ZNode *node = zQuery(entry->set.get(), score, name.data(), name.size());
+  auto *node = zset::query(entry->set.get(), score, name.data(), name.size());
   node = zOffset(node, off);
 
   // output
