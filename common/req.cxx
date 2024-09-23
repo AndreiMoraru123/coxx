@@ -145,7 +145,7 @@ void Request::zquery(std::vector<std::string> &commandList,
     return out::arr(output, 0);
   }
   auto *node = zset::query(entry->set.get(), score, name.data(), name.size());
-  node = zOffset(node, off);
+  node = zset::offset(node, off);
 
   // output
   auto arr = out::begin_arr(output);
@@ -153,7 +153,7 @@ void Request::zquery(std::vector<std::string> &commandList,
   while (node && static_cast<std::int64_t>(n) < limit) {
     out::str(output, node->name);
     out::dbl(output, node->score);
-    node = zOffset(node, +1);
+    node = zset::offset(node, +1);
     n += 2;
   }
 

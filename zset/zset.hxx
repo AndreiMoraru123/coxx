@@ -34,12 +34,17 @@ struct ZNode {
 };
 
 auto stringHash(const std::string &data) -> std::uint64_t;
-auto zAdd(ZSet *set, const std::string &name, std::size_t len,
-          std::double_t score) -> bool;
-auto zLookUp(ZSet *set, const std::string &name, std::size_t len) -> ZNode *;
-auto zPop(ZSet *set, const std::string &name, std::size_t len) -> ZNode *;
-auto zQuery(ZSet *set, std::double_t score, const std::string &name,
-            std::size_t len) -> ZNode *;
-auto zOffset(ZNode *node, std::int64_t off) -> ZNode *;
-void zDel(ZNode *node);
-void zDispose(ZSet *set);
+
+namespace zset {
+
+auto add(ZSet *set, const std::string &name, std::size_t len,
+         std::double_t score) -> bool;
+auto lookup(ZSet *set, const std::string &name, std::size_t len) -> ZNode *;
+auto pop(ZSet *set, const std::string &name, std::size_t len) -> ZNode *;
+auto query(ZSet *set, std::double_t score, const std::string &name,
+           std::size_t len) -> ZNode *;
+auto offset(ZNode *node, std::int64_t off) -> ZNode *;
+void del(ZNode *node);
+void dispose(ZSet *set);
+
+} // namespace zset

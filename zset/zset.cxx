@@ -18,8 +18,8 @@ auto stringHash(const std::string &data) -> std::uint64_t {
   return hash;
 }
 
-static auto zLess(const AVLNode *lhs, std::double_t score, std::string name,
-                  std::size_t len) -> bool {
+static auto less(const AVLNode *lhs, std::double_t score, std::string name,
+                 std::size_t len) -> bool {
   ZNode *zl = containerOf(lhs, ZNode, tree);
   if (zl->score != score) {
     return zl->score < score;
@@ -34,10 +34,10 @@ static auto zLess(const AVLNode *lhs, std::double_t score, std::string name,
   return zl->len < len;
 }
 
-static auto zLess(const AVLNode *lhs, const AVLNode *rhs) -> bool {
+static auto less(const AVLNode *lhs, const AVLNode *rhs) -> bool {
 
   const auto *zr = containerOf(rhs, ZNode, tree);
-  return zLess(lhs, zr->score, zr->name, zr->len);
+  return less(lhs, zr->score, zr->name, zr->len);
 }
 
 static void treeAdd(ZSet *set, ZNode *node) {
@@ -45,15 +45,15 @@ static void treeAdd(ZSet *set, ZNode *node) {
   AVLNode **from = &set->tree;
   while (*from) {
     curr = *from;
-    from = zLess(&node->tree, curr) ? &curr->left : &curr->right;
+    from = less(&node->tree, curr) ? &curr->left : &curr->right;
   }
   *from = &node->tree; // attach the new node
   node->tree.parent = curr;
   set->tree = avl::fix(&node->tree);
 }
 
-auto zNew(const std::string &name, std::size_t len, std::double_t score)
-    -> ZNode * {
+static auto create(const std::string &name, std::size_t len,
+                   std::double_t score) -> ZNode * {
   auto node = new ZNode();
   init(&node->tree);
   node->map.next = nullptr;
@@ -69,7 +69,9 @@ auto zNew(const std::string &name, std::size_t len, std::double_t score)
   return node;
 }
 
-auto zLookUp(ZSet *set, const std::string &name, std::size_t len) -> ZNode * {
+namespace zset {
+
+auto lookup(ZSet *set, const std::string &name, std::size_t len) -> ZNode * {
   if (!set->tree)
     return nullptr;
 
@@ -81,7 +83,7 @@ auto zLookUp(ZSet *set, const std::string &name, std::size_t len) -> ZNode * {
   return found ? containerOf(found, ZNode, map) : nullptr;
 }
 
-static void zUpdate(ZSet *set, ZNode *node, std::double_t score) {
+static void update(ZSet *set, ZNode *node, std::double_t score) {
   if (node->score == score) {
     return;
   }
@@ -91,21 +93,21 @@ static void zUpdate(ZSet *set, ZNode *node, std::double_t score) {
   treeAdd(set, node);
 }
 
-auto zAdd(ZSet *set, const std::string &name, std::size_t len,
-          std::double_t score) -> bool {
-  ZNode *node = zLookUp(set, name, len);
+auto add(ZSet *set, const std::string &name, std::size_t len,
+         std::double_t score) -> bool {
+  ZNode *node = lookup(set, name, len);
   if (node) { // update the score of an existing pair
-    zUpdate(set, node, score);
+    update(set, node, score);
     return false;
   } else {
-    node = zNew(name, len, score);
+    node = create(name, len, score);
     map::insert(&set->map, &node->map);
     treeAdd(set, node);
     return true;
   }
 }
 
-auto zPop(ZSet *set, const std::string &name, std::size_t len) -> ZNode * {
+auto pop(ZSet *set, const std::string &name, std::size_t len) -> ZNode * {
   if (!set->tree)
     return nullptr;
 
@@ -124,12 +126,12 @@ auto zPop(ZSet *set, const std::string &name, std::size_t len) -> ZNode * {
   return node;
 }
 
-auto zQuery(ZSet *set, std::double_t score, const std::string &name,
-            std::size_t len) -> ZNode * {
+auto query(ZSet *set, std::double_t score, const std::string &name,
+           std::size_t len) -> ZNode * {
   const AVLNode *found = nullptr;
   AVLNode *curr = set->tree;
   while (curr) {
-    if (zLess(curr, score, name, len)) {
+    if (less(curr, score, name, len)) {
       curr = curr->right;
     } else {
       found = curr; // candidate
@@ -139,11 +141,13 @@ auto zQuery(ZSet *set, std::double_t score, const std::string &name,
   return found ? containerOf(found, ZNode, tree) : nullptr;
 }
 
-auto zOffset(ZNode *node, std::int64_t off) -> ZNode * {
+auto offset(ZNode *node, std::int64_t off) -> ZNode * {
   const AVLNode *offsetNode = node ? avl::offset(&node->tree, off) : nullptr;
   return offsetNode ? containerOf(offsetNode, ZNode, tree) : nullptr;
 }
 
-void zDel(ZNode *node) { free(node); }
+void del(ZNode *node) { free(node); }
 
-void zDispose(ZSet *set) { map::destroy(&set->map); }
+void dispose(ZSet *set) { map::destroy(&set->map); }
+
+} // namespace zset
