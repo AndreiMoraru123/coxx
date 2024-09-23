@@ -36,7 +36,7 @@ static auto zLess(const AVLNode *lhs, std::double_t score, std::string name,
 
 static auto zLess(const AVLNode *lhs, const AVLNode *rhs) -> bool {
 
-  const ZNode *zr = containerOf(rhs, ZNode, tree);
+  const auto *zr = containerOf(rhs, ZNode, tree);
   return zLess(lhs, zr->score, zr->name, zr->len);
 }
 
@@ -114,7 +114,7 @@ auto zPop(ZSet *set, const std::string &name, std::size_t len) -> ZNode * {
   key.name = name;
   key.len = len;
 
-  const Node *found = map::pop(&set->map, &key.node, mapCmp);
+  const auto *found = map::pop(&set->map, &key.node, mapCmp);
   if (!found) {
     return nullptr;
   }

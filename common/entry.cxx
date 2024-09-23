@@ -2,8 +2,8 @@
 #include "entry.hxx"
 
 auto entryEquality(Node *lhs, Node *rhs) -> bool {
-  const Entry *le = containerOf(lhs, Entry, node);
-  const Entry *re = containerOf(rhs, Entry, node);
+  const auto *le = containerOf(lhs, Entry, node);
+  const auto *re = containerOf(rhs, Entry, node);
   return le->key == re->key;
 }
 
