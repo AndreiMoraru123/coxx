@@ -1,4 +1,4 @@
-name: C++23 | GCC 14 | Bazel | Linux
+name: trei linii de coxx
 
 on:
   push:
