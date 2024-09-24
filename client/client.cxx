@@ -80,7 +80,7 @@ static auto deserialize(std::string_view data) -> std::int32_t {
       std::memcpy(&len, &data[1], 4);
       std::println("(arr) len={}", len);
       std::size_t arrayBytes = 1 + 4;
-      for (auto i = 0; i < len; ++i) {
+      for (std::uint32_t i = 0; i < len; ++i) {
         std::int32_t responseValue = deserialize(data.substr(arrayBytes));
         if (responseValue < 0) {
           return responseValue;
